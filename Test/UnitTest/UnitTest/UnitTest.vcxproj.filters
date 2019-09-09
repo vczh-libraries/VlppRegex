@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{a0063a3f-fb90-4cc0-8369-26646e7eadf7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Regex">
+      <UniqueIdentifier>{6a63ae5d-f2f8-41d9-a43d-88e3bf8355f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Import">
+      <UniqueIdentifier>{d0814cec-f110-4481-b9cc-56952b2c98cc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Source\TestRegex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Regex\Regex.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Regex\RegexAutomaton.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Regex\RegexData.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Regex\RegexExpression.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Regex\RegexParser.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Regex\RegexPure.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Regex\RegexRich.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Regex\RegexWriter.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Import\Vlpp.cpp">
+      <Filter>Import</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Import\VlppOS.cpp">
+      <Filter>Import</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\Source\Regex\Regex.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Regex\RegexAutomaton.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Regex\RegexData.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Regex\RegexExpression.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Regex\RegexPure.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Regex\RegexRich.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Regex\RegexWriter.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Import\Vlpp.h">
+      <Filter>Import</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Import\VlppOS.h">
+      <Filter>Import</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
