@@ -1,8 +1,4 @@
-#include "../../../Source/String.h"
-#include "../../../Source/Threading.h"
-#include "../../../Source/GlobalStorage.h"
-#include "../../../Source/FileSystem.h"
-#include "../../../Source/UnitTest/UnitTest.h"
+#include "../../../Import/VlppOS.h"
 #include <windows.h>
 
 using namespace vl;

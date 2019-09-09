@@ -15,10 +15,7 @@ Classes:
 #ifndef VCZH_REGEX_REGEX
 #define VCZH_REGEX_REGEX
 
-#include "../String.h"
-#include "../Pointer.h"
-#include "../Collections/List.h"
-#include "../Collections/Dictionary.h"
+#include "../../Import/Vlpp.h"
 
 namespace vl
 {

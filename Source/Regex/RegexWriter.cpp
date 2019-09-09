@@ -1,5 +1,4 @@
 #include "RegexWriter.h"
-#include "../Collections/OperationCopyFrom.h"
 
 namespace vl
 {

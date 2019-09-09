@@ -1,5 +1,4 @@
 #include "RegexAutomaton.h"
-#include "../Collections/OperationCopyFrom.h"
 
 namespace vl
 {
