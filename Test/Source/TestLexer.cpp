@@ -4,6 +4,80 @@ using namespace vl;
 using namespace vl::collections;
 using namespace vl::regex;
 
+struct TestRegexLexer6InterTokenState
+{
+	WString postfix;
+};
+
+void TestRegexLexer6Deleter(void* interStateDeleter)
+{
+	delete (TestRegexLexer6InterTokenState*)interStateDeleter;
+}
+
+void TestRegexLexer6ExtendProc(void* argument, const wchar_t* reading, vint length, bool completeText, RegexProcessingToken& processingToken)
+{
+	WString readingBuffer = length == -1 ? WString(reading, false) : WString(reading, length);
+	reading = readingBuffer.Buffer();
+
+	if (processingToken.token == 2 || processingToken.token == 3)
+	{
+		WString postfix;
+		if (processingToken.interTokenState)
+		{
+			postfix = ((TestRegexLexer6InterTokenState*)processingToken.interTokenState)->postfix;
+		}
+		else
+		{
+			postfix = L")" + WString(reading + 2, processingToken.length - 3) + L"\"";
+		}
+
+		auto find = wcsstr(reading, postfix.Buffer());
+		if (find)
+		{
+			processingToken.length = (vint)(find - reading) + postfix.Length();
+			processingToken.completeToken = true;
+			processingToken.interTokenState = nullptr;
+		}
+		else
+		{
+			processingToken.length = readingBuffer.Length();
+			processingToken.token = 3;
+			processingToken.completeToken = false;
+
+			if (!completeText && !processingToken.interTokenState)
+			{
+				auto state = new TestRegexLexer6InterTokenState;
+				state->postfix = postfix;
+				processingToken.interTokenState = state;
+			}
+		}
+	}
+}
+
+void ColorizerProc(void* argument, vint start, vint length, vint token)
+{
+	vint* colors = (vint*)argument;
+	for (vint i = 0; i < length; i++)
+	{
+		colors[start + i] = token;
+	}
+}
+
+template<int Size, int Length>
+void* AssertColorizer(vint(&actual)[Size], vint(&expect)[Length], RegexLexerColorizer& colorizer, const wchar_t(&input)[Length + 1], bool firstLine)
+{
+	for (vint i = 0; i < Size; i++)
+	{
+		actual[i] = -2;
+	}
+	auto newStateObject = colorizer.Colorize(input, Length);
+	for (vint i = 0; i < Length; i++)
+	{
+		TEST_ASSERT(actual[i] == expect[i]);
+	}
+	return newStateObject;
+}
+
 TEST_FILE
 {
 	auto TestRegexLexer1Validation = [](List<RegexToken>& tokens)
@@ -566,56 +640,6 @@ TEST_FILE
 		TEST_ASSERT(tokens[9].completeToken == false);
 	};
 
-	struct TestRegexLexer6InterTokenState
-	{
-		WString postfix;
-	};
-
-	auto TestRegexLexer6Deleter = [](void* interStateDeleter)
-	{
-		delete (TestRegexLexer6InterTokenState*)interStateDeleter;
-	};
-
-	auto TestRegexLexer6ExtendProc = [](void* argument, const wchar_t* reading, vint length, bool completeText, RegexProcessingToken& processingToken)
-	{
-		WString readingBuffer = length == -1 ? WString(reading, false) : WString(reading, length);
-		reading = readingBuffer.Buffer();
-
-		if (processingToken.token == 2 || processingToken.token == 3)
-		{
-			WString postfix;
-			if (processingToken.interTokenState)
-			{
-				postfix = ((TestRegexLexer6InterTokenState*)processingToken.interTokenState)->postfix;
-			}
-			else
-			{
-				postfix = L")" + WString(reading + 2, processingToken.length - 3) + L"\"";
-			}
-
-			auto find = wcsstr(reading, postfix.Buffer());
-			if (find)
-			{
-				processingToken.length = (vint)(find - reading) + postfix.Length();
-				processingToken.completeToken = true;
-				processingToken.interTokenState = nullptr;
-			}
-			else
-			{
-				processingToken.length = readingBuffer.Length();
-				processingToken.token = 3;
-				processingToken.completeToken = false;
-
-				if (!completeText && !processingToken.interTokenState)
-				{
-					auto state = new TestRegexLexer6InterTokenState;
-					state->postfix = postfix;
-					processingToken.interTokenState = state;
-				}
-			}
-		}
-	};
-
 	TEST_CASE(L"Test RegexLexer 6")
 	{
 		List<WString> codes;
@@ -642,6 +666,102 @@ abcde
 			List<RegexToken> tokens;
 			lexer.Parse(input).ReadToEnd(tokens);
 			TestRegexLexer6Validation(tokens);
+		}
+	});
+
+	TEST_CASE(L"Test RegexLexerColorizer 1")
+	{
+		List<WString> codes;
+		codes.Add(L"/d+(./d+)?");
+		codes.Add(L"[a-zA-Z_]/w*");
+		codes.Add(L"\"[^\"]*\"");
+
+		vint colors[100];
+		RegexProc proc;
+		proc.colorizeProc = &ColorizerProc;
+		proc.argument = colors;
+		RegexLexer lexer(codes, proc);
+		RegexLexerColorizer colorizer = lexer.Colorize();
+
+		{
+			const wchar_t input[] = L" genius 10..10.10   \"a";
+			vint expect[] = { -1, 1, 1, 1, 1, 1, 1, -1, 0, 0, -1, -1, 0, 0, 0, 0, 0, -1, -1, -1, 2, 2 };
+			TEST_ASSERT(AssertColorizer(colors, expect, colorizer, input, true) == nullptr);
+		}
+		colorizer.Pass(L'\r');
+		colorizer.Pass(L'\n');
+		{
+			const wchar_t input[] = L"b\"\"genius\"";
+			vint expect[] = { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 };
+			TEST_ASSERT(AssertColorizer(colors, expect, colorizer, input, true) == nullptr);
+		}
+	});
+
+	TEST_CASE(L"Test RegexLexerColorizer 2")
+	{
+		List<WString> codes;
+		codes.Add(L"/d+");
+		codes.Add(L"\"[^\"]*\"");
+		codes.Add(L"/$\"=*/(");
+
+		vint colors[100];
+		RegexProc proc;
+		proc.deleter = &TestRegexLexer6Deleter;
+		proc.extendProc = &TestRegexLexer6ExtendProc;
+		proc.colorizeProc = &ColorizerProc;
+		proc.argument = colors;
+		RegexLexer lexer(codes, proc);
+		RegexLexerColorizer colorizer = lexer.Colorize();
+
+		void* lastInterTokenState = nullptr;
+		{
+			const wchar_t input[] = L"123$\"==()==)==\"456";
+			vint expect[] = { 0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0 };
+			auto state = AssertColorizer(colors, expect, colorizer, input, true);
+			TEST_ASSERT(state == nullptr);
+			lastInterTokenState = state;
+		}
+		colorizer.Pass(L'\r');
+		colorizer.Pass(L'\n');
+		{
+			const wchar_t input[] = L"\"simple text\"";
+			vint expect[] = { 1,1,1,1,1,1,1,1,1,1,1,1,1 };
+			auto state = AssertColorizer(colors, expect, colorizer, input, true);
+			TEST_ASSERT(state == nullptr);
+			lastInterTokenState = state;
+		}
+		colorizer.Pass(L'\r');
+		colorizer.Pass(L'\n');
+		{
+			const wchar_t input[] = L"123$\"===(+";
+			vint expect[] = { 0,0,0,3,3,3,3,3,3,3 };
+			auto state = AssertColorizer(colors, expect, colorizer, input, true);
+			TEST_ASSERT(state != nullptr);
+			lastInterTokenState = state;
+		}
+		colorizer.Pass(L'\r');
+		colorizer.Pass(L'\n');
+		{
+			const wchar_t input[] = L"abcde";
+			vint expect[] = { 3,3,3,3,3 };
+			auto state = AssertColorizer(colors, expect, colorizer, input, true);
+			TEST_ASSERT(state == lastInterTokenState);
+			lastInterTokenState = state;
+		}
+		colorizer.Pass(L'\r');
+		colorizer.Pass(L'\n');
+		{
+			const wchar_t input[] = L"-)===\"456$\"===(";
+			vint expect[] = { 3,3,3,3,3,3,0,0,0,3,3,3,3,3,3 };
+			auto state = AssertColorizer(colors, expect, colorizer, input, true);
+			TEST_ASSERT(state != nullptr && state != lastInterTokenState);
+			proc.deleter(lastInterTokenState);
+			lastInterTokenState = state;
+		}
+
+		if (lastInterTokenState)
+		{
+			proc.deleter(lastInterTokenState);
 		}
 	});
 }

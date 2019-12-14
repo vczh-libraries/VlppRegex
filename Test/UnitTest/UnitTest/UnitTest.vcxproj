@@ -221,7 +221,6 @@
     <ClCompile Include="..\..\..\Source\Regex\RegexRich.cpp" />
     <ClCompile Include="..\..\..\Source\Regex\RegexWriter.cpp" />
     <ClCompile Include="..\..\Source\TestAutomaton.cpp" />
-    <ClCompile Include="..\..\Source\TestColorizer.cpp" />
     <ClCompile Include="..\..\Source\TestLexer.cpp" />
     <ClCompile Include="..\..\Source\TestParser.cpp" />
     <ClCompile Include="..\..\Source\TestPure.cpp" />
