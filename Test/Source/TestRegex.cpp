@@ -15,26 +15,29 @@ using namespace vl::stream;
 extern WString GetTestResourcePath();
 extern WString GetTestOutputPath();
 
+void NormalizedRegexAssert(const wchar_t* input, RegexNode node)
+{
+	CharRange::List subsets;
+	Expression::Ref exp = ParseExpression(input);
+	exp->NormalizeCharSet(subsets);
+	TEST_ASSERT(exp->IsEqual(node.expression.Obj()));
+
+	subsets.Clear();
+	exp->CollectCharSet(subsets);
+	exp->ApplyCharSet(subsets);
+	TEST_ASSERT(exp->IsEqual(node.expression.Obj()));
+}
+
+void MergedRegexAssert(const wchar_t* input, RegexNode node)
+{
+	RegexExpression::Ref regex = ParseRegexExpression(input);
+	Expression::Ref exp = regex->Merge();
+	TEST_ASSERT(exp->IsEqual(node.expression.Obj()));
+}
+
 TEST_FILE
 {
-	/***********************************************************************
-	Character Normalization
-	***********************************************************************/
-
-	void NormalizedRegexAssert(const wchar_t* input, RegexNode node)
-	{
-		CharRange::List subsets;
-		Expression::Ref exp = ParseExpression(input);
-		exp->NormalizeCharSet(subsets);
-		TEST_ASSERT(exp->IsEqual(node.expression.Obj()));
-
-		subsets.Clear();
-		exp->CollectCharSet(subsets);
-		exp->ApplyCharSet(subsets);
-		TEST_ASSERT(exp->IsEqual(node.expression.Obj()));
-	}
-
-	TEST_CASE(TestCharSetNormalization)
+	TEST_CASE(L"Test charset normalization")
 	{
 		NormalizedRegexAssert(L"[a-g][h-n]", rC(L'a', L'g') + rC(L'h', L'n'));
 		NormalizedRegexAssert(L"[a-g][g-n]", (rC(L'a', L'f') % rC(L'g')) + (rC(L'g') % rC(L'h', L'n')));
@@ -43,31 +46,16 @@ TEST_FILE
 			).Some() + rC(L'v') + rC(L'c') + rC(L'z') + rC(L'h'));
 		NormalizedRegexAssert(L"[0-2][1-3][2-4]", (rC(L'0') % rC(L'1') % rC(L'2')) + (rC(L'1') % rC(L'2') % rC(L'3')) + (rC(L'2') % rC(L'3') % rC(L'4')));
 		NormalizedRegexAssert(L"[^C-X][A-Z]", (rC(1, L'A' - 1) % rC(L'A', L'B') % rC(L'Y', L'Z') % rC(L'Z' + 1, 65535)) + (rC(L'A', L'B') % rC(L'C', L'X') % rC(L'Y', L'Z')));
-	}
+	});
 
-	/***********************************************************************
-	Sub Regex
-	***********************************************************************/
-
-	void MergedRegexAssert(const wchar_t* input, RegexNode node)
-	{
-		RegexExpression::Ref regex = ParseRegexExpression(input);
-		Expression::Ref exp = regex->Merge();
-		TEST_ASSERT(exp->IsEqual(node.expression.Obj()));
-	}
-
-	TEST_CASE(TestRegexExpressionMerging)
+	TEST_CASE(L"Test expression merging")
 	{
 		const wchar_t* code = L"(<#part>/d+)(<#capture>(<section>(<&part>)))((<&capture>).){3}(<&capture>)";
 		RegexNode node = (rCapture(L"section", r_d().Some()) + rC(L'.')).Loop(3, 3) + rCapture(L"section", r_d().Some());
 		MergedRegexAssert(code, node);
-	}
+	});
 
-	/***********************************************************************
-	Integration Test
-	***********************************************************************/
-
-	void TestRegexMatchPosition(bool preferPure)
+	auto TestRegexMatchPosition = [](bool preferPure)
 	{
 		Regex regex(L"/d+", preferPure);
 		TEST_ASSERT(regex.IsPureMatch() == preferPure);
@@ -241,15 +229,15 @@ TEST_FILE
 		TEST_ASSERT(matches[6]->Result().Start() == 14);
 		TEST_ASSERT(matches[6]->Result().Length() == 2);
 		TEST_ASSERT(matches[6]->Result().Value() == L"ZW");
-	}
+	};
 
-	TEST_CASE(TestRegexMatchPosition)
+	TEST_CASE(L"Test matching position")
 	{
 		TestRegexMatchPosition(true);
 		TestRegexMatchPosition(false);
-	}
+	});
 
-	TEST_CASE(TestRegexCapture)
+	TEST_CASE(L"Test capturing")
 	{
 		{
 			Regex regex(L"^(<a>/w+?)(<b>/w+?)((<$a>)(<$b>))+(<$a>)/w{6}$", true);
@@ -298,39 +286,28 @@ TEST_FILE
 			TEST_ASSERT(match->Captures().Get(2).Length() == 2);
 			TEST_ASSERT(match->Captures().Get(2).Value() == L"56");
 		}
-	}
+	});
 
-	/***********************************************************************
-	Performance
-	***********************************************************************/
-
-	namespace TestRegexSpeedHelper
+#ifdef NDEBUG
+	auto FindRows = [](WString* lines, int count, const WString& pattern)
 	{
-		void FindRows(WString* lines, int count, const WString& pattern)
+		Regex regex(pattern);
+		DateTime dt1 = DateTime::LocalTime();
+		for (int i = 0; i < 10000000; i++)
 		{
-			Regex regex(pattern);
-			DateTime dt1 = DateTime::LocalTime();
-			for (int i = 0; i < 10000000; i++)
+			for (int j = 0; j < count; j++)
 			{
-				for (int j = 0; j < count; j++)
-				{
-					bool result = regex.TestHead(lines[j]);
-					TEST_ASSERT(result);
-				}
+				bool result = regex.TestHead(lines[j]);
+				TEST_ASSERT(result);
 			}
-			DateTime dt2 = DateTime::LocalTime();
-			vuint64_t ms = dt2.totalMilliseconds - dt1.totalMilliseconds;
-			vl::unittest::UnitTest::PrintInfo(L"Running 10000000 times of Regex::TestHead uses: " + i64tow(ms) + L" milliseconds.");
 		}
-	}
-	using namespace TestRegexSpeedHelper;
+		DateTime dt2 = DateTime::LocalTime();
+		vuint64_t ms = dt2.totalMilliseconds - dt1.totalMilliseconds;
+		unittest::UnitTest::PrintMessage(L"Running 10000000 times of Regex::TestHead uses: " + i64tow(ms) + L" milliseconds.", unittest::UnitTest::MessageKind::Info);
+	};
 
-	TEST_CASE(TestRegexSpeed1)
+	TEST_CASE(L"Test performance")
 	{
-	#ifdef _DEBUG
-		vl::unittest::UnitTest::PrintInfo(L"Pass TestRegexSpeed1 under Debug mode");
-	#endif
-	#ifdef NDEBUG
 		WString pattern = L"(\\.*A\\.*B\\.*C|\\.*A\\.*C\\.*B|\\.*B\\.*A\\.*C|\\.*B\\.*C\\.*A|\\.*C\\.*A\\.*B|\\.*C\\.*B\\.*A)";
 		WString lines[] =
 		{
@@ -343,6 +320,6 @@ TEST_FILE
 		};
 		FindRows(lines, sizeof(lines) / sizeof(*lines), pattern);
 		FindRows(lines, sizeof(lines) / sizeof(*lines), pattern);
-	#endif
-	}
+	});
+#endif
 }
