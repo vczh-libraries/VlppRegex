@@ -1,23 +1,12 @@
-#include <stdlib.h>
-#include "../../Source/Regex/RegexExpression.h"
-#include "../../Source/Regex/RegexWriter.h"
-#include "../../Source/Regex/RegexPure.h"
-#include "../../Source/Regex/RegexRich.h"
 #include "../../Source/Regex/Regex.h"
-#include "../../Import/VlppOS.h"
 
 using namespace vl;
 using namespace vl::collections;
 using namespace vl::regex;
-using namespace vl::regex_internal;
-using namespace vl::stream;
-
-extern WString GetTestResourcePath();
-extern WString GetTestOutputPath();
 
 TEST_FILE
 {
-	void TestRegexLexer1Validation(List<RegexToken>& tokens)
+	auto TestRegexLexer1Validation = [](List<RegexToken>& tokens)
 	{
 		TEST_ASSERT(tokens.Count() == 9);
 		for (vint i = 0; i < tokens.Count(); i++)
@@ -96,9 +85,9 @@ TEST_FILE
 		TEST_ASSERT(tokens[8].columnStart == 20);
 		TEST_ASSERT(tokens[8].rowEnd == 0);
 		TEST_ASSERT(tokens[8].columnEnd == 23);
-	}
+	};
 
-	TEST_CASE(TestRegexLexer1)
+	TEST_CASE(L"Lexer 1")
 	{
 		List<WString> codes;
 		codes.Add(L"/d+");
@@ -116,9 +105,9 @@ TEST_FILE
 			lexer.Parse(L"vczh is$$a&&genius  1234").ReadToEnd(tokens);
 			TestRegexLexer1Validation(tokens);
 		}
-	}
+	});
 
-	void TestRegexLexer2Validation(List<RegexToken>& tokens)
+	auto TestRegexLexer2Validation = [](List<RegexToken>& tokens)
 	{
 		TEST_ASSERT(tokens.Count() == 19);
 		for (vint i = 0; i < tokens.Count(); i++)
@@ -277,9 +266,9 @@ TEST_FILE
 		TEST_ASSERT(tokens[18].columnStart == 3);
 		TEST_ASSERT(tokens[18].rowEnd == 2);
 		TEST_ASSERT(tokens[18].columnEnd == 3);
-	}
+	};
 
-	TEST_CASE(TestRegexLexer2)
+	TEST_CASE(L"Lexer 2")
 	{
 		List<WString> codes;
 		codes.Add(L"/d+");
@@ -301,9 +290,9 @@ TEST_FILE
 			lexer.Parse(input).ReadToEnd(tokens);
 			TestRegexLexer2Validation(tokens);
 		}
-	}
+	});
 
-	TEST_CASE(TestRegexLexer3)
+	TEST_CASE(L"Lexer 3")
 	{
 		{
 			List<WString> codes;
@@ -369,9 +358,9 @@ TEST_FILE
 				TEST_ASSERT(tokens[0].columnEnd == 3);
 			}
 		}
-	}
+	});
 
-	TEST_CASE(TestRegexLexer4)
+	TEST_CASE(L"Lexer 4")
 	{
 		{
 			List<WString> codes;
@@ -437,9 +426,9 @@ TEST_FILE
 				TEST_ASSERT(tokens[0].columnEnd == 1);
 			}
 		}
-	}
+	});
 
-	void TestRegexLexer5Validation(List<RegexToken>& tokens)
+	auto TestRegexLexer5Validation = [](List<RegexToken>& tokens)
 	{
 		TEST_ASSERT(tokens.Count() == 2);
 		//[123]
@@ -460,9 +449,9 @@ TEST_FILE
 		TEST_ASSERT(tokens[1].rowEnd == 0);
 		TEST_ASSERT(tokens[1].columnEnd == 6);
 		TEST_ASSERT(tokens[1].completeToken == false);
-	}
+	};
 
-	TEST_CASE(TestRegexLexer5)
+	TEST_CASE(L"Lexer 5")
 	{
 		List<WString> codes;
 		codes.Add(L"/d+");
@@ -480,9 +469,9 @@ TEST_FILE
 			lexer.Parse(input).ReadToEnd(tokens);
 			TestRegexLexer5Validation(tokens);
 		}
-	}
+	});
 
-	void TestRegexLexer6Validation(List<RegexToken>& tokens)
+	auto TestRegexLexer6Validation = [](List<RegexToken>& tokens)
 	{
 		TEST_ASSERT(tokens.Count() == 10);
 		//[123]
@@ -575,19 +564,19 @@ TEST_FILE
 		TEST_ASSERT(tokens[9].rowEnd == 4);
 		TEST_ASSERT(tokens[9].columnEnd == 14);
 		TEST_ASSERT(tokens[9].completeToken == false);
-	}
+	};
 
 	struct TestRegexLexer6InterTokenState
 	{
 		WString postfix;
 	};
 
-	void TestRegexLexer6Deleter(void* interStateDeleter)
+	auto TestRegexLexer6Deleter = [](void* interStateDeleter)
 	{
 		delete (TestRegexLexer6InterTokenState*)interStateDeleter;
-	}
+	};
 
-	void TestRegexLexer6ExtendProc(void* argument, const wchar_t* reading, vint length, bool completeText, RegexProcessingToken& processingToken)
+	auto TestRegexLexer6ExtendProc = [](void* argument, const wchar_t* reading, vint length, bool completeText, RegexProcessingToken& processingToken)
 	{
 		WString readingBuffer = length == -1 ? WString(reading, false) : WString(reading, length);
 		reading = readingBuffer.Buffer();
@@ -625,9 +614,9 @@ TEST_FILE
 				}
 			}
 		}
-	}
+	};
 
-	TEST_CASE(TestRegexLexer6)
+	TEST_CASE(L"Lexer 6")
 	{
 		List<WString> codes;
 		codes.Add(L"/d+");
@@ -635,15 +624,15 @@ TEST_FILE
 		codes.Add(L"/$\"=*/(");
 
 		RegexProc proc;
-		proc.deleter = &TestRegexLexer6Deleter;
-		proc.extendProc = &TestRegexLexer6ExtendProc;
+		proc.deleter = TestRegexLexer6Deleter;
+		proc.extendProc = TestRegexLexer6ExtendProc;
 		RegexLexer lexer(codes, proc);
 
 		WString input = LR"test_input(123 456
-	"simple text"
-	123$"===(+
-	abcde
-	-)==="456$"===()test_input";
+"simple text"
+123$"===(+
+abcde
+-)==="456$"===()test_input";
 		{
 			List<RegexToken> tokens;
 			CopyFrom(tokens, lexer.Parse(input));
@@ -654,5 +643,5 @@ TEST_FILE
 			lexer.Parse(input).ReadToEnd(tokens);
 			TestRegexLexer6Validation(tokens);
 		}
-	}
+	});
 }
