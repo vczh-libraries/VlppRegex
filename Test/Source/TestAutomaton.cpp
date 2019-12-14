@@ -1,130 +1,124 @@
-#include <stdlib.h>
-#include "../../Source/Regex/RegexExpression.h"
 #include "../../Source/Regex/RegexWriter.h"
-#include "../../Source/Regex/RegexPure.h"
-#include "../../Source/Regex/RegexRich.h"
-#include "../../Source/Regex/Regex.h"
 #include "../../Import/VlppOS.h"
 
 using namespace vl;
 using namespace vl::collections;
-using namespace vl::regex;
 using namespace vl::regex_internal;
 using namespace vl::stream;
 
 extern WString GetTestResourcePath();
 extern WString GetTestOutputPath();
 
-TEST_FILE
+void PrintAutomaton(WString fileName, Automaton::Ref automaton)
 {
-	void PrintAutomaton(WString fileName, Automaton::Ref automaton)
-	{
-		FileStream file(GetTestOutputPath() + fileName, FileStream::WriteOnly);
-		BomEncoder encoder(BomEncoder::Utf16);
-		EncoderStream output(file, encoder);
-		StreamWriter writer(output);
+	FileStream file(GetTestOutputPath() + fileName, FileStream::WriteOnly);
+	BomEncoder encoder(BomEncoder::Utf16);
+	EncoderStream output(file, encoder);
+	StreamWriter writer(output);
 
-		wchar_t intbuf[100] = { 0 };
-		for (vint i = 0; i < automaton->states.Count(); i++)
+	wchar_t intbuf[100] = { 0 };
+	for (vint i = 0; i < automaton->states.Count(); i++)
+	{
+		State* state = automaton->states[i].Obj();
+		if (automaton->startState == state)
 		{
-			State* state = automaton->states[i].Obj();
-			if (automaton->startState == state)
-			{
-				writer.WriteString(L"[START]");
-			}
-			if (state->finalState)
-			{
-				writer.WriteString(L"[FINISH]");
-			}
-			writer.WriteString(L"State<");
-			ITOW_S(i, intbuf, sizeof(intbuf) / sizeof(*intbuf), 10);
+			writer.WriteString(L"[START]");
+		}
+		if (state->finalState)
+		{
+			writer.WriteString(L"[FINISH]");
+		}
+		writer.WriteString(L"State<");
+		ITOW_S(i, intbuf, sizeof(intbuf) / sizeof(*intbuf), 10);
+		writer.WriteString(intbuf);
+		writer.WriteLine(L">");
+		for (vint j = 0; j < state->transitions.Count(); j++)
+		{
+			Transition* transition = state->transitions[j];
+			ITOW_S(automaton->states.IndexOf(transition->target), intbuf, sizeof(intbuf) / sizeof(*intbuf), 10);
+			writer.WriteString(L"    To State<");
 			writer.WriteString(intbuf);
-			writer.WriteLine(L">");
-			for (vint j = 0; j < state->transitions.Count(); j++)
+			writer.WriteString(L"> : ");
+			switch (transition->type)
 			{
-				Transition* transition = state->transitions[j];
-				ITOW_S(automaton->states.IndexOf(transition->target), intbuf, sizeof(intbuf) / sizeof(*intbuf), 10);
-				writer.WriteString(L"    To State<");
+			case Transition::Chars:
+				writer.WriteString(L"<Char : ");
+				_itow_s(transition->range.begin, intbuf, sizeof(intbuf) / sizeof(*intbuf), 10);
 				writer.WriteString(intbuf);
-				writer.WriteString(L"> : ");
-				switch (transition->type)
-				{
-				case Transition::Chars:
-					writer.WriteString(L"<Char : ");
-					_itow_s(transition->range.begin, intbuf, sizeof(intbuf) / sizeof(*intbuf), 10);
-					writer.WriteString(intbuf);
-					writer.WriteString(L"[");
-					writer.WriteChar(transition->range.begin);
-					writer.WriteString(L"] - ");
-					_itow_s(transition->range.end, intbuf, sizeof(intbuf) / sizeof(*intbuf), 10);
-					writer.WriteString(intbuf);
-					writer.WriteString(L"[");
-					writer.WriteChar(transition->range.end);
-					writer.WriteLine(L"]>");
-					break;
-				case Transition::Epsilon:
-					writer.WriteLine(L"<Epsilon>");
-					break;
-				case Transition::BeginString:
-					writer.WriteLine(L"^");
-					break;
-				case Transition::EndString:
-					writer.WriteLine(L"$");
-					break;
-				case Transition::Nop:
-					writer.WriteLine(L"<Nop>");
-					break;
-				case Transition::Capture:
-					writer.WriteString(L"<Capture : ");
-					writer.WriteString(automaton->captureNames[transition->capture]);
-					writer.WriteLine(L" >");
-					break;
-				case Transition::Match:
-					writer.WriteString(L"<Match : ");
-					writer.WriteString(automaton->captureNames[transition->capture]);
-					writer.WriteString(L";");
-					ITOW_S(transition->index, intbuf, sizeof(intbuf) / sizeof(*intbuf), 10);
-					writer.WriteString(intbuf);
-					writer.WriteLine(L" >");
-					break;
-				case Transition::Positive:
-					writer.WriteLine(L"<Positive>");
-					break;
-				case Transition::Negative:
-					writer.WriteLine(L"<Negative>");
-					break;
-				case Transition::NegativeFail:
-					writer.WriteLine(L"<NegativeFail>");
-					break;
-				case Transition::End:
-					writer.WriteLine(L"<End>");
-					break;
-				}
+				writer.WriteString(L"[");
+				writer.WriteChar(transition->range.begin);
+				writer.WriteString(L"] - ");
+				_itow_s(transition->range.end, intbuf, sizeof(intbuf) / sizeof(*intbuf), 10);
+				writer.WriteString(intbuf);
+				writer.WriteString(L"[");
+				writer.WriteChar(transition->range.end);
+				writer.WriteLine(L"]>");
+				break;
+			case Transition::Epsilon:
+				writer.WriteLine(L"<Epsilon>");
+				break;
+			case Transition::BeginString:
+				writer.WriteLine(L"^");
+				break;
+			case Transition::EndString:
+				writer.WriteLine(L"$");
+				break;
+			case Transition::Nop:
+				writer.WriteLine(L"<Nop>");
+				break;
+			case Transition::Capture:
+				writer.WriteString(L"<Capture : ");
+				writer.WriteString(automaton->captureNames[transition->capture]);
+				writer.WriteLine(L" >");
+				break;
+			case Transition::Match:
+				writer.WriteString(L"<Match : ");
+				writer.WriteString(automaton->captureNames[transition->capture]);
+				writer.WriteString(L";");
+				ITOW_S(transition->index, intbuf, sizeof(intbuf) / sizeof(*intbuf), 10);
+				writer.WriteString(intbuf);
+				writer.WriteLine(L" >");
+				break;
+			case Transition::Positive:
+				writer.WriteLine(L"<Positive>");
+				break;
+			case Transition::Negative:
+				writer.WriteLine(L"<Negative>");
+				break;
+			case Transition::NegativeFail:
+				writer.WriteLine(L"<NegativeFail>");
+				break;
+			case Transition::End:
+				writer.WriteLine(L"<End>");
+				break;
 			}
 		}
 	}
+}
 
-	void CompareToBaseline(WString fileName)
-	{
-		WString generatedPath = GetTestOutputPath() + fileName;
-		WString baselinePath = GetTestResourcePath() + L"Baseline/" + fileName;
+void CompareToBaseline(WString fileName)
+{
+	WString generatedPath = GetTestOutputPath() + fileName;
+	WString baselinePath = GetTestResourcePath() + L"Baseline/" + fileName;
 
-		FileStream generatedFile(generatedPath, FileStream::ReadOnly);
-		FileStream baselineFile(baselinePath, FileStream::ReadOnly);
+	FileStream generatedFile(generatedPath, FileStream::ReadOnly);
+	FileStream baselineFile(baselinePath, FileStream::ReadOnly);
 
-		BomDecoder generatedDecoder;
-		BomDecoder baselineDecoder;
+	BomDecoder generatedDecoder;
+	BomDecoder baselineDecoder;
 
-		DecoderStream generatedStream(generatedFile, generatedDecoder);
-		DecoderStream baselineStream(baselineFile, baselineDecoder);
+	DecoderStream generatedStream(generatedFile, generatedDecoder);
+	DecoderStream baselineStream(baselineFile, baselineDecoder);
 
-		StreamReader generatedReader(generatedStream);
-		StreamReader baselineReader(baselineStream);
+	StreamReader generatedReader(generatedStream);
+	StreamReader baselineReader(baselineStream);
 
-		TEST_ASSERT(generatedReader.ReadToEnd() == baselineReader.ReadToEnd());
-	}
+	TEST_ASSERT(generatedReader.ReadToEnd() == baselineReader.ReadToEnd());
+}
 
-	void PrintRegex(WString name, WString code, bool compareToBaseline = true)
+void PrintRegex(WString name, WString code, bool compareToBaseline = true)
+{
+	TEST_CASE(name + L": " + code)
 	{
 		RegexExpression::Ref regex = ParseRegexExpression(code);
 		Expression::Ref expression = regex->Merge();
@@ -147,9 +141,12 @@ TEST_FILE
 			CompareToBaseline(name + L".Nfa.txt");
 			CompareToBaseline(name + L".Dfa.txt");
 		}
-	}
+	});
+}
 
-	TEST_CASE(TestEpsilonNfa)
+TEST_FILE
+{
+	TEST_CATEGORY(L"Automaton")
 	{
 		PrintRegex(L"RegexInteger", L"/d");
 		PrintRegex(L"RegexFullint", L"(/+|-)?/d+");
@@ -159,5 +156,5 @@ TEST_FILE
 		PrintRegex(L"RegexIP", L"(<#sec>(<sec>/d+))((<&sec>).){3}(<&sec>)");
 		PrintRegex(L"RegexDuplicate", L"^(<sec>/.+)(<$sec>)+$");
 		PrintRegex(L"RegexPrescan", L"/d+(=/w+)(!vczh)");
-	}
+	});
 }
