@@ -1,19 +1,9 @@
-#include <stdlib.h>
-#include "../../Source/Regex/RegexExpression.h"
 #include "../../Source/Regex/RegexWriter.h"
-#include "../../Source/Regex/RegexPure.h"
 #include "../../Source/Regex/RegexRich.h"
-#include "../../Source/Regex/Regex.h"
-#include "../../Import/VlppOS.h"
 
 using namespace vl;
 using namespace vl::collections;
-using namespace vl::regex;
 using namespace vl::regex_internal;
-using namespace vl::stream;
-
-extern WString GetTestResourcePath();
-extern WString GetTestOutputPath();
 
 TEST_FILE
 {

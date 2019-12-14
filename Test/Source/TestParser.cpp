@@ -1,30 +1,24 @@
-#include <stdlib.h>
 #include "../../Source/Regex/RegexExpression.h"
 #include "../../Source/Regex/RegexWriter.h"
-#include "../../Source/Regex/RegexPure.h"
-#include "../../Source/Regex/RegexRich.h"
-#include "../../Source/Regex/Regex.h"
-#include "../../Import/VlppOS.h"
 
 using namespace vl;
 using namespace vl::collections;
 using namespace vl::regex;
 using namespace vl::regex_internal;
-using namespace vl::stream;
-
-extern WString GetTestResourcePath();
-extern WString GetTestOutputPath();
 
 TEST_FILE
 {
-	void RegexAssert(const wchar_t* input, RegexNode node, bool pure)
+	auto RegexAssert = [](const wchar_t* input, RegexNode node, bool pure)
 	{
-		Expression::Ref exp = ParseExpression(input);
-		TEST_ASSERT(exp->IsEqual(node.expression.Obj()));
-		TEST_ASSERT(exp->CanTreatAsPure() == pure);
-	}
+		TEST_CASE(input)
+		{
+			Expression::Ref exp = ParseExpression(input);
+			TEST_ASSERT(exp->IsEqual(node.expression.Obj()));
+			TEST_ASSERT(exp->CanTreatAsPure() == pure);
+		});
+	};
 
-	TEST_CASE(TestRegexCharSetParsing)
+	TEST_CATEGORY(L"Parser: charset")
 	{
 		RegexAssert(L"a", rC(L'a'), true);
 		RegexAssert(L"vczh", rC(L'v') + rC(L'c') + rC(L'z') + rC(L'h'), true);
@@ -58,9 +52,9 @@ TEST_FILE
 		RegexAssert(L"[^0-9]", !r_d(), true);
 		RegexAssert(L"[^a-zA-Z_]", !r_l(), true);
 		RegexAssert(L"[^a-zA-Z0-9_]", !r_w(), true);
-	}
+	});
 
-	TEST_CASE(TestRegexLoopParsing)
+	TEST_CATEGORY(L"Parser: looping")
 	{
 		RegexAssert(L"/d+", r_d().Some(), true);
 		RegexAssert(L"/d*", r_d().Any(), true);
@@ -75,9 +69,9 @@ TEST_FILE
 		RegexAssert(L"\\d{3}", r_d().Loop(3, 3), true);
 		RegexAssert(L"\\d{3,5}", r_d().Loop(3, 5), true);
 		RegexAssert(L"\\d{4,}", r_d().AtLeast(4), true);
-	}
+	});
 
-	TEST_CASE(TestRegexFunctionParsing)
+	TEST_CATEGORY(L"Parser: function")
 	{
 		RegexAssert(L"(<name>/d+)", rCapture(L"name", r_d().Some()), true);
 		RegexAssert(L"(<&name>)", rUsing(L"name"), false);
@@ -88,9 +82,9 @@ TEST_FILE
 		RegexAssert(L"(!/d+)", -r_d().Some(), false);
 		RegexAssert(L"(=\\d+)", +r_d().Some(), false);
 		RegexAssert(L"(!\\d+)", -r_d().Some(), false);
-	}
+	});
 
-	TEST_CASE(TestRegexComplexParsing)
+	TEST_CATEGORY(L"Parser: complex string")
 	{
 		RegexAssert(L"a+(bc)*", rC(L'a').Some() + (rC(L'b') + rC(L'c')).Any(), true);
 		RegexAssert(L"(1+2)*(3+4)", (rC(L'1').Some() + rC(L'2')).Any() + (rC(L'3').Some() + rC(L'4')), true);
@@ -102,9 +96,9 @@ TEST_FILE
 
 		RegexAssert(L"((<part>\\d+).){3}(<part>\\d+)", (rCapture(L"part", r_d().Some()) + rC(L'.')).Loop(3, 3) + rCapture(L"part", r_d().Some()), true);
 		RegexAssert(L"\\.*[\\r\\n\\t]", rAnyChar().Any() + (rC(L'\r') % rC(L'\n') % rC(L'\t')), true);
-	}
+	});
 
-	TEST_CASE(TestRegexCompleteParsingA)
+	TEST_CASE(L"Parser: integration 1")
 	{
 		WString code = L"(<#part>/d+)(<#capture>(<section>(<&part>)))((<&capture>).){3}(<&capture>)";
 		RegexExpression::Ref regex = ParseRegexExpression(code);
@@ -120,9 +114,9 @@ TEST_FILE
 		TEST_ASSERT(regex->definitions[L"part"]->IsEqual(part.Obj()));
 		TEST_ASSERT(regex->definitions[L"capture"]->IsEqual(capture.Obj()));
 		TEST_ASSERT(regex->expression->IsEqual(main.Obj()));
-	}
+	});
 
-	TEST_CASE(TestRegexCompleteParsingB)
+	TEST_CASE(L"Parser: integration 2")
 	{
 		WString code = L"((<part>\\d+).){3}(<part>\\d+)";
 		RegexExpression::Ref regex = ParseRegexExpression(code);
@@ -131,5 +125,5 @@ TEST_FILE
 
 		TEST_ASSERT(regex->definitions.Count() == 0);
 		TEST_ASSERT(regex->expression->IsEqual(main.Obj()));
-	}
+	});
 }
