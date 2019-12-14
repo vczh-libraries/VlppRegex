@@ -220,11 +220,18 @@
     <ClCompile Include="..\..\..\Source\Regex\RegexPure.cpp" />
     <ClCompile Include="..\..\..\Source\Regex\RegexRich.cpp" />
     <ClCompile Include="..\..\..\Source\Regex\RegexWriter.cpp" />
+    <ClCompile Include="..\..\Source\TestAutomaton.cpp" />
+    <ClCompile Include="..\..\Source\TestColorizer.cpp" />
+    <ClCompile Include="..\..\Source\TestLexer.cpp" />
+    <ClCompile Include="..\..\Source\TestParser.cpp" />
+    <ClCompile Include="..\..\Source\TestPure.cpp" />
     <ClCompile Include="..\..\Source\TestRegex.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugNoReflection|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\Source\TestRich.cpp" />
+    <ClCompile Include="..\..\Source\TestWalker.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
