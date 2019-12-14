@@ -87,7 +87,7 @@ TEST_FILE
 		TEST_ASSERT(tokens[8].columnEnd == 23);
 	};
 
-	TEST_CASE(L"Lexer 1")
+	TEST_CASE(L"Test RegexLexer 1")
 	{
 		List<WString> codes;
 		codes.Add(L"/d+");
@@ -268,7 +268,7 @@ TEST_FILE
 		TEST_ASSERT(tokens[18].columnEnd == 3);
 	};
 
-	TEST_CASE(L"Lexer 2")
+	TEST_CASE(L"Test RegexLexer 2")
 	{
 		List<WString> codes;
 		codes.Add(L"/d+");
@@ -292,7 +292,7 @@ TEST_FILE
 		}
 	});
 
-	TEST_CASE(L"Lexer 3")
+	TEST_CASE(L"Test RegexLexer 3")
 	{
 		{
 			List<WString> codes;
@@ -360,7 +360,7 @@ TEST_FILE
 		}
 	});
 
-	TEST_CASE(L"Lexer 4")
+	TEST_CASE(L"Test RegexLexer 4")
 	{
 		{
 			List<WString> codes;
@@ -451,7 +451,7 @@ TEST_FILE
 		TEST_ASSERT(tokens[1].completeToken == false);
 	};
 
-	TEST_CASE(L"Lexer 5")
+	TEST_CASE(L"Test RegexLexer 5")
 	{
 		List<WString> codes;
 		codes.Add(L"/d+");
@@ -616,7 +616,7 @@ TEST_FILE
 		}
 	};
 
-	TEST_CASE(L"Lexer 6")
+	TEST_CASE(L"Test RegexLexer 6")
 	{
 		List<WString> codes;
 		codes.Add(L"/d+");

@@ -29,7 +29,7 @@ TEST_FILE
 		TEST_ASSERT(STOP==previousTokenStop);\
 	}while(0)\
 
-	TEST_CASE(TestRegexLexerWalker)
+	TEST_CASE(L"Test RegexLexerWalker")
 	{
 		List<WString> codes;
 		codes.Add(L"/d+(./d+)?");
@@ -77,7 +77,7 @@ TEST_FILE
 		WALK(L'u', -1, false, false);
 		WALK(L's', -1, false, false);
 		WALK(L'\"', 2, true, false);
-	}
+});
 
 #undef WALK
 }
