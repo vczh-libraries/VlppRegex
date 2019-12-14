@@ -17,7 +17,7 @@ extern WString GetTestOutputPath();
 
 TEST_FILE
 {
-	Ptr<RichInterpretor> BuildRichInterpretor(const wchar_t* code)
+	auto BuildRichInterpretor = [](const wchar_t* code)
 	{
 		CharRange::List subsets;
 		Dictionary<State*, State*> nfaStateMap;
@@ -31,22 +31,25 @@ TEST_FILE
 		Automaton::Ref dfa = NfaToDfa(nfa, dfaStateMap);
 
 		return new RichInterpretor(dfa);
-	}
+	};
 
-	void RunRichInterpretor(const wchar_t* code, const wchar_t* input, vint start, vint length)
+	auto RunRichInterpretor = [&](const wchar_t* code, const wchar_t* input, vint start, vint length)
 	{
-		RichResult matchResult;
-		Ptr<RichInterpretor> interpretor = BuildRichInterpretor(code);
-		bool expectedSuccessful = start != -1;
-		TEST_ASSERT(interpretor->Match(input, input, matchResult) == expectedSuccessful);
-		if (expectedSuccessful)
+		TEST_CASE(code + WString(L" on ") + input)
 		{
-			TEST_ASSERT(start == matchResult.start);
-			TEST_ASSERT(length == matchResult.length);
-		}
-	}
+			RichResult matchResult;
+			Ptr<RichInterpretor> interpretor = BuildRichInterpretor(code);
+			bool expectedSuccessful = start != -1;
+			TEST_ASSERT(interpretor->Match(input, input, matchResult) == expectedSuccessful);
+			if (expectedSuccessful)
+			{
+				TEST_ASSERT(start == matchResult.start);
+				TEST_ASSERT(length == matchResult.length);
+			}
+		});
+	};
 
-	TEST_CASE(TestRichInterpretorSimple)
+	TEST_CATEGORY(L"Rich interpretor: simple")
 	{
 		RunRichInterpretor(L"/d", L"abcde12345abcde", 5, 1);
 		RunRichInterpretor(L"/d", L"12345abcde", 0, 1);
@@ -87,9 +90,9 @@ TEST_FILE
 		RunRichInterpretor(L"///*([^*]|/*+[^*//])*/*+//", L"vczh/*is*/genius", 4, 6);
 		RunRichInterpretor(L"///*([^*]|/*+[^*//])*/*+//", L"vczh/***is***/genius", 4, 10);
 		RunRichInterpretor(L"///*([^*]|/*+[^*//])*/*+//", L"vczh is genius", -1, 0);
-	}
+	});
 
-	TEST_CASE(TestRichInterpretorBeginEndString)
+	TEST_CATEGORY(L"Rich interpretor: ^ / $")
 	{
 		RunRichInterpretor(L"/d+", L"abc1234abc", 3, 4);
 		RunRichInterpretor(L"/d+", L"1234abc", 0, 4);
@@ -110,18 +113,19 @@ TEST_FILE
 		RunRichInterpretor(L"^/d+$", L"1234abc", -1, 0);
 		RunRichInterpretor(L"^/d+$", L"abc1234", -1, 0);
 		RunRichInterpretor(L"^/d+$", L"1234", 0, 4);
-	}
+	});
 
-	TEST_CASE(TestRichInterpretorLoop)
+	TEST_CATEGORY(L"Rich interpretor: looping")
 	{
 		RunRichInterpretor(L"/d+", L"abcde12345abcde", 5, 5);
 		RunRichInterpretor(L"/d+?", L"abcde12345abcde", 5, 1);
 		RunRichInterpretor(L"/d+a", L"abcde12345abcde", 5, 6);
 		RunRichInterpretor(L"/d+?a", L"abcde12345abcde", 5, 6);
-	}
+	});
 
-	TEST_CASE(TestRichInterpretorCapture)
+	TEST_CATEGORY(L"Rich interpretor: capturing")
 	{
+		TEST_CASE(L"(<number>/d+) on abcde123456abcde")
 		{
 			const wchar_t* code = L"(<number>/d+)";
 			const wchar_t* input = L"abcde123456abcde";
@@ -137,7 +141,9 @@ TEST_FILE
 			TEST_ASSERT(result.captures[0].capture == 0);
 			TEST_ASSERT(result.captures[0].start == 5);
 			TEST_ASSERT(result.captures[0].length == 6);
-		}
+		});
+
+		TEST_CASE(L"(<#sec>(<sec>/d+))((<&sec>).){3}(<&sec>) on 196.128.0.1")
 		{
 			const wchar_t* code = L"(<#sec>(<sec>/d+))((<&sec>).){3}(<&sec>)";
 			const wchar_t* input = L"196.128.0.1";
@@ -162,7 +168,9 @@ TEST_FILE
 			TEST_ASSERT(result.captures[3].capture == 0);
 			TEST_ASSERT(result.captures[3].start == 10);
 			TEST_ASSERT(result.captures[3].length == 1);
-		}
+		});
+
+		TEST_CASE(L"(<sec>/d+?)(<$sec>)+ on 98765123123123123123123")
 		{
 			const wchar_t* code = L"(<sec>/d+?)(<$sec>)+";
 			const wchar_t* input = L"98765123123123123123123";
@@ -178,7 +186,9 @@ TEST_FILE
 			TEST_ASSERT(result.captures[0].capture == 0);
 			TEST_ASSERT(result.captures[0].start == 5);
 			TEST_ASSERT(result.captures[0].length == 3);
-		}
+		});
+
+		TEST_CASE(L"(<sec>/d+)(<$sec>)+ on 98765123123123123123123")
 		{
 			const wchar_t* code = L"(<sec>/d+)(<$sec>)+";
 			const wchar_t* input = L"98765123123123123123123";
@@ -194,11 +204,12 @@ TEST_FILE
 			TEST_ASSERT(result.captures[0].capture == 0);
 			TEST_ASSERT(result.captures[0].start == 5);
 			TEST_ASSERT(result.captures[0].length == 9);
-		}
-	}
+		});
+	});
 
-	TEST_CASE(TestRichInterpretorPrematching)
+	TEST_CATEGORY(L"Rich interpretor: prematching")
 	{
+		TEST_CASE(L"win(=2000) on win98win2000winxp")
 		{
 			const wchar_t* code = L"win(=2000)";
 			const wchar_t* input = L"win98win2000winxp";
@@ -209,7 +220,9 @@ TEST_FILE
 			TEST_ASSERT(result.start == 5);
 			TEST_ASSERT(result.length == 3);
 			TEST_ASSERT(result.captures.Count() == 0);
-		}
+		});
+
+		TEST_CASE(L"win(!98) on win98win2000winxp")
 		{
 			const wchar_t* code = L"win(!98)";
 			const wchar_t* input = L"win98win2000winxp";
@@ -220,11 +233,12 @@ TEST_FILE
 			TEST_ASSERT(result.start == 5);
 			TEST_ASSERT(result.length == 3);
 			TEST_ASSERT(result.captures.Count() == 0);
-		}
-	}
+		});
+	});
 
-	TEST_CASE(TestRichInterpretorChaos)
+	TEST_CATEGORY(L"Rich interpretor: others")
 	{
+		TEST_CASE(L"^(<a>/w+?)(<b>/w+?)((<$a>)(<$b>))+(<$a>)/w{6}$ on vczhgeniusvczhgeniusvczhgeniusvczhgenius")
 		{
 			const wchar_t* code = L"^(<a>/w+?)(<b>/w+?)((<$a>)(<$b>))+(<$a>)/w{6}$";
 			const wchar_t* input = L"vczhgeniusvczhgeniusvczhgeniusvczhgenius";
@@ -243,7 +257,9 @@ TEST_FILE
 			TEST_ASSERT(result.captures[1].capture == 1);
 			TEST_ASSERT(result.captures[1].start == 4);
 			TEST_ASSERT(result.captures[1].length == 6);
-		}
+		});
+
+		TEST_CASE(L"^/d+./d*?(<sec>/d+?)(<$sec>)+$ on 1428.57142857142857142857")
 		{
 			const wchar_t* code = L"^/d+./d*?(<sec>/d+?)(<$sec>)+$";
 			const wchar_t* input = L"1428.57142857142857142857";
@@ -258,7 +274,9 @@ TEST_FILE
 			TEST_ASSERT(result.captures[0].capture == 0);
 			TEST_ASSERT(result.captures[0].start == 7);
 			TEST_ASSERT(result.captures[0].length == 6);
-		}
+		});
+
+		TEST_CASE(L"^/d+./d*?(?/d+?)(<$0>)+$ on 1428.57142857142857142857")
 		{
 			const wchar_t* code = L"^/d+./d*?(?/d+?)(<$0>)+$";
 			const wchar_t* input = L"1428.57142857142857142857";
@@ -272,6 +290,6 @@ TEST_FILE
 			TEST_ASSERT(result.captures[0].capture == -1);
 			TEST_ASSERT(result.captures[0].start == 7);
 			TEST_ASSERT(result.captures[0].length == 6);
-		}
-	}
+		});
+	});
 }
