@@ -15,7 +15,7 @@ Classes:
 #ifndef VCZH_REGEX_REGEX
 #define VCZH_REGEX_REGEX
 
-#include "../../Import/Vlpp.h"
+#include <Vlpp.h>
 
 namespace vl
 {

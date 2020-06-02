@@ -1,5 +1,5 @@
 #include "../../Source/Regex/RegexWriter.h"
-#include "../../Import/VlppOS.h"
+#include <VlppOS.h>
 
 using namespace vl;
 using namespace vl::collections;

@@ -9,7 +9,7 @@ Classes:
 #ifndef VCZH_REGEX_REGEXDATA
 #define VCZH_REGEX_REGEXDATA
 
-#include "../../Import/Vlpp.h"
+#include <Vlpp.h>
 
 namespace vl
 {

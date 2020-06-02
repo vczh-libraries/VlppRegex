@@ -4,10 +4,10 @@ DEVELOPER: Zihan Chen(vczh)
 ***********************************************************************/
 #include "Vlpp.h"
 
+#include "..\..\Source\Regex\Regex.h"
 #include "..\..\Source\Regex\RegexData.h"
 #include "..\..\Source\Regex\RegexAutomaton.h"
 #include "..\..\Source\Regex\RegexExpression.h"
-#include "..\..\Source\Regex\Regex.h"
 #include "..\..\Source\Regex\RegexPure.h"
 #include "..\..\Source\Regex\RegexRich.h"
 #include "..\..\Source\Regex\RegexWriter.h"
