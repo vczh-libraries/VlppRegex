@@ -434,7 +434,7 @@ Tokenizer
 			void										ReadToEnd(collections::List<RegexToken>& tokens, bool(*discard)(vint)=0)const;
 		};
 		
-		/// <summary>Lexical walker.</summary>
+		/// <summary>A type for walking through a text against a <see cref="RegexLexer"/>.</summary>
 		class RegexLexerWalker : public Object
 		{
 			friend class RegexLexer;
@@ -449,6 +449,7 @@ Tokenizer
 			
 			/// <summary>Get the start DFA state number, which represents the correct state before parsing any input.</summary>
 			/// <returns>The DFA state number.</returns>
+			/// <remarks>When calling <see cref="Walk"/> for the first character, the return value should be passed to the second parameter.</remarks>
 			vint										GetStartState()const;
 			/// <summary>Test if this state can only lead to the end of one kind of token.</summary>
 			/// <returns>Returns the token index if this state can only lead to the end of one kind of token. Returns -1 if not.</returns>
@@ -459,10 +460,10 @@ Tokenizer
 			/// <param name="state">The current state. Returns the new current state when this function returns.</param>
 			/// <param name="token">Returns the token index at the end of the token.</param>
 			/// <param name="finalState">Returns true if it reach the end of the token.</param>
-			/// <param name="previousTokenStop">Returns true if the last character is the end of the token.</param>
+			/// <param name="previousTokenStop">Returns true if the previous character is the end of the token.</param>
 			void										Walk(wchar_t input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const;
 			/// <summary>Step forward by one character.</summary>
-			/// <returns>Returns the new current state.</returns>
+			/// <returns>Returns the new current state. It is used to walk the next character.</returns>
 			/// <param name="input">The input character.</param>
 			/// <param name="state">The current state.</param>
 			vint										Walk(wchar_t input, vint state)const;
