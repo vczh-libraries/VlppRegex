@@ -524,6 +524,7 @@ Tokenizer
 			void										SetInternalState(InternalState state);
 			/// <summary>Step forward by one character.</summary>
 			/// <param name="input">The input character.</param>
+			/// <remarks>Callbacks in <see cref="RegexProc"/> will be called, which is from the second argument of the constructor of <see cref="RegexLexer"/>.</remarks>
 			void										Pass(wchar_t input);
 			/// <summary>Get the start DFA state number, which represents the correct state before colorizing any characters.</summary>
 			/// <returns>The DFA state number.</returns>
@@ -533,7 +534,8 @@ Tokenizer
 			/// <param name="input">The text to colorize.</param>
 			/// <param name="length">Size of the text in characters.</param>
 			/// <remarks>
-			/// See <see cref="RegexProcessingToken::interTokenState"/> and <see cref="RegexProc::extendProc"/> for more information about the return value.
+			/// <p>See <see cref="RegexProcessingToken::interTokenState"/> and <see cref="RegexProc::extendProc"/> for more information about the return value.</p>
+			/// <p>Callbacks in <see cref="RegexProc"/> will be called, which is from the second argument of the constructor of <see cref="RegexLexer"/>.</p>
 			/// </remarks>
 			void*										Colorize(const wchar_t* input, vint length);
 		};
@@ -548,18 +550,19 @@ Tokenizer
 			RegexProc									proc;
 
 		public:
-			/// <summary>Create a lexical analyzer by a set of regular expressions. [F:vl.regex.RegexToken.token] will be the index of the matched regular expression.</summary>
-			/// <param name="tokens">The regular expressions.</param>
-			/// <param name="_proc">Callback procedures.</param>
+			/// <summary>Create a lexical analyzer by a set of regular expressions. [F:vl.regex.RegexToken.token] will be the index of the matched regular expression in the first argument.</summary>
+			/// <param name="tokens">ALl regular expression, each one represent a kind of tokens.</param>
+			/// <param name="_proc">Configuration of all callbacks.</param>
 			RegexLexer(const collections::IEnumerable<WString>& tokens, RegexProc _proc);
 			~RegexLexer();
 
-			/// <summary>Tokenize a input text.</summary>
-			/// <returns>The result.</returns>
+			/// <summary>Tokenize an input text.</summary>
+			/// <returns>All tokens, including recognized tokens or unrecognized tokens. For unrecognized tokens, [F:vl.regex.RegexToken.token] will be -1.</returns>
 			/// <param name="code">The text to tokenize.</param>
-			/// <param name="codeIndex">Extra information that will store in [F:vl.regex.RegexToken.codeIndex].</param>
+			/// <param name="codeIndex">Extra information that will be copied to [F:vl.regex.RegexToken.codeIndex].</param>
+			/// <remarks>Callbacks in <see cref="RegexProc"/> will be called when iterating through tokens, which is from the second argument of the constructor of <see cref="RegexLexer"/>.</remarks>
 			RegexTokens									Parse(const WString& code, vint codeIndex=-1)const;
-			/// <summary>Create a equivalence walker from this lexical analyzer.</summary>
+			/// <summary>Create a equivalence walker from this lexical analyzer. A walker enable you to walk throught characters one by one,</summary>
 			/// <returns>The walker.</returns>
 			RegexLexerWalker							Walk()const;
 			/// <summary>Create a equivalence colorizer from this lexical analyzer.</summary>
