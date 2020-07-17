@@ -184,7 +184,7 @@ Regex
 		///                 <li><b>(&lt;&name&gt;)</b>: Copy the named regex "name" here and apply</li>
 		///             </ul>
 		///         </li>
-		///     <ul>
+		///     </ul>
 		/// </p>
 		/// <p>
 		///     The regular expression has pupre mode and rich mode.
@@ -516,7 +516,7 @@ Tokenizer
 			/// In order to colorize another piece of multi-lined text,
 			/// you can either save the start state and call <see cref="SetInternalState"/> to reset the state,
 			/// or call <see cref="RegexLexer::Colorize"/> for a new colorizer.
-			/// <p>
+			/// </p>
 			/// </remarks>
 			InternalState								GetInternalState();
 			/// <summary>Restore the colorizer to a specified state.</summary>
