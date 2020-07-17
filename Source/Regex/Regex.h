@@ -434,7 +434,7 @@ Tokenizer
 			void										ReadToEnd(collections::List<RegexToken>& tokens, bool(*discard)(vint)=0)const;
 		};
 		
-		/// <summary>A type for walking through a text against a <see cref="RegexLexer"/>.</summary>
+		/// <summary>A type for walking through a text against a <see cref="RegexLexer"/>. Call <see cref="RegexLexer::Walk"/> to create this object.</summary>
 		class RegexLexerWalker : public Object
 		{
 			friend class RegexLexer;
@@ -478,7 +478,7 @@ Tokenizer
 			bool										IsClosedToken(const WString& input)const;
 		};
 
-		/// <summary>Lexical colorizer.</summary>
+		/// <summary>Lexical colorizer. Call <see cref="RegexLexer::Colorize"/> to create this object.</summary>
 		class RegexLexerColorizer : public Object
 		{
 			friend class RegexLexer;
@@ -505,9 +505,22 @@ Tokenizer
 
 			/// <summary>Get the internal state.</summary>
 			/// <returns>The internal state.</returns>
+			/// <remarks>
+			/// <p>
+			/// If <see cref="Colorize"/> has not been called, the return value of this function is the start state.
+			/// </p>
+			/// <p>
+			/// If a text is multi-lined, <see cref="Colorize"/> could be called line by line, and the internal state is changed.
+			/// </p>
+			/// <p>
+			/// In order to colorize another piece of multi-lined text,
+			/// you can either save the start state and call <see cref="SetInternalState"/> to reset the state,
+			/// or call <see cref="RegexLexer::Colorize"/> for a new colorizer.
+			/// <p>
+			/// </remarks>
 			InternalState								GetInternalState();
-			/// <summary>Restore the colorizer to a internal state.</summary>
-			/// <param name="state">The internal state.</param>
+			/// <summary>Restore the colorizer to a specified state.</summary>
+			/// <param name="state">The state to restore.</param>
 			void										SetInternalState(InternalState state);
 			/// <summary>Step forward by one character.</summary>
 			/// <param name="input">The input character.</param>
@@ -515,10 +528,13 @@ Tokenizer
 			/// <summary>Get the start DFA state number, which represents the correct state before colorizing any characters.</summary>
 			/// <returns>The DFA state number.</returns>
 			vint										GetStartState()const;
-			/// <summary>Colorize a text.</summary>	GetCurrentState()const;
-			/// <returns>An inter token state at the end of this line. It could be the same object which is returned from the previous call.</returns>
+			/// <summary>Colorize a text.</summary>
+			/// <returns>An inter token state at the end of this line. It could be the same object to which is returned from the previous call.</returns>
 			/// <param name="input">The text to colorize.</param>
 			/// <param name="length">Size of the text in characters.</param>
+			/// <remarks>
+			/// See <see cref="RegexProcessingToken::interTokenState"/> and <see cref="RegexProc::extendProc"/> for more information about the return value.
+			/// </remarks>
 			void*										Colorize(const wchar_t* input, vint length);
 		};
 
