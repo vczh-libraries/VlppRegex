@@ -255,17 +255,18 @@ Tokenizer
 		/// <summary>A token.</summary>
 		struct RegexToken
 		{
-			/// <summary>Position in the input string.</summary>
+			/// <summary>Position in the input string in characters.</summary>
 			vint										start;
 			/// <summary>Size of this token in characters.</summary>
 			vint										length;
 			/// <summary>The token id, begins at 0, represents the regular expression in the list that matches this token. -1 means this token is produced by an error.</summary>
 			vint										token;
 			/// <summary>The pointer to where this token starts in the input string .</summary>
+			/// <remarks>This pointer comes from a <see cref="WString"/> that used to be analyzed. You should keep a variable to that string alive, so that to keep this pointer alive.</remarks>
 			const wchar_t*								reading;
-			/// <summary>The argument value from [M:vl.regex.RegexLexer.Parse].</summary>
+			/// <summary>The "codeIndex" argument from [M:vl.regex.RegexLexer.Parse].</summary>
 			vint										codeIndex;
-			/// <summary>True if this token is complete. False if this token does not end here.</summary>
+			/// <summary>True if this token is complete. False if this token does not end here. This could happend when colorizing a text line by line.</summary>
 			bool										completeToken;
 
 			/// <summary>Row number of the first character, begins at 0.</summary>
@@ -304,11 +305,13 @@ Tokenizer
 			/// </summary>
 			bool										completeToken;
 			/// <summary>
-			/// The inter token state object, could be modified after the callback.
+			/// The internal token state object, could be modified after the callback.
 			/// When the callback returns:
-			///   if the completeText parameter is true in <see cref="RegexProc::extendProc"/>, it should be nullptr.
-			///   if the token does not end at the end of the input, it should not be nullptr.
-			///   if a token is completed, it should be nullptr.
+			/// <ul>
+			///   <li>if the completeText parameter is true in <see cref="RegexProc::extendProc"/>, it should be nullptr.</li>
+			///   <li>if the token does not end at the end of the input, it should not be nullptr.</li>
+			///   <li>if a token is completed in one attemp of extending, it should be nullptr.</li>
+			/// </ul>
 			/// </summary>
 			void*										interTokenState;
 
