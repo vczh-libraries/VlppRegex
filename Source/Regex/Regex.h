@@ -305,7 +305,7 @@ Tokenizer
 			/// </summary>
 			bool										completeToken;
 			/// <summary>
-			/// The internal token state object, could be modified after the callback.
+			/// The inter token state object, could be modified after the callback.
 			/// When the callback returns:
 			/// <ul>
 			///   <li>if the completeText parameter is true in <see cref="RegexProc::extendProc"/>, it should be nullptr.</li>
@@ -333,15 +333,40 @@ Tokenizer
 		struct RegexProc
 		{
 			/// <summary>
-			/// The deleter which deletes inter token state objects created by <see cref="extendProc"/>. This callback is not called automatically.
+			/// The deleter which deletes <see cref="RegexProcessingToken::interTokenState"/> created by <see cref="extendProc"/>.
+			/// This callback is not called automatically.
+			/// It is here to make the maintainance convenient for the caller.
 			/// </summary>
 			RegexInterTokenStateDeleter					deleter = nullptr;
 			/// <summary>
-			/// The token extend callback. It is called after recognizing any token, and run a customized procedure to modify the token based on the given context.
-			/// If the length parameter is -1, it means the caller does not measure the incoming text buffer, which automatically indicates that the buffer is null-terminated.
-			/// If the length parameter is not -1, it means the number of available characters in the buffer.
-			/// The completeText parameter could be true or false. When it is false, it means that the buffer does not contain all the text.
+			/// <p>The token extend callback. It is called after recognizing any token, and run a customized procedure to modify the token based on the given context.</p>
+			/// <p>If the length parameter is -1, it means the caller does not measure the incoming text buffer, which automatically indicates that the buffer is null-terminated.</p>
+			/// <p>If the length parameter is not -1, it means the number of available characters in the buffer.</p>
+			/// <p>The completeText parameter could be true or false. When it is false, it means that the buffer does not contain all the text.</p>
 			/// </summary>
+			/// <remarks>
+			/// <p>
+			/// This is very useful to recognize any token that cannot be expressed using a regular expression.
+			/// For example, a C++ literal string R"tag(the conteng)tag".
+			/// It is recommended to add a token for <b>R"tag(</b>,
+			/// and then use this extend proc to search for a <b>)tag"</b> to complete the token.
+			/// </p>
+			/// <p>
+			/// <b>Important</b>:
+			/// when colorizing a text line by line,
+			/// a cross-line token could be incomplete at the end of the line.
+			/// Because a given buffer ends at the end of that line,
+			/// the extend proc is not able to know right now about what is going on in the future.
+			/// Here is what <see cref="RegexProcessingToken::interTokenState"/> is designed for,
+			/// the extend proc can store anything it wants using that pointer.
+			/// </p>
+			/// <p>
+			/// The caller can get this pointer from the return value of <see cref="RegexLexerColorizer::Colorize"/>.
+			/// This pointer only available for cross-line tokens, it is obvious that one line produces at most one such pointer.
+			/// Then the caller keeps calling that function to walk throught the whole string.
+			/// When the return value is changed, the pointer is no longer used, and it can be deleted by calling <see cref="deleter"/> manually.
+			/// </p>
+			/// </remarks>
 			RegexTokenExtendProc						extendProc = nullptr;
 			/// <summary>
 			/// The colorizer callback. It is called when a token is recognized.
