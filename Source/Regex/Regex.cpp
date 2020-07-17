@@ -172,8 +172,6 @@ Regex
 		}
 		
 		Regex::Regex(const WString& code, bool preferPure)
-			:pure(0)
-			,rich(0)
 		{
 			CharRange::List subsets;
 			RegexExpression::Ref regex=ParseRegexExpression(code);

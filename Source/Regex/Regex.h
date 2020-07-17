@@ -34,7 +34,7 @@ namespace vl
 Data Structure
 ***********************************************************************/
 
-		/// <summary>A type representing a fragment of the input string.</summary>
+		/// <summary>A sub string of the string that a <see cref="Regex"/> is matched against.</summary>
 		class RegexString : public Object
 		{
 		protected:
@@ -46,19 +46,19 @@ Data Structure
 			RegexString(vint _start=0);
 			RegexString(const WString& _string, vint _start, vint _length);
 
-			/// <summary>The position of the input string.</summary>
+			/// <summary>The position of the input string in characters.</summary>
 			/// <returns>The position.</returns>
 			vint										Start()const;
-			/// <summary>The size of the fragment in characters.</summary>
+			/// <summary>The size of the sub string in characters.</summary>
 			/// <returns>The size.</returns>
 			vint										Length()const;
-			/// <summary>Get the fragment.</summary>
-			/// <returns>The fragment.</returns>
+			/// <summary>Get the sub string as a <see cref="WString"/>.</summary>
+			/// <returns>The sub string.</returns>
 			const WString&								Value()const;
 			bool										operator==(const RegexString& string)const;
 		};
 
-		/// <summary>A type representing a match of the input string.</summary>
+		/// <summary>A match produces by a <see cref="Regex"/>.</summary>
 		class RegexMatch : public Object, private NotCopyable
 		{
 			friend class Regex;
@@ -78,17 +78,21 @@ Data Structure
 			RegexMatch(const RegexString& _result);
 		public:
 			
-			/// <summary>Test if this match is a success match or a failed match. A failed match will only appear when calling [M:vl.regex.Regex.Split] or [M:vl.regex.Regex.Cut]. In other cases, failed matches are either not included in the result, or become null pointers.</summary>
-			/// <returns>Returns true if this match is a success match.</returns>
+			/// <summary>
+			/// Test if this match is a succeeded match or a failed match.
+			/// A failed match will only appear when calling [M:vl.regex.Regex.Split] or [M:vl.regex.Regex.Cut].
+			/// In other cases, failed matches are either not included in the result.
+			/// </summary>
+			/// <returns>Returns true if this match is a succeeded match.</returns>
 			bool										Success()const;
-			/// <summary>Get the whole fragment that matches.</summary>
-			/// <returns>The whole fragment.</returns>
+			/// <summary>Get the matched sub string.</summary>
+			/// <returns>The matched sub string.</returns>
 			const RegexString&							Result()const;
-			/// <summary>Get all fragments that are captured.</summary>
-			/// <returns>All fragments that are captured.</returns>
+			/// <summary>Get all sub strings that are captured anonymously.</summary>
+			/// <returns>All sub strings that are captured anonymously.</returns>
 			const CaptureList&							Captures()const;
-			/// <summary>Get all fragments that are captured by named groups.</summary>
-			/// <returns>All fragments that are captured.</returns>
+			/// <summary>Get all sub strings that are captured by named groups.</summary>
+			/// <returns>All sub strings that are captured by named groups.</returns>
 			const CaptureGroup&							Groups()const;
 		};
 
@@ -96,105 +100,151 @@ Data Structure
 Regex
 ***********************************************************************/
 
-		/// <summary><![CDATA[
-		/// Regular Expression. Here is a brief description of the regular expression grammar:
-		///	1) Charset:
-		///		a, [a-z], [^a-z]
-		/// 2) Functional characters:
-		///		^: the beginning of the input (DFA incompatible)
-		///		$: the end of the input (DFA incompatible)
-		///		regex1|regex2: match either regex1 or regex2
-		///	3) Escaping (both \ and / mean the next character is escaped)
-		///		Escaped characters:
-		///			\r: the CR character
-		///			\n: the LF character
-		///			\t: the tab character
-		///			\s: spacing characters (including space, \r, \n, \t)
-		///			\S: non-spacing characters
-		///			\d: [0-9]
-		///			\D: [^0-9]
-		///			\l: [a-zA-Z]
-		///			\L: [^a-zA-Z]
-		///			\w: [a-zA-Z0-9_]
-		///			\W: [^a-zA-Z0-9_]
-		///			\.: any character (this is the main different from other regex, which treat "." as any characters and "\." as the dot character)
-		///			\\, \/, \(, \), \+, \*, \?, \{, \}, \[, \], \<, \>, \^, \$, \!, \=: represents itself
-		///		Escaped characters in charset defined in a square bracket:
-		///			\r: the CR character
-		///			\n: the LF character
-		///			\t: the tab character
-		///			\-, \[, \], \\, \/, \^, \$: represents itself
-		///	4) Loops:
-		///		regex{3}: repeats 3 times
-		///		regex{3,}: repeats 3 or more times
-		///		regex{1,3}: repeats 1 to 3 times
-		///		regex?: repeats 0 or 1 times
-		///		regex*: repeats 0 or more times
-		///		regex+: repeats 1 or more times
-		///		if you add a "?" right after a loop, it means repeating as less as possible (DFA incompatible)
-		///	5) Capturing: (DFA incompatible)
-		///		(regex): No capturing, just change the operators' association
-		///		(?regex): Capture matched fragment
-		///		(<name>regex): Capture matched fragment in a named group called "name"
-		///		(<$i>): Match the i-th captured fragment, begins from 0
-		///		(<$name;i>): Match the i-th captured fragment in the named group called "name", begins from 0
-		///		(<$name>): Match any captured fragment in the named group called "name"
-		///	6) MISC
-		///		(=regex): The prefix of the following text should match the regex, but it is not counted in the whole match (DFA incompatible)
-		///		(!regex): Any prefix of the following text should not match the regex, and it is not counted in the whole match (DFA incompatible)
-		///		(<#name>regex): Name the regex "name", and it applies here
-		///		(<&name>): Copy the named regex "name" here and apply
-		/// ]]></summary>
+		/// <summary>
+		/// <p>
+		///     Regular Expression. Here is a brief description of the regular expression grammar.
+		/// </p>
+		/// <p>
+		///     <ul>
+		///         <li>
+		///             <b>Charset</b>:
+		///             <ul>
+		///                 <li><b>a</b>, <b>[a-z]</b>, <b>[^a-z]</b></li>
+		///             </ul>
+		///         </li>
+		///         <li>
+		///             <b>Functional characters</b>:
+		///             <ul>
+		///                 <li><b>^</b>: the beginning of the input (DFA incompatible)</li>
+		///                 <li><b>$</b>: the end of the input (DFA incompatible)</li>
+		///                 <li><b>regex1|regex2</b>: match either regex1 or regex2</li>
+		///             </ul>
+		///         </li>
+		///         <li>
+		///             <b>Escaping</b> (both \ and / mean the next character is escaped):
+		///             <ul>
+		///                 <li>
+		///                     Escaped characters:
+		///                     <ul>
+		///                         <li><b>\r</b>: the CR character</li>
+		///                         <li><b>\n</b>: the LF character</li>
+		///                         <li><b>\t</b>: the tab character</li>
+		///                         <li><b>\s</b>: spacing characters (including space, \r, \n, \t)</li>
+		///                         <li><b>\S</b>: non-spacing characters</li>
+		///                         <li><b>\d</b>: [0-9]</li>
+		///                         <li><b>\D</b>: [^0-9]</li>
+		///                         <li><b>\l</b>: [a-zA-Z]</li>
+		///                         <li><b>\L</b>: [^a-zA-Z]</li>
+		///                         <li><b>\w</b>: [a-zA-Z0-9_]</li>
+		///                         <li><b>\W</b>: [^a-zA-Z0-9_]</li>
+		///                         <li><b>\.</b>: any character (this is the main different from other regex, which treat "." as any characters and "\." as the dot character)</li>
+		///                         <li><b>\\</b>, <b>\/</b>, <b>\(</b>, <b>\)</b>, <b>\+</b>, <b>\*</b>, <b>\?</b>, <b>\{</b>, <b>\}</b>, <b>\[</b>, <b>\]</b>, <b>\&lt;</b>, <b>\&gt;</b>, <b>\^</b>, <b>\$</b>, <b>\!</b>, <b>\=</b>: represents itself</li>
+		///                     </ul>
+		///                 </li>
+		///                 <li>
+		///                     Escaped characters in charset defined in a square bracket:
+		///                     <ul>
+		///                         <li><b>\r</b>: the CR character</li>
+		///                         <li><b>\n</b>: the LF character</li>
+		///                         <li><b>\t</b>: the tab character</li>
+		///                         <li><b>\-</b>, <b>\[</b>, <b>\]</b>, <b>\\</b>, <b>\/</b>, <b>\^</b>, <b>\$</b>: represents itself</li>
+		///                     </ul>
+		///                 </li>
+		///             </ul>
+		///         </li>
+		///         <li>
+		///             <b>Loops</b>:
+		///             <ul>
+		///                 <li><b>regex{3}</b>: repeats 3 times</li>
+		///                 <li><b>regex{3,}</b>: repeats 3 or more times</li>
+		///                 <li><b>regex{1,3}</b>: repeats 1 to 3 times</li>
+		///                 <li><b>regex?</b>: repeats 0 or 1 times</li>
+		///                 <li><b>regex*</b>: repeats 0 or more times</li>
+		///                 <li><b>regex+</b>: repeats 1 or more times</li>
+		///             </ul>
+		///             if you add an additional <b>?</b> right after a loop, it means repeating as less as possible <b>(DFA incompatible)</b>
+		///         </li>
+		///         <li>
+		///             <b>Capturing</b>: <b>(DFA incompatible)</b>
+		///             <ul>
+		///                 <li><b>(regex)</b>: No capturing, just change the operators' association</li>
+		///                 <li><b>(?regex)</b>: Capture matched fragment</li>
+		///                 <li><b>(&lt;name&gt;regex)</b>: Capture matched fragment in a named group called "name"</li>
+		///                 <li><b>(&lt;$i&gt;)</b>: Match the i-th captured fragment, begins from 0</li>
+		///                 <li><b>(&lt;$name;i&gt;)</b>: Match the i-th captured fragment in the named group called "name", begins from 0</li>
+		///                 <li><b>(&lt;$name&gt;)</b>: Match any captured fragment in the named group called "name"</li>
+		///             </ul>
+		///         </li>
+		///         <li>
+		///             <b>MISC</b>
+		///             <ul>
+		///                 <li><b>(=regex)</b>: The prefix of the following text should match the regex, but it is not counted in the whole match <b>(DFA incompatible)</b></li>
+		///                 <li><b>(!regex)</b>: Any prefix of the following text should not match the regex, and it is not counted in the whole match <b>(DFA incompatible)</b></li>
+		///                 <li><b>(&lt;#name&gt;regex)</b>: Name the regex "name", and it applies here</li>
+		///                 <li><b>(&lt;&name&gt;)</b>: Copy the named regex "name" here and apply</li>
+		///             </ul>
+		///         </li>
+		///     <ul>
+		/// </p>
+		/// <p>
+		///     The regular expression has pupre mode and rich mode.
+		///     Pure mode means the regular expression is driven by a DFA, while the rich mode is not.
+		/// </p>
+		/// <p>
+		///     The regular expression can test a string instead of matching.
+		///     Testing only returns a bool very indicating success or failure.
+		/// </p>
+		/// </summary>
 		class Regex : public Object, private NotCopyable
 		{
 		protected:
-			regex_internal::PureInterpretor*			pure;
-			regex_internal::RichInterpretor*			rich;
+			regex_internal::PureInterpretor*			pure = nullptr;
+			regex_internal::RichInterpretor*			rich = nullptr;
 
 			void										Process(const WString& text, bool keepEmpty, bool keepSuccess, bool keepFail, RegexMatch::List& matches)const;
 		public:
-			/// <summary>Create a regular expression.</summary>
+			/// <summary>Create a regular expression. It will crash if the regular expression produces syntax error.</summary>
 			/// <param name="code">The regular expression in a string.</param>
-			/// <param name="preferPure">Set to true to tell the Regex to use DFA if possible.</param>
-			Regex(const WString& code, bool preferPure=true);
+			/// <param name="preferPure">Set to true to use DFA if possible.</param>
+			Regex(const WString& code, bool preferPure = true);
 			~Regex();
 
-			/// <summary>Test does the Regex uses DFA to match a string.</summary>
-			/// <returns>Returns true if DFA is used.</returns>
+			/// <summary>Test is a DFA used to match a string.</summary>
+			/// <returns>Returns true if a DFA is used.</returns>
 			bool										IsPureMatch()const;
-			/// <summary>Test does the Regex uses DFA to test a string. Test means ignoring all capturing requirements.</summary>
-			/// <returns>Returns true if DFA is used.</returns>
+			/// <summary>Test is a DFA used to test a string. It ignores all capturing.</summary>
+			/// <returns>Returns true if a DFA is used.</returns>
 			bool										IsPureTest()const;
 
 			/// <summary>Match a prefix of the text.</summary>
 			/// <returns>Returns the match. Returns null if failed.</returns>
 			/// <param name="text">The text to match.</param>
 			RegexMatch::Ref								MatchHead(const WString& text)const;
-			/// <summary>Match a fragment of the text.</summary>
+			/// <summary>Match a sub string of the text.</summary>
 			/// <returns>Returns the match. Returns null if failed.</returns>
 			/// <param name="text">The text to match.</param>
 			RegexMatch::Ref								Match(const WString& text)const;
-			/// <summary>Match a prefix of the text, ignoring all capturing requirements.</summary>
-			/// <returns>Returns true if succeeded.</returns>
+			/// <summary>Match a prefix of the text, ignoring all capturing.</summary>
+			/// <returns>Returns true if it succeeded.</returns>
 			/// <param name="text">The text to match.</param>
 			bool										TestHead(const WString& text)const;
-			/// <summary>Match a fragment of the text, ignoring all capturing requirements.</summary>
+			/// <summary>Match a sub string of the text, ignoring all capturing.</summary>
 			/// <returns>Returns true if succeeded.</returns>
 			/// <param name="text">The text to match.</param>
 			bool										Test(const WString& text)const;
-			/// <summary>Find all matched fragments of the text, returning all matched fragments.</summary>
+			/// <summary>Find all matched fragments in the given text, returning all matched sub strings.</summary>
 			/// <param name="text">The text to match.</param>
-			/// <param name="matches">All successful matches.</param>
+			/// <param name="matches">Returns all succeeded matches.</param>
 			void										Search(const WString& text, RegexMatch::List& matches)const;
-			/// <summary>Split the text by matched fragments, returning all unmatched fragments.</summary>
+			/// <summary>Split the text by matched sub strings, returning all unmatched sub strings.</summary>
 			/// <param name="text">The text to match.</param>
-			/// <param name="keepEmptyMatch">Set to true to keep all empty matches.</param>
-			/// <param name="matches">All failed matches.</param>
+			/// <param name="keepEmptyMatch">Set to true to keep all empty unmatched sub strings. This could happen when there is nothing between two matched sub strings.</param>
+			/// <param name="matches">Returns all failed matches.</param>
 			void										Split(const WString& text, bool keepEmptyMatch, RegexMatch::List& matches)const;
-			/// <summary>Cut the text by matched fragments, returning all matched or unmatched fragments.</summary>
+			/// <summary>Cut the text by matched sub strings, returning all matched and unmatched sub strings.</summary>
 			/// <param name="text">The text to match.</param>
-			/// <param name="keepEmptyMatch">Set to true to keep all empty matches.</param>
-			/// <param name="matches">All successful and failed matches.</param>
+			/// <param name="keepEmptyMatch">Set to true to keep all empty matches. This could happen when there is nothing between two matched sub strings.</param>
+			/// <param name="matches">Returns all succeeded and failed matches.</param>
 			void										Cut(const WString& text, bool keepEmptyMatch, RegexMatch::List& matches)const;
 		};
 
