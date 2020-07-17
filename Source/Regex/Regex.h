@@ -259,7 +259,7 @@ Tokenizer
 			vint										start;
 			/// <summary>Size of this token in characters.</summary>
 			vint										length;
-			/// <summary>The token id, begins at 0, represents the regular expression in the list that matches this token. -1 means this token is produced by an error.</summary>
+			/// <summary>The token id, begins at 0, represents the regular expression in the list (the first argument in the contructor of <see cref="RegexLexer"/>) that matches this token. -1 means this token is produced by an error.</summary>
 			vint										token;
 			/// <summary>The pointer to where this token starts in the input string .</summary>
 			/// <remarks>This pointer comes from a <see cref="WString"/> that used to be analyzed. You should keep a variable to that string alive, so that to keep this pointer alive.</remarks>
@@ -291,21 +291,21 @@ Tokenizer
 			/// </summary>
 			const vint									start;
 			/// <summary>
-			/// The length of the token, could be modified after the callback.
+			/// The length of the token, allowing to be updated by the callback.
 			/// When the callback returns, the length is not allowed to be decreased.
 			/// This value will be -1 if <see cref="interTokenState"/> is not null.
 			/// </summary>
 			vint										length;
 			/// <summary>
-			/// The id of the token, could be modified after the callback.
+			/// The id of the token, allowing to be updated by the callback.
 			/// </summary>
 			vint										token;
 			/// <summary>
-			/// The flag indicating if this token is completed, could be modified after the callback.
+			/// The flag indicating if this token is completed, allowing to be updated by the callback.
 			/// </summary>
 			bool										completeToken;
 			/// <summary>
-			/// The inter token state object, could be modified after the callback.
+			/// The inter token state object, allowing to be updated by the callback.
 			/// When the callback returns:
 			/// <ul>
 			///   <li>if the completeText parameter is true in <see cref="RegexProc::extendProc"/>, it should be nullptr.</li>
@@ -366,10 +366,42 @@ Tokenizer
 			/// Then the caller keeps calling that function to walk throught the whole string.
 			/// When the return value is changed, the pointer is no longer used, and it can be deleted by calling <see cref="deleter"/> manually.
 			/// </p>
+			/// <p>
+			/// The first argument is <see cref="argument"/>.
+			/// </p>
+			/// <p>
+			/// The second argument is a pointer to the buffer of the first character in this token.
+			/// If the previous token is incomplete, then the buffer begins at the first character of the new buffer.
+			/// </p>
+			/// <p>
+			/// The third argument is the length of the recognized token in characters.
+			/// </p>
+			/// <p>
+			/// The fourth character indicates if the token is completed.
+			/// Even if a token is completed, but the extend proc found that, the extend exceeds the end of the buffer,
+			/// then it can update the value to make it incomplete.
+			/// </p>
+			/// <p>
+			/// The fifth contains the context for this token. Fields except "start" are allowed to be updated by the extend proc.
+			/// </p>
 			/// </remarks>
 			RegexTokenExtendProc						extendProc = nullptr;
 			/// <summary>
+			/// <p>
 			/// The colorizer callback. It is called when a token is recognized.
+			/// </p>
+			/// <p>
+			/// The first argument is <see cref="argument"/>.
+			/// </p>
+			/// <p>
+			/// The second argument is the position of the first character of the token in characters.
+			/// </p>
+			/// <p>
+			/// The third argument is the length of the recognized token in characters.
+			/// </p>
+			/// <p>
+			/// The fourth character is the regular expression in the list (the first argument in the contructor of <see cref="RegexLexer"/>) that matches this token.
+			/// </p>
 			/// </summary>
 			RegexTokenColorizeProc						colorizeProc = nullptr;
 			/// <summary>
