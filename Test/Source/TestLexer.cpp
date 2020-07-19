@@ -19,7 +19,7 @@ void TestRegexLexer6ExtendProc(void* argument, const wchar_t* reading, vint leng
 	WString readingBuffer = length == -1 ? WString(reading, false) : WString(reading, length);
 	reading = readingBuffer.Buffer();
 
-	if (processingToken.token == 2 || processingToken.token == 3)
+	if (processingToken.token == 2 || processingToken.token == 4)
 	{
 		WString postfix;
 		if (processingToken.interTokenState)
@@ -41,7 +41,7 @@ void TestRegexLexer6ExtendProc(void* argument, const wchar_t* reading, vint leng
 		else
 		{
 			processingToken.length = readingBuffer.Length();
-			processingToken.token = 3;
+			processingToken.token = 4;
 			processingToken.completeToken = false;
 
 			if (!completeText && !processingToken.interTokenState)
@@ -632,7 +632,7 @@ TEST_FILE
 		//[$"===(]
 		TEST_ASSERT(tokens[9].start == 48);
 		TEST_ASSERT(tokens[9].length == 6);
-		TEST_ASSERT(tokens[9].token == 3);
+		TEST_ASSERT(tokens[9].token == 4);
 		TEST_ASSERT(tokens[9].rowStart == 4);
 		TEST_ASSERT(tokens[9].columnStart == 9);
 		TEST_ASSERT(tokens[9].rowEnd == 4);
@@ -646,6 +646,7 @@ TEST_FILE
 		codes.Add(L"/d+");
 		codes.Add(L"\"[^\"]*\"");
 		codes.Add(L"/$\"=*/(");
+		codes.Add(L"/t+");
 
 		RegexProc proc;
 		proc.deleter = TestRegexLexer6Deleter;
