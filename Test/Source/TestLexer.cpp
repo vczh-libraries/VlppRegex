@@ -703,6 +703,7 @@ abcde
 		codes.Add(L"/d+");
 		codes.Add(L"\"[^\"]*\"");
 		codes.Add(L"/$\"=*/(");
+		codes.Add(L"/s+");
 
 		vint colors[100];
 		RegexProc proc;

@@ -764,6 +764,61 @@ Tokenizer
 		};
 
 		/// <summary>Lexical colorizer. Call <see cref="RegexLexer::Colorize"/> to create this object.</summary>
+		/// <example><![CDATA[
+		/// int main()
+		/// {
+		///     List<WString> tokenDefs;
+		///     tokenDefs.Add(L"/d+");
+		///     tokenDefs.Add(L"[a-zA-Z_]/w*");
+		///     tokenDefs.Add(L"[(){};]");
+		///     tokenDefs.Add(L"/s+");
+		///     tokenDefs.Add(L"///*+([^//*]|/*+[^//])*/*+//");
+		/// 
+		///     const wchar_t* lines[] = {
+		///         L"/*********************",
+		///         L"MAIN.CPP",
+		///         L"*********************/",
+		///         L"",
+		///         L"int main()",
+		///         L"{",
+		///         L"    return 0;",
+		///         L"}",
+		///     };
+		/// 
+		///     struct Argument
+		///     {
+		///         // for a real colorizer, you can put a color buffer here.
+		///         // the buffer is reused for every line of code.
+		///         // but for the demo, I put the current processing text instead.
+		///         // so that I am able to print what is processed.
+		///         const wchar_t* processingText = nullptr;
+		///     } argument;
+		/// 
+		///     RegexProc proc;
+		///     proc.argument = &argument;
+		///     proc.colorizeProc = [](void* argument, vint start, vint length, vint token)
+		///     {
+		///         // this is guaranteed by "proc.argument = &argument;"
+		///         auto text = reinterpret_cast<Argument*>(argument)->processingText;
+		///         Console::WriteLine(itow(token) + L": <" + WString(text + start, length) + L">");
+		///     };
+		/// 
+		///     RegexLexer lexer(tokenDefs, proc);
+		///     RegexLexerColorizer colorizer = lexer.Colorize();
+		/// 
+		///     FOREACH_INDEXER(const wchar_t*, line, index, From(lines))
+		///     {
+		///         Console::WriteLine(L"Begin line " + itow(index));
+		///         argument.processingText = line;
+		///         colorizer.Colorize(line, wcslen(line));
+		/// 
+		///         argument.processingText = nullptr;
+		///         colorizer.Pass(L'\r');
+		///         colorizer.Pass(L'\n');
+		///         Console::WriteLine(L"");
+		///     }
+		/// }
+		/// ]]></example>
 		class RegexLexerColorizer : public Object
 		{
 			friend class RegexLexer;
@@ -809,7 +864,7 @@ Tokenizer
 			void										SetInternalState(InternalState state);
 			/// <summary>Step forward by one character.</summary>
 			/// <param name="input">The input character.</param>
-			/// <remarks>Callbacks in <see cref="RegexProc"/> will be called, which is from the second argument of the constructor of <see cref="RegexLexer"/>.</remarks>
+			/// <remarks>Callbacks in <see cref="RegexProc"/> will be called <b>except colorizeProc</b>, which is from the second argument of the constructor of <see cref="RegexLexer"/>.</remarks>
 			void										Pass(wchar_t input);
 			/// <summary>Get the start DFA state number, which represents the correct state before colorizing any characters.</summary>
 			/// <returns>The DFA state number.</returns>
