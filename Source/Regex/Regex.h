@@ -90,9 +90,31 @@ Data Structure
 			const RegexString&							Result()const;
 			/// <summary>Get all sub strings that are captured anonymously.</summary>
 			/// <returns>All sub strings that are captured anonymously.</returns>
+			/// <example><![CDATA[
+			/// int main()
+			/// {
+			///     Regex regex(L"^/.*?((?C/S+)(/.*?))+$");
+			///     auto match = regex.MatchHead(L"C++ and C# are my favorite programing languages");
+			///     FOREACH(RegexString, capture, match->Captures())
+			///     {
+			///         Console::WriteLine(capture.Value());
+			///     }
+			/// }
+			/// ]]></example>
 			const CaptureList&							Captures()const;
 			/// <summary>Get all sub strings that are captured by named groups.</summary>
 			/// <returns>All sub strings that are captured by named groups.</returns>
+			/// <example><![CDATA[
+			/// int main()
+			/// {
+			///     Regex regex(L"^/.*?((<lang>C/S+)(/.*?))+$");
+			///     auto match = regex.MatchHead(L"C++ and C# are my favorite programing languages");
+			///     FOREACH(RegexString, capture, match->Groups().Get(L"lang"))
+			///     {
+			///         Console::WriteLine(capture.Value());
+			///     }
+			/// }
+			/// ]]></example>
 			const CaptureGroup&							Groups()const;
 		};
 
@@ -219,10 +241,26 @@ Regex
 			/// <summary>Match a prefix of the text.</summary>
 			/// <returns>Returns the match. Returns null if failed.</returns>
 			/// <param name="text">The text to match.</param>
+			/// <example><![CDATA[
+			/// int main()
+			/// {
+			///     Regex regex(L"C/S+");
+			///     auto match = regex.MatchHead(L"C++ and C# are my favorite programing languages");
+			///     Console::WriteLine(match->Result().Value());
+			/// }
+			/// ]]></example>
 			RegexMatch::Ref								MatchHead(const WString& text)const;
 			/// <summary>Match a sub string of the text.</summary>
-			/// <returns>Returns the match. Returns null if failed.</returns>
+			/// <returns>Returns the first match. Returns null if failed.</returns>
 			/// <param name="text">The text to match.</param>
+			/// <example><![CDATA[
+			/// int main()
+			/// {
+			///     Regex regex(L"C/S+");
+			///     auto match = regex.Match(L"C++ and C# are my favorite programing languages");
+			///     Console::WriteLine(match->Result().Value());
+			/// }
+			/// ]]></example>
 			RegexMatch::Ref								Match(const WString& text)const;
 			/// <summary>Match a prefix of the text, ignoring all capturing.</summary>
 			/// <returns>Returns true if it succeeded.</returns>
@@ -235,16 +273,52 @@ Regex
 			/// <summary>Find all matched fragments in the given text, returning all matched sub strings.</summary>
 			/// <param name="text">The text to match.</param>
 			/// <param name="matches">Returns all succeeded matches.</param>
+			/// <example><![CDATA[
+			/// int main()
+			/// {
+			///     Regex regex(L"C/S+");
+			///     RegexMatch::List matches;
+			///     regex.Search(L"C++ and C# are my favorite programing languages", matches);
+			///     FOREACH(Ptr<RegexMatch>, match, matches)
+			///     {
+			///         Console::WriteLine(match->Result().Value());
+			///     }
+			/// }
+			/// ]]></example>
 			void										Search(const WString& text, RegexMatch::List& matches)const;
 			/// <summary>Split the text by matched sub strings, returning all unmatched sub strings.</summary>
 			/// <param name="text">The text to match.</param>
 			/// <param name="keepEmptyMatch">Set to true to keep all empty unmatched sub strings. This could happen when there is nothing between two matched sub strings.</param>
 			/// <param name="matches">Returns all failed matches.</param>
+			/// <example><![CDATA[
+			/// int main()
+			/// {
+			///     Regex regex(L"C/S+");
+			///     RegexMatch::List matches;
+			///     regex.Split(L"C++ and C# are my favorite programing languages", false, matches);
+			///     FOREACH(Ptr<RegexMatch>, match, matches)
+			///     {
+			///         Console::WriteLine(match->Result().Value());
+			///     }
+			/// }
+			/// ]]></example>
 			void										Split(const WString& text, bool keepEmptyMatch, RegexMatch::List& matches)const;
 			/// <summary>Cut the text by matched sub strings, returning all matched and unmatched sub strings.</summary>
 			/// <param name="text">The text to match.</param>
 			/// <param name="keepEmptyMatch">Set to true to keep all empty matches. This could happen when there is nothing between two matched sub strings.</param>
 			/// <param name="matches">Returns all succeeded and failed matches.</param>
+			/// <example><![CDATA[
+			/// int main()
+			/// {
+			///     Regex regex(L"C/S+");
+			///     RegexMatch::List matches;
+			///     regex.Cut(L"C++ and C# are my favorite programing languages", false, matches);
+			///     FOREACH(Ptr<RegexMatch>, match, matches)
+			///     {
+			///         Console::WriteLine(match->Result().Value());
+			///     }
+			/// }
+			/// ]]></example>
 			void										Cut(const WString& text, bool keepEmptyMatch, RegexMatch::List& matches)const;
 		};
 
