@@ -484,7 +484,7 @@ Tokenizer
 			void*										argument = nullptr;
 		};
 
-		/// <summary>Token collection representing the result from the lexical analyzer.</summary>
+		/// <summary>Token collection representing the result from the lexical analyzer. Call <see cref="RegexLexer::Parse"/> to create this object.</summary>
 		class RegexTokens : public Object, public collections::IEnumerable<RegexToken>
 		{
 			friend class RegexLexer;
@@ -505,6 +505,29 @@ Tokenizer
 			/// <summary>Copy all tokens.</summary>
 			/// <param name="tokens">Returns all tokens.</param>
 			/// <param name="discard">A callback to decide which kind of tokens to discard. The input is [F:vl.regex.RegexToken.token]. Returns true to discard this kind of tokens.</param>
+			/// <example><![CDATA[
+			/// int main()
+			/// {
+			///     List<WString> tokenDefs;
+			///     tokenDefs.Add(L"/d+");
+			///     tokenDefs.Add(L"/w+");
+			///     tokenDefs.Add(L"/s+");
+			/// 
+			///     RegexLexer lexer(tokenDefs, {});
+			///     WString input = L"I have 2 books.";
+			///     auto tokenResult = lexer.Parse(input);
+			/// 
+			///     List<RegexToken> filtered;
+			///     tokenResult.ReadToEnd(filtered, [](vint token) { return token < 0 || token == 2; });
+			/// 
+			///     FOREACH(RegexToken, token, tokenResult)
+			///     {
+			///         // input must be in a variable
+			///         // because token.reading points to a position from input.Buffer();
+			///         Console::WriteLine(itow(token.token) + L": <" + WString(token.reading, token.length) + L">");
+			///     }
+			/// }
+			/// ]]></example>
 			void										ReadToEnd(collections::List<RegexToken>& tokens, bool(*discard)(vint)=0)const;
 		};
 		
@@ -635,6 +658,26 @@ Tokenizer
 			/// <param name="code">The text to tokenize.</param>
 			/// <param name="codeIndex">Extra information that will be copied to [F:vl.regex.RegexToken.codeIndex].</param>
 			/// <remarks>Callbacks in <see cref="RegexProc"/> will be called when iterating through tokens, which is from the second argument of the constructor of <see cref="RegexLexer"/>.</remarks>
+			/// <example><![CDATA[
+			/// int main()
+			/// {
+			///     List<WString> tokenDefs;
+			///     tokenDefs.Add(L"/d+");
+			///     tokenDefs.Add(L"/w+");
+			///     tokenDefs.Add(L"/s+");
+			/// 
+			///     RegexLexer lexer(tokenDefs, {});
+			///     WString input = L"I have 2 books.";
+			///     auto tokenResult = lexer.Parse(input);
+			/// 
+			///     FOREACH(RegexToken, token, tokenResult)
+			///     {
+			///         // input must be in a variable
+			///         // because token.reading points to a position from input.Buffer();
+			///         Console::WriteLine(itow(token.token) + L": <" + WString(token.reading, token.length) + L">");
+			///     }
+			/// }
+			/// ]]></example>
 			RegexTokens									Parse(const WString& code, vint codeIndex=-1)const;
 			/// <summary>Create a equivalence walker from this lexical analyzer. A walker enable you to walk throught characters one by one,</summary>
 			/// <returns>The walker.</returns>
