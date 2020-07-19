@@ -485,6 +485,26 @@ Tokenizer
 		};
 
 		/// <summary>Token collection representing the result from the lexical analyzer. Call <see cref="RegexLexer::Parse"/> to create this object.</summary>
+		/// <example><![CDATA[
+		/// int main()
+		/// {
+		///     List<WString> tokenDefs;
+		///     tokenDefs.Add(L"/d+");
+		///     tokenDefs.Add(L"/w+");
+		///     tokenDefs.Add(L"/s+");
+		/// 
+		///     RegexLexer lexer(tokenDefs, {});
+		///     WString input = L"I have 2 books.";
+		///     auto tokenResult = lexer.Parse(input);
+		/// 
+		///     FOREACH(RegexToken, token, tokenResult)
+		///     {
+		///         // input must be in a variable
+		///         // because token.reading points to a position from input.Buffer();
+		///         Console::WriteLine(itow(token.token) + L": <" + WString(token.reading, token.length) + L">");
+		///     }
+		/// }
+		/// ]]></example>
 		class RegexTokens : public Object, public collections::IEnumerable<RegexToken>
 		{
 			friend class RegexLexer;
@@ -532,6 +552,69 @@ Tokenizer
 		};
 		
 		/// <summary>A type for walking through a text against a <see cref="RegexLexer"/>. Call <see cref="RegexLexer::Walk"/> to create this object.</summary>
+		/// <example><![CDATA[
+		/// int main()
+		/// {
+		///     List<WString> tokenDefs;
+		///     tokenDefs.Add(L"/d+./d+");
+		///     tokenDefs.Add(L"/d+");
+		///     tokenDefs.Add(L"/w+");
+		///     tokenDefs.Add(L"/s+");
+		/// 
+		///     RegexLexer lexer(tokenDefs, {});
+		///     RegexLexerWalker walker = lexer.Walk();
+		/// 
+		///     WString input = L"This book costs 2.5. That book costs 2.";
+		///     const wchar_t* reading = input.Buffer();
+		/// 
+		///     const wchar_t* tokenBegin = reading;
+		///     const wchar_t* tokenEnd = nullptr;
+		///     vint tokenId = -1;
+		/// 
+		///     vint state = walker.GetStartState();
+		///     while (*reading)
+		///     {
+		///         vint token = -1;
+		///         bool finalState = false;
+		///         bool previousTokenStop = false;
+		///         walker.Walk(*reading++, state, token, finalState, previousTokenStop);
+		/// 
+		///         if (previousTokenStop || !*reading)
+		///         {
+		///             if (tokenEnd)
+		///             {
+		///                 if (tokenBegin == tokenEnd)
+		///                 {
+		///                     Console::WriteLine(L"Recognized token: " + itow(tokenId) + L": <" + WString(*tokenBegin) + L">");
+		///                     tokenBegin = reading;
+		///                     tokenEnd = nullptr;
+		///                     tokenId = -1;
+		///                     state = walker.GetStartState();
+		///                 }
+		///                 else
+		///                 {
+		///                     Console::WriteLine(L"Recognized token: " + itow(tokenId) + L": <" + WString(tokenBegin, tokenEnd - tokenBegin) + L">");
+		///                     tokenBegin = reading = tokenEnd;
+		///                     tokenEnd = nullptr;
+		///                     tokenId = -1;
+		///                     state = walker.GetStartState();
+		///                 }
+		///             }
+		///             else
+		///             {
+		///                 Console::WriteLine(L"Unrecognized character: <" + WString(*tokenBegin) + L">");
+		///                 tokenBegin++;
+		///                 state = walker.GetStartState();
+		///             }
+		///         }
+		///         else if (finalState)
+		///         {
+		///             tokenEnd = reading;
+		///             tokenId = token;
+		///         }
+		///     }
+		/// }
+		/// ]]></example>
 		class RegexLexerWalker : public Object
 		{
 			friend class RegexLexer;
@@ -558,20 +641,125 @@ Tokenizer
 			/// <param name="token">Returns the token index at the end of the token.</param>
 			/// <param name="finalState">Returns true if it reach the end of the token.</param>
 			/// <param name="previousTokenStop">Returns true if the previous character is the end of the token.</param>
+			/// <remarks>
+			/// <p>
+			/// The "finalState" argument is important.
+			/// When "previousTokenStop" becomes true,
+			/// it tells you that this character can no longer form a token with previous consumed characters.
+			/// But it does not mean that the recognized token ends at the previous token.
+			/// The recognized token could end eariler,
+			/// which is indiated at the last time when "finalState" becomes true.
+			/// </p>
+			/// <p>
+			/// See the example for <see cref="RegexLexerWalker"/> about how to use this function.
+			/// </p>
+			/// </remarks>
 			void										Walk(wchar_t input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const;
 			/// <summary>Step forward by one character.</summary>
 			/// <returns>Returns the new current state. It is used to walk the next character.</returns>
 			/// <param name="input">The input character.</param>
 			/// <param name="state">The current state.</param>
 			vint										Walk(wchar_t input, vint state)const;
-			/// <summary>Test if the input text is a complete token.</summary>
-			/// <returns>Returns true if the input text is a complete token.</returns>
+			/// <summary>Test if the input text is a closed token.</summary>
+			/// <returns>Returns true if the input text is a closed token.</returns>
 			/// <param name="input">The input text.</param>
 			/// <param name="length">Size of the input text in characters.</param>
+			/// <remarks>
+			/// <p>
+			/// A closed token means that,
+			/// there is a prefix that is a recognized token.
+			/// At the same time, the input string itself could not be a token, or a prefix of any token.
+			/// the recognized token has ended before reaching the end of the string.
+			/// </p>
+			/// <p>
+			/// An unrecognized token is also considered as closed.
+			/// </p>
+			/// <p>
+			/// For example, assume we have a token defined by "/d+./d+":
+			/// <ul>
+			///     <li>"2" is not a closed token, because it has not ended.</li>
+			///     <li>
+			///         "2.5." is a closed token, because it has ended at "2.5",
+			///         and "2.5." could never be a prefix of any token,
+			///         unless we have another token defined by "/d+./d+./d+".
+			///     </li>
+			/// </ul>
+			/// </p>
+			/// </remarks>
+			/// int main()
+			/// {
+			///     List<WString> tokenDefs;
+			///     tokenDefs.Add(L"/d+./d+");
+			///     tokenDefs.Add(L"/d+");
+			/// 
+			///     RegexLexer lexer(tokenDefs, {});
+			///     RegexLexerWalker walker = lexer.Walk();
+			/// 
+			///     WString tests[] = { L".", L"2", L"2.", L"2.5", L"2.5." };
+			///     FOREACH(WString, test, From(tests))
+			///     {
+			///         if (walker.IsClosedToken(test.Buffer(), test.Length()))
+			///         {
+			///             Console::WriteLine(test + L" is a closed token.");
+			///         }
+			///         else
+			///         {
+			///             Console::WriteLine(test + L" is not a closed token.");
+			///         }
+			///     }
+			/// }
+			/// <example><![CDATA[
+			/// ]]></example>
 			bool										IsClosedToken(const wchar_t* input, vint length)const;
-			/// <summary>Test if the input is a complete token.</summary>
-			/// <returns>Returns true if the input text is a complete token.</returns>
+			/// <summary>Test if the input is a closed token.</summary>
+			/// <returns>Returns true if the input text is a closed token.</returns>
 			/// <param name="input">The input text.</param>
+			/// <remarks>
+			/// <p>
+			/// A closed token means that,
+			/// there is a prefix that is a recognized token.
+			/// At the same time, the input string itself could not be a token, or a prefix of any token.
+			/// the recognized token has ended before reaching the end of the string.
+			/// </p>
+			/// <p>
+			/// An unrecognized token is also considered as closed.
+			/// </p>
+			/// <p>
+			/// For example, assume we have a token defined by "/d+./d+":
+			/// <ul>
+			///     <li>"2" is not a closed token, because it has not ended.</li>
+			///     <li>
+			///         "2.5." is a closed token, because it has ended at "2.5",
+			///         and "2.5." could never be a prefix of any token,
+			///         unless we have another token defined by "/d+./d+./d+".
+			///     </li>
+			/// </ul>
+			/// </p>
+			/// </remarks>
+			/// <example><![CDATA[
+			/// int main()
+			/// {
+			///     List<WString> tokenDefs;
+			///     tokenDefs.Add(L"/d+./d+");
+			///     tokenDefs.Add(L"/d+");
+			/// 
+			///     RegexLexer lexer(tokenDefs, {});
+			///     RegexLexerWalker walker = lexer.Walk();
+			/// 
+			///     WString tests[] = { L".", L"2", L"2.", L"2.5", L"2.5." };
+			///     FOREACH(WString, test, From(tests))
+			///     {
+			///         if (walker.IsClosedToken(test))
+			///         {
+			///             Console::WriteLine(test + L" is a closed token.");
+			///         }
+			///         else
+			///         {
+			///             Console::WriteLine(test + L" is not a closed token.");
+			///         }
+			///     }
+			/// }
+			/// ]]></example>
 			bool										IsClosedToken(const WString& input)const;
 		};
 
@@ -658,26 +846,6 @@ Tokenizer
 			/// <param name="code">The text to tokenize.</param>
 			/// <param name="codeIndex">Extra information that will be copied to [F:vl.regex.RegexToken.codeIndex].</param>
 			/// <remarks>Callbacks in <see cref="RegexProc"/> will be called when iterating through tokens, which is from the second argument of the constructor of <see cref="RegexLexer"/>.</remarks>
-			/// <example><![CDATA[
-			/// int main()
-			/// {
-			///     List<WString> tokenDefs;
-			///     tokenDefs.Add(L"/d+");
-			///     tokenDefs.Add(L"/w+");
-			///     tokenDefs.Add(L"/s+");
-			/// 
-			///     RegexLexer lexer(tokenDefs, {});
-			///     WString input = L"I have 2 books.";
-			///     auto tokenResult = lexer.Parse(input);
-			/// 
-			///     FOREACH(RegexToken, token, tokenResult)
-			///     {
-			///         // input must be in a variable
-			///         // because token.reading points to a position from input.Buffer();
-			///         Console::WriteLine(itow(token.token) + L": <" + WString(token.reading, token.length) + L">");
-			///     }
-			/// }
-			/// ]]></example>
 			RegexTokens									Parse(const WString& code, vint codeIndex=-1)const;
 			/// <summary>Create a equivalence walker from this lexical analyzer. A walker enable you to walk throught characters one by one,</summary>
 			/// <returns>The walker.</returns>
