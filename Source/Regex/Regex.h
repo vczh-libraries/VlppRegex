@@ -815,6 +815,7 @@ Tokenizer
 			/// </ul>
 			/// </p>
 			/// </remarks>
+			/// <example><![CDATA[
 			/// int main()
 			/// {
 			///     List<WString> tokenDefs;
@@ -837,7 +838,6 @@ Tokenizer
 			///         }
 			///     }
 			/// }
-			/// <example><![CDATA[
 			/// ]]></example>
 			bool										IsClosedToken(const wchar_t* input, vint length)const;
 			/// <summary>Test if the input is a closed token.</summary>
