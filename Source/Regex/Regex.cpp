@@ -763,7 +763,6 @@ RegexLexerColorizer
 			if ((internalState.interTokenState = token.interTokenState))
 			{
 				internalState.interTokenId = token.token;
-				internalState.currentState = walker.GetStartState();
 			}
 			if (colorize)
 			{
@@ -807,6 +806,7 @@ RegexLexerColorizer
 
 			vint lastFinalStateLength = 0;
 			vint lastFinalStateToken = -1;
+			vint lastFinalStateState = -1;
 
 			vint tokenStartState = internalState.currentState;
 			for (vint i = start; i < length; i++)
@@ -818,11 +818,14 @@ RegexLexerColorizer
 
 				if (previousTokenStop)
 				{
-					internalState.currentState = walker.GetStartState();
 					if (proc.extendProc && lastFinalStateToken != -1)
 					{
 						RegexProcessingToken token(start, lastFinalStateLength, lastFinalStateToken, true, nullptr);
 						CallExtendProcAndColorizeProc(input, length, token, colorize);
+						if (token.completeToken)
+						{
+							internalState.currentState = walker.GetStartState();
+						}
 						return start + token.length;
 					}
 					else if (i == start)
@@ -833,6 +836,7 @@ RegexLexerColorizer
 							{
 								proc.colorizeProc(proc.argument, start, 1, -1);
 							}
+							internalState.currentState = walker.GetStartState();
 							return i + 1;
 						}
 					}
@@ -842,6 +846,7 @@ RegexLexerColorizer
 						{
 							proc.colorizeProc(proc.argument, start, lastFinalStateLength, lastFinalStateToken);
 						}
+						internalState.currentState = lastFinalStateState;
 						return start + lastFinalStateLength;
 					}
 				}
@@ -850,6 +855,7 @@ RegexLexerColorizer
 				{
 					lastFinalStateLength = i + 1 - start;
 					lastFinalStateToken = currentToken;
+					lastFinalStateState = internalState.currentState;
 				}
 			}
 
