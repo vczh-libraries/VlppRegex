@@ -1,10 +1,6 @@
 /***********************************************************************
-Vczh Library++ 3.0
-Developer: Zihan Chen(vczh)
-Regex::RegexInterpretor
-
-Classes:
-	PureInterpretor					: Pure regular expression interpretor
+Author: Zihan Chen (vczh)
+Licensed under https://github.com/vczh-libraries/License
 ***********************************************************************/
 
 #ifndef VCZH_REGEX_REGEXPURE

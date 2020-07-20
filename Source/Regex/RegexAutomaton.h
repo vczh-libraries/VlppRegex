@@ -1,16 +1,6 @@
 /***********************************************************************
-Vczh Library++ 3.0
-Developer: Zihan Chen(vczh)
-Regex::RegexAutomaton
-
-Classes:
-	State						: State
-	Transition					: Transation
-	Automaton					: Automaton
-
-Functions:
-	EpsilonNfaToNfa				: Copy and remove epsilon states and transitions from an NFA
-	NfaToDfa					: Convert an NFA to a DFA
+Author: Zihan Chen (vczh)
+Licensed under https://github.com/vczh-libraries/License
 ***********************************************************************/
 
 #ifndef VCZH_REGEX_REGEXAUTOMATON

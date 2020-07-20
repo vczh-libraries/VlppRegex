@@ -1,15 +1,6 @@
 /***********************************************************************
-Vczh Library++ 3.0
-Developer: Zihan Chen(vczh)
-Regex::Regular Expression
-
-Classes:
-	RegexString						: String Fragment
-	RegexMatch						: Match Result
-	Regex							: Regular Expression
-	RegexToken						: Token
-	RegexTokens						: Token Stream
-	RegexLexer						: Tokenizer
+Author: Zihan Chen (vczh)
+Licensed under https://github.com/vczh-libraries/License
 ***********************************************************************/
 
 #ifndef VCZH_REGEX_REGEX

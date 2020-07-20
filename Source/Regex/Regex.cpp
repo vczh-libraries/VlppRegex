@@ -1,3 +1,8 @@
+/***********************************************************************
+Author: Zihan Chen (vczh)
+Licensed under https://github.com/vczh-libraries/License
+***********************************************************************/
+
 #include "Regex.h"
 #include "RegexExpression.h"
 #include "RegexPure.h"
