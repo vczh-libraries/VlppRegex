@@ -113,5 +113,8 @@
     <ClInclude Include="..\..\..\Import\VlppOS.h">
       <Filter>Import</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\ColorizerCommon.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

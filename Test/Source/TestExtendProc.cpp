@@ -1,8 +1,4 @@
-#include "../../Source/Regex/Regex.h"
-
-using namespace vl;
-using namespace vl::collections;
-using namespace vl::regex;
+#include "ColorizerCommon.h"
 
 struct TestExtendProc_InterTokenState
 {
@@ -52,30 +48,6 @@ void TestExtendProc_ExtendProc(void* argument, const wchar_t* reading, vint leng
 			}
 		}
 	}
-}
-
-void TestExtendProc_ColorizerProc(void* argument, vint start, vint length, vint token)
-{
-	vint* colors = (vint*)argument;
-	for (vint i = 0; i < length; i++)
-	{
-		colors[start + i] = token;
-	}
-}
-
-template<int Size, int Length>
-void* AssertColorizer(vint(&actual)[Size], vint(&expect)[Length], RegexLexerColorizer& colorizer, const wchar_t(&input)[Length + 1], bool firstLine)
-{
-	for (vint i = 0; i < Size; i++)
-	{
-		actual[i] = -2;
-	}
-	auto newStateObject = colorizer.Colorize(input, Length);
-	for (vint i = 0; i < Length; i++)
-	{
-		TEST_ASSERT(actual[i] == expect[i]);
-	}
-	return newStateObject;
 }
 
 TEST_FILE
@@ -217,7 +189,7 @@ abcde
 		RegexProc proc;
 		proc.deleter = &TestExtendProc_Deleter;
 		proc.extendProc = &TestExtendProc_ExtendProc;
-		proc.colorizeProc = &TestExtendProc_ColorizerProc;
+		proc.colorizeProc = &ColorizerProc;
 		proc.argument = colors;
 		RegexLexer lexer(codes, proc);
 		RegexLexerColorizer colorizer = lexer.Colorize();

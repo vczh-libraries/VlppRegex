@@ -186,6 +186,7 @@
     <ClInclude Include="..\..\..\Source\Regex\RegexPure.h" />
     <ClInclude Include="..\..\..\Source\Regex\RegexRich.h" />
     <ClInclude Include="..\..\..\Source\Regex\RegexWriter.h" />
+    <ClInclude Include="..\..\Source\ColorizerCommon.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
