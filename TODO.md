@@ -4,6 +4,7 @@
 
 - Regex supports UTF-16 (instead of UCS-2) on MSVC.
   - Always convert to UTF-32 internally.
+    - using `UtfStringFrom32Reader<T>` and `UtfStringTo32Reader<T>`.
   - `Regex` and a few other classes become template class instantiations.
     - Class names for `WString` will still be unchanged, like `using Regex = RegexUnicode<wchar_t>;` or something.
   - Token will have char component position and `char32_t` component position at the same time.
