@@ -12,7 +12,7 @@ void TestExtendProc_Deleter(void* interStateDeleter)
 
 void TestExtendProc_ExtendProc(void* argument, const wchar_t* reading, vint length, bool completeText, RegexProcessingToken& processingToken)
 {
-	WString readingBuffer = length == -1 ? WString(reading, false) : WString(reading, length);
+	WString readingBuffer = length == -1 ? WString::Unmanaged(reading) : WString::CopyFrom(reading, length);
 	reading = readingBuffer.Buffer();
 
 	if (processingToken.token == 2 || processingToken.token == 4)
@@ -24,7 +24,7 @@ void TestExtendProc_ExtendProc(void* argument, const wchar_t* reading, vint leng
 		}
 		else
 		{
-			postfix = L")" + WString(reading + 2, processingToken.length - 3) + L"\"";
+			postfix = L")" + WString::CopyFrom(reading + 2, processingToken.length - 3) + L"\"";
 		}
 
 		auto find = wcsstr(reading, postfix.Buffer());
