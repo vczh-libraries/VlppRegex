@@ -50,7 +50,7 @@ Data Structure
 		};
 
 		/// <summary>A match produces by a <see cref="Regex"/>.</summary>
-		class RegexMatch : public Object, private NotCopyable
+		class RegexMatch : public Object
 		{
 			friend class Regex;
 		public:
@@ -68,6 +68,7 @@ Data Structure
 			RegexMatch(const WString& _string, regex_internal::RichResult* _result, regex_internal::RichInterpretor* _rich);
 			RegexMatch(const RegexString& _result);
 		public:
+			NOT_COPYABLE(RegexMatch);
 			
 			/// <summary>
 			/// Test if this match is a succeeded match or a failed match.
@@ -208,7 +209,7 @@ Regex
 		///     Testing only returns a bool very indicating success or failure.
 		/// </p>
 		/// </summary>
-		class Regex : public Object, private NotCopyable
+		class Regex : public Object
 		{
 		protected:
 			regex_internal::PureInterpretor*			pure = nullptr;
@@ -216,6 +217,7 @@ Regex
 
 			void										Process(const WString& text, bool keepEmpty, bool keepSuccess, bool keepFail, RegexMatch::List& matches)const;
 		public:
+			NOT_COPYABLE(Regex);
 			/// <summary>Create a regular expression. It will crash if the regular expression produces syntax error.</summary>
 			/// <param name="code">The regular expression in a string.</param>
 			/// <param name="preferPure">Set to true to use DFA if possible.</param>
@@ -1001,7 +1003,7 @@ Tokenizer
 		};
 
 		/// <summary>Lexical analyzer.</summary>
-		class RegexLexer : public Object, private NotCopyable
+		class RegexLexer : public Object
 		{
 		protected:
 			regex_internal::PureInterpretor*			pure = nullptr;
@@ -1010,6 +1012,7 @@ Tokenizer
 			RegexProc									proc;
 
 		public:
+			NOT_COPYABLE(RegexLexer);
 			/// <summary>Create a lexical analyzer by a set of regular expressions. [F:vl.regex.RegexToken.token] will be the index of the matched regular expression in the first argument.</summary>
 			/// <param name="tokens">ALl regular expression, each one represent a kind of tokens.</param>
 			/// <param name="_proc">Configuration of all callbacks.</param>

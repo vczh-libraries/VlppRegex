@@ -38,9 +38,12 @@ namespace vl
 Regex Expression AST
 ***********************************************************************/
 
-		class Expression : public Object, private NotCopyable
+		class Expression : public Object
 		{
 		public:
+			NOT_COPYABLE(Expression);
+			Expression() = default;
+
 			typedef Ptr<Expression>											Ref;
 			typedef collections::Dictionary<WString, Expression::Ref>		Map;
 
@@ -149,13 +152,16 @@ Regex Expression AST
 			void						Apply(IRegexExpressionAlgorithm& algorithm);
 		};
 
-		class RegexExpression : public Object, private NotCopyable
+		class RegexExpression : public Object
 		{
 		public:
 			typedef Ptr<RegexExpression>						Ref;
 
 			Expression::Map				definitions;	// Named regex to be referred
 			Expression::Ref				expression;		// Regex to match
+
+			NOT_COPYABLE(RegexExpression);
+			RegexExpression() = default;
 
 			Expression::Ref				Merge();
 		};

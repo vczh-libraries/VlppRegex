@@ -23,12 +23,6 @@ namespace vl
 		};
 	}
 
-	template<>
-	struct POD<regex_internal::CaptureRecord>
-	{
-		static const bool Result=true;
-	};
-
 	namespace regex_internal
 	{
 		class RichResult

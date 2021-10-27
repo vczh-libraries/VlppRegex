@@ -43,12 +43,6 @@ Data Structure
 			bool					operator!=(wchar_t item)const;
 		};
 	}
-
-	template<>
-	struct POD<regex_internal::CharRange>
-	{
-		static const bool Result=true;
-	};
 }
 
 #endif
