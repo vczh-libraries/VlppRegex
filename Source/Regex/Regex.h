@@ -627,7 +627,7 @@ Tokenizer
 		///     }
 		/// }
 		/// ]]></example>
-		class RegexTokens : public Object, public collections::IEnumerable<RegexToken>
+		class RegexTokens : public collections::EnumerableBase<RegexToken>
 		{
 			friend class RegexLexer;
 		protected:
@@ -641,8 +641,9 @@ Tokenizer
 		public:
 			RegexTokens(const RegexTokens& tokens);
 			~RegexTokens();
-
-			collections::IEnumerator<RegexToken>*		CreateEnumerator()const;
+			
+			collections::CollectionEntity				GetCollectionEntity() const override;
+			collections::IEnumerator<RegexToken>*		CreateEnumerator() const override;
 
 			/// <summary>Copy all tokens.</summary>
 			/// <param name="tokens">Returns all tokens.</param>
