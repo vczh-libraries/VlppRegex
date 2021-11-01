@@ -148,13 +148,13 @@ TEST_FILE
 {
 	TEST_CATEGORY(L"Automaton")
 	{
-		PrintRegex(L"RegexInteger", L"/d");
-		PrintRegex(L"RegexFullint", L"(/+|-)?/d+");
-		PrintRegex(L"RegexFloat", L"(/+|-)?/d+(./d+)?");
-		PrintRegex(L"RegexString", L"\"([^\\\\\"]|\\\\\\.)*\"");
-		PrintRegex(L"RegexComment", L"///*([^*]|/*+[^*//])*/*+//");
-		PrintRegex(L"RegexIP", L"(<#sec>(<sec>/d+))((<&sec>).){3}(<&sec>)");
-		PrintRegex(L"RegexDuplicate", L"^(<sec>/.+)(<$sec>)+$");
-		PrintRegex(L"RegexPrescan", L"/d+(=/w+)(!vczh)");
+		PrintRegex(L"RegexInteger",		L"/d");
+		PrintRegex(L"RegexFullint",		L"(/+|-)?/d+");
+		PrintRegex(L"RegexFloat",		L"(/+|-)?/d+(./d+)?");
+		PrintRegex(L"RegexString",		LR"("([^\\"]|\\\.)*")");
+		PrintRegex(L"RegexComment",		L"///*([^*]|/*+[^*//])*/*+//");
+		PrintRegex(L"RegexIP",			L"(<#sec>(<sec>/d+))((<&sec>).){3}(<&sec>)");
+		PrintRegex(L"RegexDuplicate",	L"^(<sec>/.+)(<$sec>)+$");
+		PrintRegex(L"RegexPrescan",		L"/d+(=/w+)(!vczh)");
 	});
 }
