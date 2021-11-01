@@ -163,6 +163,11 @@
     <ClCompile Include="..\..\..\Import\Vlpp.cpp" />
     <ClCompile Include="..\..\..\Import\VlppOS.cpp" />
     <ClCompile Include="..\..\..\Source\Regex\AST\RegexExpression.cpp" />
+    <ClCompile Include="..\..\..\Source\Regex\AST\RegexExpression_CanTreatAsPure.cpp" />
+    <ClCompile Include="..\..\..\Source\Regex\AST\RegexExpression_CharSet.cpp" />
+    <ClCompile Include="..\..\..\Source\Regex\AST\RegexExpression_GenerateEpsilonNfa.cpp" />
+    <ClCompile Include="..\..\..\Source\Regex\AST\RegexExpression_HasNoExtension.cpp" />
+    <ClCompile Include="..\..\..\Source\Regex\AST\RegexExpression_IsEqual.cpp" />
     <ClCompile Include="..\..\..\Source\Regex\AST\RegexParser.cpp" />
     <ClCompile Include="..\..\..\Source\Regex\AST\RegexWriter.cpp" />
     <ClCompile Include="..\..\..\Source\Regex\Automaton\RegexAutomaton.cpp" />

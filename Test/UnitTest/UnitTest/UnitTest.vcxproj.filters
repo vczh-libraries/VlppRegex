@@ -87,6 +87,21 @@
     <ClCompile Include="..\..\..\Source\Regex\Automaton\RegexData.cpp">
       <Filter>Regex\Automaton</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\Source\Regex\AST\RegexExpression_CanTreatAsPure.cpp">
+      <Filter>Regex\AST</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Regex\AST\RegexExpression_CharSet.cpp">
+      <Filter>Regex\AST</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Regex\AST\RegexExpression_GenerateEpsilonNfa.cpp">
+      <Filter>Regex\AST</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Regex\AST\RegexExpression_HasNoExtension.cpp">
+      <Filter>Regex\AST</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Regex\AST\RegexExpression_IsEqual.cpp">
+      <Filter>Regex\AST</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Import\Vlpp.h">
