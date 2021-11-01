@@ -162,14 +162,14 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\Import\Vlpp.cpp" />
     <ClCompile Include="..\..\..\Import\VlppOS.cpp" />
+    <ClCompile Include="..\..\..\Source\Regex\AST\RegexExpression.cpp" />
+    <ClCompile Include="..\..\..\Source\Regex\AST\RegexParser.cpp" />
+    <ClCompile Include="..\..\..\Source\Regex\AST\RegexWriter.cpp" />
+    <ClCompile Include="..\..\..\Source\Regex\Automaton\RegexAutomaton.cpp" />
+    <ClCompile Include="..\..\..\Source\Regex\Automaton\RegexData.cpp" />
     <ClCompile Include="..\..\..\Source\Regex\Regex.cpp" />
-    <ClCompile Include="..\..\..\Source\Regex\RegexAutomaton.cpp" />
-    <ClCompile Include="..\..\..\Source\Regex\RegexData.cpp" />
-    <ClCompile Include="..\..\..\Source\Regex\RegexExpression.cpp" />
-    <ClCompile Include="..\..\..\Source\Regex\RegexParser.cpp" />
     <ClCompile Include="..\..\..\Source\Regex\RegexPure.cpp" />
     <ClCompile Include="..\..\..\Source\Regex\RegexRich.cpp" />
-    <ClCompile Include="..\..\..\Source\Regex\RegexWriter.cpp" />
     <ClCompile Include="..\..\Source\TestAutomaton.cpp" />
     <ClCompile Include="..\..\Source\TestColorizer.cpp" />
     <ClCompile Include="..\..\Source\TestExtendProc.cpp" />
@@ -187,13 +187,13 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\Import\Vlpp.h" />
     <ClInclude Include="..\..\..\Import\VlppOS.h" />
+    <ClInclude Include="..\..\..\Source\Regex\AST\RegexExpression.h" />
+    <ClInclude Include="..\..\..\Source\Regex\AST\RegexWriter.h" />
+    <ClInclude Include="..\..\..\Source\Regex\Automaton\RegexAutomaton.h" />
+    <ClInclude Include="..\..\..\Source\Regex\Automaton\RegexData.h" />
     <ClInclude Include="..\..\..\Source\Regex\Regex.h" />
-    <ClInclude Include="..\..\..\Source\Regex\RegexAutomaton.h" />
-    <ClInclude Include="..\..\..\Source\Regex\RegexData.h" />
-    <ClInclude Include="..\..\..\Source\Regex\RegexExpression.h" />
     <ClInclude Include="..\..\..\Source\Regex\RegexPure.h" />
     <ClInclude Include="..\..\..\Source\Regex\RegexRich.h" />
-    <ClInclude Include="..\..\..\Source\Regex\RegexWriter.h" />
     <ClInclude Include="..\..\Source\ColorizerCommon.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

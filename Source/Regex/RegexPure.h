@@ -6,7 +6,7 @@ Licensed under https://github.com/vczh-libraries/License
 #ifndef VCZH_REGEX_REGEXPURE
 #define VCZH_REGEX_REGEXPURE
 
-#include "RegexAutomaton.h"
+#include "./Automaton/RegexAutomaton.h"
 
 namespace vl
 {

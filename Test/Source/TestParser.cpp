@@ -1,5 +1,4 @@
-#include "../../Source/Regex/RegexExpression.h"
-#include "../../Source/Regex/RegexWriter.h"
+#include "../../Source/Regex/AST/RegexWriter.h"
 
 using namespace vl;
 using namespace vl::collections;

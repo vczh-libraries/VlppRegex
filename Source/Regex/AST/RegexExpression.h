@@ -25,8 +25,7 @@ Functions:
 #ifndef VCZH_REGEX_REGEXEXPRESSION
 #define VCZH_REGEX_REGEXEXPRESSION
 
-#include "RegexData.h"
-#include "RegexAutomaton.h"
+#include "../Automaton/RegexAutomaton.h"
 
 namespace vl
 {

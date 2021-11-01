@@ -4,7 +4,7 @@ Licensed under https://github.com/vczh-libraries/License
 ***********************************************************************/
 
 #include "Regex.h"
-#include "RegexExpression.h"
+#include "./AST/RegexExpression.h"
 #include "RegexPure.h"
 #include "RegexRich.h"
 
