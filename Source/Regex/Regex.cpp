@@ -21,14 +21,14 @@ RegexString
 
 		RegexString::RegexString(vint _start)
 			:start(_start)
-			,length(0)
+			, length(0)
 		{
 		}
 
 		RegexString::RegexString(const WString& _string, vint _start, vint _length)
-			:value(_length==0?L"":_string.Sub(_start, _length))
-			,start(_start)
-			,length(_length)
+			: value(_length == 0 ? L"" : _string.Sub(_start, _length))
+			, start(_start)
+			, length(_length)
 		{
 		}
 
@@ -49,7 +49,7 @@ RegexString
 
 		bool RegexString::operator==(const RegexString& string)const
 		{
-			return start==string.start && length==string.length && value==string.value;
+			return start == string.start && length == string.length && value == string.value;
 		}
 
 /***********************************************************************
@@ -58,18 +58,18 @@ RegexMatch
 		
 		RegexMatch::RegexMatch(const WString& _string, PureResult* _result)
 			:success(true)
-			,result(_string, _result->start, _result->length)
+			, result(_string, _result->start, _result->length)
 		{
 		}
 
 		RegexMatch::RegexMatch(const WString& _string, RichResult* _result, RichInterpretor* _rich)
-			:success(true)
-			,result(_string, _result->start, _result->length)
+			: success(true)
+			, result(_string, _result->start, _result->length)
 		{
-			for(vint i=0;i<_result->captures.Count();i++)
+			for (vint i = 0; i < _result->captures.Count(); i++)
 			{
-				CaptureRecord& capture=_result->captures[i];
-				if(capture.capture==-1)
+				CaptureRecord& capture = _result->captures[i];
+				if (capture.capture == -1)
 				{
 					captures.Add(RegexString(_string, capture.start, capture.length));
 				}
@@ -82,7 +82,7 @@ RegexMatch
 
 		RegexMatch::RegexMatch(const RegexString& _result)
 			:success(false)
-			,result(_result)
+			, result(_result)
 		{
 		}
 			
@@ -112,32 +112,32 @@ Regex
 
 		void Regex::Process(const WString& text, bool keepEmpty, bool keepSuccess, bool keepFail, RegexMatch::List& matches)const
 		{
-			if(rich)
+			if (rich)
 			{
-				const wchar_t* start=text.Buffer();
-				const wchar_t* input=start;
+				const wchar_t* start = text.Buffer();
+				const wchar_t* input = start;
 				RichResult result;
-				while(rich->Match(input, start, result))
+				while (rich->Match(input, start, result))
 				{
-					vint offset=input-start;
-					if(keepFail)
+					vint offset = input - start;
+					if (keepFail)
 					{
-						if(result.start>offset || keepEmpty)
+						if (result.start > offset || keepEmpty)
 						{
-							matches.Add(new RegexMatch(RegexString(text, offset, result.start-offset)));
+							matches.Add(new RegexMatch(RegexString(text, offset, result.start - offset)));
 						}
 					}
-					if(keepSuccess)
+					if (keepSuccess)
 					{
 						matches.Add(new RegexMatch(text, &result, rich));
 					}
-					input=start+result.start+result.length;
+					input = start + result.start + result.length;
 				}
-				if(keepFail)
+				if (keepFail)
 				{
-					vint remain=input-start;
-					vint length=text.Length()-remain;
-					if(length || keepEmpty)
+					vint remain = input - start;
+					vint length = text.Length() - remain;
+					if (length || keepEmpty)
 					{
 						matches.Add(new RegexMatch(RegexString(text, remain, length)));
 					}
@@ -145,30 +145,30 @@ Regex
 			}
 			else
 			{
-				const wchar_t* start=text.Buffer();
-				const wchar_t* input=start;
+				const wchar_t* start = text.Buffer();
+				const wchar_t* input = start;
 				PureResult result;
-				while(pure->Match(input, start, result))
+				while (pure->Match(input, start, result))
 				{
-					vint offset=input-start;
-					if(keepFail)
+					vint offset = input - start;
+					if (keepFail)
 					{
-						if(result.start>offset || keepEmpty)
+						if (result.start > offset || keepEmpty)
 						{
-							matches.Add(new RegexMatch(RegexString(text, offset, result.start-offset)));
+							matches.Add(new RegexMatch(RegexString(text, offset, result.start - offset)));
 						}
 					}
-					if(keepSuccess)
+					if (keepSuccess)
 					{
 						matches.Add(new RegexMatch(text, &result));
 					}
-					input=start+result.start+result.length;
+					input = start + result.start + result.length;
 				}
-				if(keepFail)
+				if (keepFail)
 				{
-					vint remain=input-start;
-					vint length=text.Length()-remain;
-					if(length || keepEmpty)
+					vint remain = input - start;
+					vint length = text.Length() - remain;
+					if (length || keepEmpty)
 					{
 						matches.Add(new RegexMatch(RegexString(text, remain, length)));
 					}
@@ -179,87 +179,87 @@ Regex
 		Regex::Regex(const WString& code, bool preferPure)
 		{
 			CharRange::List subsets;
-			RegexExpression::Ref regex=ParseRegexExpression(code);
-			Expression::Ref expression=regex->Merge();
+			RegexExpression::Ref regex = ParseRegexExpression(code);
+			Expression::Ref expression = regex->Merge();
 			expression->NormalizeCharSet(subsets);
 
-			bool pureRequired=false;
-			bool richRequired=false;
-			if(preferPure)
+			bool pureRequired = false;
+			bool richRequired = false;
+			if (preferPure)
 			{
-				if(expression->HasNoExtension())
+				if (expression->HasNoExtension())
 				{
-					pureRequired=true;
+					pureRequired = true;
 				}
 				else
 				{
-					if(expression->CanTreatAsPure())
+					if (expression->CanTreatAsPure())
 					{
-						pureRequired=true;
-						richRequired=true;
+						pureRequired = true;
+						richRequired = true;
 					}
 					else
 					{
-						richRequired=true;
+						richRequired = true;
 					}
 				}
 			}
 			else
 			{
-				richRequired=true;
+				richRequired = true;
 			}
 
 			try
 			{
-				if(pureRequired)
+				if (pureRequired)
 				{
 					Dictionary<State*, State*> nfaStateMap;
 					Group<State*, State*> dfaStateMap;
-					Automaton::Ref eNfa=expression->GenerateEpsilonNfa();
-					Automaton::Ref nfa=EpsilonNfaToNfa(eNfa, PureEpsilonChecker, nfaStateMap);
-					Automaton::Ref dfa=NfaToDfa(nfa, dfaStateMap);
-					pure=new PureInterpretor(dfa, subsets);
+					Automaton::Ref eNfa = expression->GenerateEpsilonNfa();
+					Automaton::Ref nfa = EpsilonNfaToNfa(eNfa, PureEpsilonChecker, nfaStateMap);
+					Automaton::Ref dfa = NfaToDfa(nfa, dfaStateMap);
+					pure = new PureInterpretor(dfa, subsets);
 				}
-				if(richRequired)
+				if (richRequired)
 				{
 					Dictionary<State*, State*> nfaStateMap;
 					Group<State*, State*> dfaStateMap;
-					Automaton::Ref eNfa=expression->GenerateEpsilonNfa();
-					Automaton::Ref nfa=EpsilonNfaToNfa(eNfa, RichEpsilonChecker, nfaStateMap);
-					Automaton::Ref dfa=NfaToDfa(nfa, dfaStateMap);
-					rich=new RichInterpretor(dfa);
+					Automaton::Ref eNfa = expression->GenerateEpsilonNfa();
+					Automaton::Ref nfa = EpsilonNfaToNfa(eNfa, RichEpsilonChecker, nfaStateMap);
+					Automaton::Ref dfa = NfaToDfa(nfa, dfaStateMap);
+					rich = new RichInterpretor(dfa);
 				}
 			}
-			catch(...)
+			catch (...)
 			{
-				if(pure)delete pure;
-				if(rich)delete rich;
+				if (pure)delete pure;
+				if (rich)delete rich;
 				throw;
 			}
 		}
 
 		Regex::~Regex()
 		{
-			if(pure)delete pure;
-			if(rich)delete rich;
+			if (pure) delete pure;
+			if (rich) delete rich;
 		}
 
 		bool Regex::IsPureMatch()const
 		{
-			return rich?false:true;
+			return rich ? false : true;
 		}
 
 		bool Regex::IsPureTest()const
 		{
-			return pure?true:false;
+			return pure ? true : false;
 		}
 
 		RegexMatch::Ref Regex::MatchHead(const WString& text)const
 		{
-			if(rich)
+			if (rich)
 			{
 				RichResult result;
-				if(rich->MatchHead(text.Buffer(), text.Buffer(), result))
+				if (rich->MatchHead(text.Buffer(), text.Buffer(), result))
 				{
 					return new RegexMatch(text, &result, rich);
 				}
@@ -271,7 +271,7 @@ Regex
 			else
 			{
 				PureResult result;
-				if(pure->MatchHead(text.Buffer(), text.Buffer(), result))
+				if (pure->MatchHead(text.Buffer(), text.Buffer(), result))
 				{
 					return new RegexMatch(text, &result);
 				}
@@ -284,10 +284,10 @@ Regex
 
 		RegexMatch::Ref Regex::Match(const WString& text)const
 		{
-			if(rich)
+			if (rich)
 			{
 				RichResult result;
-				if(rich->Match(text.Buffer(), text.Buffer(), result))
+				if (rich->Match(text.Buffer(), text.Buffer(), result))
 				{
 					return new RegexMatch(text, &result, rich);
 				}
@@ -299,7 +299,7 @@ Regex
 			else
 			{
 				PureResult result;
-				if(pure->Match(text.Buffer(), text.Buffer(), result))
+				if (pure->Match(text.Buffer(), text.Buffer(), result))
 				{
 					return new RegexMatch(text, &result);
 				}
@@ -312,7 +312,7 @@ Regex
 
 		bool Regex::TestHead(const WString& text)const
 		{
-			if(pure)
+			if (pure)
 			{
 				PureResult result;
 				return pure->MatchHead(text.Buffer(), text.Buffer(), result);
@@ -326,7 +326,7 @@ Regex
 
 		bool Regex::Test(const WString& text)const
 		{
-			if(pure)
+			if (pure)
 			{
 				PureResult result;
 				return pure->Match(text.Buffer(), text.Buffer(), result);
@@ -359,12 +359,12 @@ RegexTokens
 
 		bool RegexToken::operator==(const RegexToken& _token)const
 		{
-			return length==_token.length && token==_token.token && reading==_token.reading;
+			return length == _token.length && token == _token.token && reading == _token.reading;
 		}
 		
 		bool RegexToken::operator==(const wchar_t* _token)const
 		{
-			return wcslen(_token)==length && wcsncmp(reading, _token, length)==0;
+			return wcslen(_token) == length && wcsncmp(reading, _token, length) == 0;
 		}
 
 		class RegexTokenEnumerator : public Object, public IEnumerator<RegexToken>
@@ -636,60 +636,60 @@ RegexLexerWalker
 
 		void RegexLexerWalker::Walk(wchar_t input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const
 		{
-			vint previousState=state;
-			token=-1;
-			finalState=false;
-			previousTokenStop=false;
-			if(state==-1)
+			vint previousState = state;
+			token = -1;
+			finalState = false;
+			previousTokenStop = false;
+			if (state == -1)
 			{
-				state=pure->GetStartState();
-				previousTokenStop=true;
+				state = pure->GetStartState();
+				previousTokenStop = true;
 			}
 
-			state=pure->Transit(input, state);
-			if(state==-1)
+			state = pure->Transit(input, state);
+			if (state == -1)
 			{
-				previousTokenStop=true;
-				if(previousState==-1)
+				previousTokenStop = true;
+				if (previousState == -1)
 				{
-					finalState=true;
+					finalState = true;
 					return;
 				}
-				else if(pure->IsFinalState(previousState))
+				else if (pure->IsFinalState(previousState))
 				{
-					state=pure->Transit(input, pure->GetStartState());
+					state = pure->Transit(input, pure->GetStartState());
 				}
 			}
-			if(pure->IsFinalState(state))
+			if (pure->IsFinalState(state))
 			{
-				token=stateTokens.Get(state);
-				finalState=true;
+				token = stateTokens.Get(state);
+				finalState = true;
 				return;
 			}
 			else
 			{
-				finalState=state==-1;
+				finalState = state == -1;
 				return;
 			}
 		}
 
 		vint RegexLexerWalker::Walk(wchar_t input, vint state)const
 		{
-			vint token=-1;
-			bool finalState=false;
-			bool previousTokenStop=false;
+			vint token = -1;
+			bool finalState = false;
+			bool previousTokenStop = false;
 			Walk(input, state, token, finalState, previousTokenStop);
 			return state;
 		}
 
 		bool RegexLexerWalker::IsClosedToken(const wchar_t* input, vint length)const
 		{
-			vint state=pure->GetStartState();
-			for(vint i=0;i<length;i++)
+			vint state = pure->GetStartState();
+			for (vint i = 0; i < length; i++)
 			{
-				state=pure->Transit(input[i], state);
-				if(state==-1) return true;
-				if(pure->IsDeadState(state)) return true;
+				state = pure->Transit(input[i], state);
+				if (state == -1) return true;
+				if (pure->IsDeadState(state)) return true;
 			}
 			return false;
 		}
@@ -992,7 +992,7 @@ RegexLexer
 
 		RegexLexer::~RegexLexer()
 		{
-			if (pure)delete pure;
+			if (pure) delete pure;
 		}
 
 		RegexTokens RegexLexer::Parse(const WString& code, vint codeIndex)const

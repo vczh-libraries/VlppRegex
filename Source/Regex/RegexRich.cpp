@@ -67,36 +67,36 @@ Data Structures for Backtracking
 
 		void Push(List<ExtensionSaver>& elements, vint& available, vint& count, const ExtensionSaver& element)
 		{
-			if(elements.Count()==count)
+			if (elements.Count() == count)
 			{
 				elements.Add(element);
 			}
 			else
 			{
-				elements[count]=element;
+				elements[count] = element;
 			}
-			ExtensionSaver& current=elements[count];
-			current.previous=available;
-			available=count++;
+			ExtensionSaver& current = elements[count];
+			current.previous = available;
+			available = count++;
 		}
 
 		ExtensionSaver Pop(List<ExtensionSaver>& elements, vint& available, vint& count)
 		{
-			ExtensionSaver& current=elements[available];
-			available=current.previous;
+			ExtensionSaver& current = elements[available];
+			available = current.previous;
 			return current;
 		}
 
 		template<typename T, typename K>
 		void PushNonSaver(List<T, K>& elements, vint& count, const T& element)
 		{
-			if(elements.Count()==count)
+			if (elements.Count() == count)
 			{
 				elements.Add(element);
 			}
 			else
 			{
-				elements[count]=element;
+				elements[count] = element;
 			}
 			count++;
 		}
@@ -116,7 +116,7 @@ CaptureRecord
 
 		bool CaptureRecord::operator==(const CaptureRecord& record)const
 		{
-			return capture==record.capture && start==record.start && length==record.length;
+			return capture == record.capture && start == record.start && length == record.length;
 		}
 
 /***********************************************************************
@@ -126,32 +126,32 @@ RichInterpretor
 		RichInterpretor::RichInterpretor(Automaton::Ref _dfa)
 			:dfa(_dfa)
 		{
-			datas=new UserData[dfa->states.Count()];
+			datas = new UserData[dfa->states.Count()];
 
-			for(vint i=0;i<dfa->states.Count();i++)
+			for (vint i = 0; i < dfa->states.Count(); i++)
 			{
-				State* state=dfa->states[i].Obj();
-				vint charEdges=0;
-				vint nonCharEdges=0;
-				bool mustSave=false;
-				for(vint j=0;j<state->transitions.Count();j++)
+				State* state = dfa->states[i].Obj();
+				vint charEdges = 0;
+				vint nonCharEdges = 0;
+				bool mustSave = false;
+				for (vint j = 0; j < state->transitions.Count(); j++)
 				{
-					if(state->transitions[j]->type==Transition::Chars)
+					if (state->transitions[j]->type == Transition::Chars)
 					{
 						charEdges++;
 					}
 					else
 					{
-						if(state->transitions[j]->type==Transition::Negative ||
-						   state->transitions[j]->type==Transition::Positive)
+						if (state->transitions[j]->type == Transition::Negative ||
+							state->transitions[j]->type == Transition::Positive)
 						{
-							mustSave=true;
+							mustSave = true;
 						}
 						nonCharEdges++;
 					}
 				}
-				datas[i].NeedKeepState=mustSave || nonCharEdges>1 || (nonCharEdges!=0 && charEdges!=0);
-				state->userData=&datas[i];
+				datas[i].NeedKeepState = mustSave || nonCharEdges > 1 || (nonCharEdges != 0 && charEdges != 0);
+				state->userData = &datas[i];
 			}
 		}
 
@@ -166,14 +166,14 @@ RichInterpretor
 			List<ExtensionSaver> extensionSavers;
 
 			StateSaver currentState;
-			currentState.captureCount=0;
-			currentState.currentState=dfa->startState;
-			currentState.extensionSaverAvailable=-1;
-			currentState.extensionSaverCount=0;
-			currentState.minTransition=0;
-			currentState.reading=input;
-			currentState.stateSaverCount=0;
-			currentState.storeType=StateSaver::Other;
+			currentState.captureCount = 0;
+			currentState.currentState = dfa->startState;
+			currentState.extensionSaverAvailable = -1;
+			currentState.extensionSaverCount = 0;
+			currentState.minTransition = 0;
+			currentState.reading = input;
+			currentState.stateSaverCount = 0;
+			currentState.storeType = StateSaver::Other;
 
 			while (!currentState.currentState->finalState)
 			{
@@ -358,7 +358,7 @@ RichInterpretor
 						break;
 					default:;
 					}
-					
+
 					// Save the parsing state when necessary
 					if (found)
 					{
@@ -430,10 +430,10 @@ RichInterpretor
 
 		bool RichInterpretor::Match(const wchar_t* input, const wchar_t* start, RichResult& result)
 		{
-			const wchar_t* read=input;
-			while(*read)
+			const wchar_t* read = input;
+			while (*read)
 			{
-				if(MatchHead(read, start, result))
+				if (MatchHead(read, start, result))
 				{
 					return true;
 				}

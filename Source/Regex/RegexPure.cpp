@@ -16,51 +16,51 @@ PureInterpretor
 
 		PureInterpretor::PureInterpretor(Automaton::Ref dfa, CharRange::List& subsets)
 			:transition(0)
-			,finalState(0)
-			,relatedFinalState(0)
+			, finalState(0)
+			, relatedFinalState(0)
 		{
-			stateCount=dfa->states.Count();
-			charSetCount=subsets.Count()+1;
-			startState=dfa->states.IndexOf(dfa->startState);
+			stateCount = dfa->states.Count();
+			charSetCount = subsets.Count() + 1;
+			startState = dfa->states.IndexOf(dfa->startState);
 
 			// Map char to input index (equivalent char class)
-			for(vint i=0;i<SupportedCharCount;i++)
+			for (vint i = 0; i < SupportedCharCount; i++)
 			{
-				charMap[i]=charSetCount-1;
+				charMap[i] = charSetCount - 1;
 			}
-			for(vint i=0;i<subsets.Count();i++)
+			for (vint i = 0; i < subsets.Count(); i++)
 			{
-				CharRange range=subsets[i];
-				for(vint j=range.begin;j<=range.end;j++)
+				CharRange range = subsets[i];
+				for (vint j = range.begin; j <= range.end; j++)
 				{
-					charMap[j]=i;
+					charMap[j] = i;
 				}
 			}
-			
+
 			// Create transitions from DFA, using input index to represent input char
-			transition=new vint*[stateCount];
-			for(vint i=0;i<stateCount;i++)
+			transition = new vint * [stateCount];
+			for (vint i = 0; i < stateCount; i++)
 			{
-				transition[i]=new vint[charSetCount];
-				for(vint j=0;j<charSetCount;j++)
+				transition[i] = new vint[charSetCount];
+				for (vint j = 0; j < charSetCount; j++)
 				{
-					transition[i][j]=-1;
+					transition[i][j] = -1;
 				}
 
-				State* state=dfa->states[i].Obj();
-				for(vint j=0;j<state->transitions.Count();j++)
+				State* state = dfa->states[i].Obj();
+				for (vint j = 0; j < state->transitions.Count(); j++)
 				{
-					Transition* dfaTransition=state->transitions[j];
-					switch(dfaTransition->type)
+					Transition* dfaTransition = state->transitions[j];
+					switch (dfaTransition->type)
 					{
 					case Transition::Chars:
 						{
-							vint index=subsets.IndexOf(dfaTransition->range);
-							if(index==-1)
+							vint index = subsets.IndexOf(dfaTransition->range);
+							if (index == -1)
 							{
 								CHECK_ERROR(false, L"PureInterpretor::PureInterpretor(Automaton::Ref, CharRange::List&)#Specified chars don't appear in the normalized char ranges.");
 							}
-							transition[i][index]=dfa->states.IndexOf(dfaTransition->target);
+							transition[i][index] = dfa->states.IndexOf(dfaTransition->target);
 						}
 						break;
 					default:
@@ -70,18 +70,18 @@ PureInterpretor
 			}
 
 			// Mark final states
-			finalState=new bool[stateCount];
-			for(vint i=0;i<stateCount;i++)
+			finalState = new bool[stateCount];
+			for (vint i = 0; i < stateCount; i++)
 			{
-				finalState[i]=dfa->states[i]->finalState;
+				finalState[i] = dfa->states[i]->finalState;
 			}
 		}
 
 		PureInterpretor::~PureInterpretor()
 		{
-			if(relatedFinalState) delete[] relatedFinalState;
+			if (relatedFinalState) delete[] relatedFinalState;
 			delete[] finalState;
-			for(vint i=0;i<stateCount;i++)
+			for (vint i = 0; i < stateCount; i++)
 			{
 				delete[] transition[i];
 			}
@@ -90,39 +90,39 @@ PureInterpretor
 
 		bool PureInterpretor::MatchHead(const wchar_t* input, const wchar_t* start, PureResult& result)
 		{
-			result.start=input-start;
-			result.length=-1;
-			result.finalState=-1;
-			result.terminateState=-1;
+			result.start = input - start;
+			result.length = -1;
+			result.finalState = -1;
+			result.terminateState = -1;
 
-			vint currentState=startState;
-			vint terminateState=-1;
-			vint terminateLength=-1;
-			const wchar_t* read=input;
-			while(currentState!=-1)
+			vint currentState = startState;
+			vint terminateState = -1;
+			vint terminateLength = -1;
+			const wchar_t* read = input;
+			while (currentState != -1)
 			{
-				terminateState=currentState;
-				terminateLength=read-input;
-				if(finalState[currentState])
+				terminateState = currentState;
+				terminateLength = read - input;
+				if (finalState[currentState])
 				{
-					result.length=terminateLength;
-					result.finalState=currentState;
+					result.length = terminateLength;
+					result.finalState = currentState;
 				}
-				if(!*read)break;
+				if (!*read)break;
 #ifdef VCZH_GCC
-				if(*read>=SupportedCharCount)break;
+				if (*read >= SupportedCharCount)break;
 #endif
-				vint charIndex=charMap[*read++];
-				currentState=transition[currentState][charIndex];
+				vint charIndex = charMap[*read++];
+				currentState = transition[currentState][charIndex];
 			}
 
-			if(result.finalState==-1)
+			if (result.finalState == -1)
 			{
-				if(terminateLength>0)
+				if (terminateLength > 0)
 				{
-					result.terminateState=terminateState;
+					result.terminateState = terminateState;
 				}
-				result.length=terminateLength;
+				result.length = terminateLength;
 				return false;
 			}
 			else
@@ -133,10 +133,10 @@ PureInterpretor
 
 		bool PureInterpretor::Match(const wchar_t* input, const wchar_t* start, PureResult& result)
 		{
-			const wchar_t* read=input;
-			while(*read)
+			const wchar_t* read = input;
+			while (*read)
 			{
-				if(MatchHead(read, start, result))
+				if (MatchHead(read, start, result))
 				{
 					return true;
 				}
@@ -152,10 +152,10 @@ PureInterpretor
 
 		vint PureInterpretor::Transit(wchar_t input, vint state)
 		{
-			if(0<=state && state<stateCount)
+			if (0 <= state && state < stateCount)
 			{
-				vint charIndex=charMap[input];
-				vint nextState=transition[state][charIndex];
+				vint charIndex = charMap[input];
+				vint nextState = transition[state][charIndex];
 				return nextState;
 			}
 			else
@@ -166,15 +166,15 @@ PureInterpretor
 
 		bool PureInterpretor::IsFinalState(vint state)
 		{
-			return 0<=state && state<stateCount && finalState[state];
+			return 0 <= state && state < stateCount&& finalState[state];
 		}
 
 		bool PureInterpretor::IsDeadState(vint state)
 		{
-			if(state==-1) return true;
-			for(vint i=0;i<charSetCount;i++)
+			if (state == -1) return true;
+			for (vint i = 0; i < charSetCount; i++)
 			{
-				if(transition[state][i]!=-1)
+				if (transition[state][i] != -1)
 				{
 					return false;
 				}
@@ -184,41 +184,41 @@ PureInterpretor
 
 		void PureInterpretor::PrepareForRelatedFinalStateTable()
 		{
-			if(!relatedFinalState)
+			if (!relatedFinalState)
 			{
-				relatedFinalState=new vint[stateCount];
-				for(vint i=0;i<stateCount;i++)
+				relatedFinalState = new vint[stateCount];
+				for (vint i = 0; i < stateCount; i++)
 				{
-					relatedFinalState[i]=finalState[i]?i:-1;
+					relatedFinalState[i] = finalState[i] ? i : -1;
 				}
-				while(true)
+				while (true)
 				{
-					vint modifyCount=0;
-					for(vint i=0;i<stateCount;i++)
+					vint modifyCount = 0;
+					for (vint i = 0; i < stateCount; i++)
 					{
-						if(relatedFinalState[i]==-1)
+						if (relatedFinalState[i] == -1)
 						{
-							vint state=-1;
-							for(vint j=0;j<charSetCount;j++)
+							vint state = -1;
+							for (vint j = 0; j < charSetCount; j++)
 							{
-								vint nextState=transition[i][j];
-								if(nextState!=-1)
+								vint nextState = transition[i][j];
+								if (nextState != -1)
 								{
-									state=relatedFinalState[nextState];
-									if(state!=-1)
+									state = relatedFinalState[nextState];
+									if (state != -1)
 									{
 										break;
 									}
 								}
 							}
-							if(state!=-1)
+							if (state != -1)
 							{
-								relatedFinalState[i]=state;
+								relatedFinalState[i] = state;
 								modifyCount++;
 							}
 						}
 					}
-					if(modifyCount==0)
+					if (modifyCount == 0)
 					{
 						break;
 					}
@@ -228,7 +228,7 @@ PureInterpretor
 
 		vint PureInterpretor::GetRelatedFinalState(vint state)
 		{
-			return relatedFinalState?relatedFinalState[state]:-1;
+			return relatedFinalState ? relatedFinalState[state] : -1;
 		}
 	}
 }
