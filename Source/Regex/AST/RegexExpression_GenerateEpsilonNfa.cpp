@@ -166,13 +166,13 @@ EpsilonNfaAlgorithm
 				result.end = target->NewState();
 
 				vint capture = -1;
-				if (expression->name != L"")
+				if (expression->name != U32String::Empty)
 				{
-					capture = target->captureNames.IndexOf(expression->name);
+					capture = target->captureNames.IndexOf(u32tow(expression->name));
 					if (capture == -1)
 					{
 						capture = target->captureNames.Count();
-						target->captureNames.Add(expression->name);
+						target->captureNames.Add(u32tow(expression->name));
 					}
 				}
 
@@ -185,13 +185,13 @@ EpsilonNfaAlgorithm
 			EpsilonNfa Apply(MatchExpression* expression, Automaton* target)
 			{
 				vint capture = -1;
-				if (expression->name != L"")
+				if (expression->name != U32String::Empty)
 				{
-					capture = target->captureNames.IndexOf(expression->name);
+					capture = target->captureNames.IndexOf(u32tow(expression->name));
 					if (capture == -1)
 					{
 						capture = target->captureNames.Count();
-						target->captureNames.Add(expression->name);
+						target->captureNames.Add(u32tow(expression->name));
 					}
 				}
 				EpsilonNfa result;

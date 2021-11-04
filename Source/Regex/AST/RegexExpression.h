@@ -44,7 +44,7 @@ Regex Expression AST
 			Expression() = default;
 
 			typedef Ptr<Expression>											Ref;
-			typedef collections::Dictionary<WString, Expression::Ref>		Map;
+			typedef collections::Dictionary<U32String, Expression::Ref>		Map;
 
 			virtual void				Apply(IRegexExpressionAlgorithm& algorithm)=0;
 			bool						IsEqual(Expression* expression);
@@ -112,7 +112,7 @@ Regex Expression AST
 		class CaptureExpression : public Expression
 		{
 		public:
-			WString						name;			// Capture name, empty for anonymous capture
+			U32String					name;			// Capture name, empty for anonymous capture
 			Expression::Ref				expression;		// Regex to match
 
 			void						Apply(IRegexExpressionAlgorithm& algorithm);
@@ -121,7 +121,7 @@ Regex Expression AST
 		class MatchExpression : public Expression
 		{
 		public:
-			WString						name;			// Capture name, empty for anonymous
+			U32String					name;			// Capture name, empty for anonymous
 			vint						index;			// The index of captured text to match associated the name, -1 for all of them
 
 			void						Apply(IRegexExpressionAlgorithm& algorithm);
@@ -146,7 +146,7 @@ Regex Expression AST
 		class UsingExpression : public Expression
 		{
 		public:
-			WString						name;			// Name of the regex to refer
+			U32String					name;			// Name of the regex to refer
 
 			void						Apply(IRegexExpressionAlgorithm& algorithm);
 		};
@@ -366,19 +366,36 @@ Visitor
 Helper Functions
 ***********************************************************************/
 
-		extern Ptr<LoopExpression>		ParseLoop(const wchar_t*& input);
-		extern Ptr<Expression>			ParseCharSet(const wchar_t*& input);
-		extern Ptr<Expression>			ParseFunction(const wchar_t*& input);
-		extern Ptr<Expression>			ParseUnit(const wchar_t*& input);
-		extern Ptr<Expression>			ParseJoin(const wchar_t*& input);
-		extern Ptr<Expression>			ParseAlt(const wchar_t*& input);
-		extern Ptr<Expression>			ParseExpression(const wchar_t*& input);
-		extern RegexExpression::Ref		ParseRegexExpression(const WString& code);
+		extern Ptr<LoopExpression>		ParseLoop(const char32_t*& input);
+		extern Ptr<Expression>			ParseCharSet(const char32_t*& input);
+		extern Ptr<Expression>			ParseFunction(const char32_t*& input);
+		extern Ptr<Expression>			ParseUnit(const char32_t*& input);
+		extern Ptr<Expression>			ParseJoin(const char32_t*& input);
+		extern Ptr<Expression>			ParseAlt(const char32_t*& input);
+		extern Ptr<Expression>			ParseExpression(const char32_t*& input);
+		extern RegexExpression::Ref		ParseRegexExpression(const U32String& code);
 
-		extern WString					EscapeTextForRegex(const WString& literalString);
-		extern WString					UnescapeTextForRegex(const WString& escapedText);
-		extern WString					NormalizeEscapedTextForRegex(const WString& escapedText);
-		extern bool						IsRegexEscapedLiteralString(const WString& regex);
+		extern U32String				EscapeTextForRegex(const U32String& literalString);
+		extern U32String				UnescapeTextForRegex(const U32String& escapedText);
+		extern U32String				NormalizeEscapedTextForRegex(const U32String& escapedText);
+		extern bool						IsRegexEscapedLiteralString(const U32String& regex);
+
+		class RegexException : public Exception
+		{
+		public:
+			U32String					code;
+			vint						position;
+
+		public:
+			RegexException(const WString& _message, const U32String& _code, vint _position)
+				: code(_code)
+				, position(_position)
+			{
+			}
+
+			const U32String& GetCode() const { return code; }
+			vint GetPosition() const { return position; }
+		};
 	}
 }
 

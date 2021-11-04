@@ -221,7 +221,7 @@ Regex
 			/// <summary>Create a regular expression. It will crash if the regular expression produces syntax error.</summary>
 			/// <param name="code">The regular expression in a string.</param>
 			/// <param name="preferPure">Set to true to use DFA if possible.</param>
-			Regex(const WString& code, bool preferPure = true);
+			Regex(const U32String& code, bool preferPure = true);
 			~Regex();
 
 			/// <summary>Test is a DFA used to match a string.</summary>
@@ -1016,7 +1016,7 @@ Tokenizer
 			/// <summary>Create a lexical analyzer by a set of regular expressions. [F:vl.regex.RegexToken.token] will be the index of the matched regular expression in the first argument.</summary>
 			/// <param name="tokens">ALl regular expression, each one represent a kind of tokens.</param>
 			/// <param name="_proc">Configuration of all callbacks.</param>
-			RegexLexer(const collections::IEnumerable<WString>& tokens, RegexProc _proc);
+			RegexLexer(const collections::IEnumerable<U32String>& tokens, RegexProc _proc);
 			~RegexLexer();
 
 			/// <summary>Tokenize an input text.</summary>

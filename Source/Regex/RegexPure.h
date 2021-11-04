@@ -24,11 +24,7 @@ namespace vl
 		class PureInterpretor : public Object
 		{
 		protected:
-#if defined VCZH_MSVC
-			static const vint	SupportedCharCount = 0x10000;		// UTF-16
-#elif defined VCZH_GCC
-			static const vint	SupportedCharCount = 0x110000;		// UTF-32
-#endif
+			static const vint	SupportedCharCount = 0x110000;
 
 			vint				charMap[SupportedCharCount];		// char -> char set index
 			vint**				transition;							// (state * char set index) -> state*

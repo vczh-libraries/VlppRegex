@@ -171,7 +171,6 @@
     <ClCompile Include="..\..\..\Source\Regex\AST\RegexParser.cpp" />
     <ClCompile Include="..\..\..\Source\Regex\AST\RegexWriter.cpp" />
     <ClCompile Include="..\..\..\Source\Regex\Automaton\RegexAutomaton.cpp" />
-    <ClCompile Include="..\..\..\Source\Regex\Automaton\RegexData.cpp" />
     <ClCompile Include="..\..\..\Source\Regex\Regex.cpp" />
     <ClCompile Include="..\..\..\Source\Regex\RegexPure.cpp" />
     <ClCompile Include="..\..\..\Source\Regex\RegexRich.cpp" />

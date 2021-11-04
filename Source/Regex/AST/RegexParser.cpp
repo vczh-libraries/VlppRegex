@@ -14,7 +14,7 @@ namespace vl
 Helper Functions
 ***********************************************************************/
 
-		bool IsChar(const wchar_t*& input, wchar_t c)
+		bool IsChar(const char32_t*& input, char32_t c)
 		{
 			if (*input == c)
 			{
@@ -27,59 +27,50 @@ Helper Functions
 			}
 		}
 
-		bool IsChars(const wchar_t*& input, const wchar_t* chars, wchar_t& c)
+		template<vint Size>
+		bool IsChars(const char32_t*& input, const char32_t(&chars)[Size])
 		{
-			const wchar_t* position = ::wcschr(chars, *input);
-			if (position)
+			for (char32_t c : chars)
 			{
-				c = *input++;
-				return true;
+				if (*input == c)
+				{
+					input++;
+					return true;
+				}
 			}
-			else
-			{
-				return false;
-			}
+			return false;
 		}
 
-		bool IsStr(const wchar_t*& input, const wchar_t* str)
+		template<vint Size>
+		bool IsStr(const char32_t*& input, const char32_t(&str)[Size])
 		{
-			size_t len = wcslen(str);
-			if (wcsncmp(input, str, len) == 0)
+			for (vint i = 0; i < Size - 1; i++)
 			{
-				input += len;
-				return true;
+				if (input[i] != str[i]) return false;
 			}
-			else
-			{
-				return false;
-			}
+			input += Size - 1;
+			return true;
 		}
 
-		bool IsChars(const wchar_t*& input, const wchar_t* chars)
-		{
-			wchar_t c;
-			return IsChars(input, chars, c);
-		}
-
-		bool IsPositiveInteger(const wchar_t*& input, vint& number)
+		bool IsPositiveInteger(const char32_t*& input, vint& number)
 		{
 			bool readed = false;
 			number = 0;
-			while (L'0' <= *input && *input <= L'9')
+			while (U'0' <= *input && *input <= U'9')
 			{
-				number = number * 10 + (*input++) - L'0';
+				number = number * 10 + (*input++) - U'0';
 				readed = true;
 			}
 			return readed;
 		}
 
-		bool IsName(const wchar_t*& input, WString& name)
+		bool IsName(const char32_t*& input, U32String& name)
 		{
-			const wchar_t* read = input;
-			if ((L'A' <= *read && *read <= L'Z') || (L'a' <= *read && *read <= L'z') || *read == L'_')
+			const char32_t* read = input;
+			if ((U'A' <= *read && *read <= U'Z') || (U'a' <= *read && *read <= U'z') || *read == U'_')
 			{
 				read++;
-				while ((L'A' <= *read && *read <= L'Z') || (L'a' <= *read && *read <= L'z') || (L'0' <= *read && *read <= L'9') || *read == L'_')
+				while ((U'A' <= *read && *read <= U'Z') || (U'a' <= *read && *read <= U'z') || (U'0' <= *read && *read <= U'9') || *read == U'_')
 				{
 					read++;
 				}
@@ -90,13 +81,13 @@ Helper Functions
 			}
 			else
 			{
-				name = WString::CopyFrom(input, vint(read - input));
+				name = U32String::CopyFrom(input, vint(read - input));
 				input = read;
 				return true;
 			}
 		}
 
-		Ptr<LoopExpression> ParseLoop(const wchar_t*& input)
+		Ptr<LoopExpression> ParseLoop(const char32_t*& input)
 		{
 			vint min = 0;
 			vint max = 0;
@@ -104,26 +95,26 @@ Helper Functions
 			{
 				return 0;
 			}
-			else if (IsChar(input, L'+'))
+			else if (IsChar(input, U'+'))
 			{
 				min = 1;
 				max = -1;
 			}
-			else if (IsChar(input, L'*'))
+			else if (IsChar(input, U'*'))
 			{
 				min = 0;
 				max = -1;
 			}
-			else if (IsChar(input, L'?'))
+			else if (IsChar(input, U'?'))
 			{
 				min = 0;
 				max = 1;
 			}
-			else if (IsChar(input, L'{'))
+			else if (IsChar(input, U'{'))
 			{
 				if (IsPositiveInteger(input, min))
 				{
-					if (IsChar(input, L','))
+					if (IsChar(input, U','))
 					{
 						if (!IsPositiveInteger(input, max))
 						{
@@ -134,7 +125,7 @@ Helper Functions
 					{
 						max = min;
 					}
-					if (!IsChar(input, L'}'))
+					if (!IsChar(input, U'}'))
 					{
 						goto THROW_EXCEPTION;
 					}
@@ -153,77 +144,77 @@ Helper Functions
 				LoopExpression* expression = new LoopExpression;
 				expression->min = min;
 				expression->max = max;
-				expression->preferLong = !IsChar(input, L'?');
+				expression->preferLong = !IsChar(input, U'?');
 				return expression;
 			}
 		THROW_EXCEPTION:
 			throw ArgumentException(L"Regular expression syntax error: Illegal loop expression.", L"vl::regex_internal::ParseLoop", L"input");
 		}
 
-		Ptr<Expression> ParseCharSet(const wchar_t*& input)
+		Ptr<Expression> ParseCharSet(const char32_t*& input)
 		{
 			if (!*input)
 			{
 				return 0;
 			}
-			else if (IsChar(input, L'^'))
+			else if (IsChar(input, U'^'))
 			{
 				return new BeginExpression;
 			}
-			else if (IsChar(input, L'$'))
+			else if (IsChar(input, U'$'))
 			{
 				return new EndExpression;
 			}
-			else if (IsChar(input, L'\\') || IsChar(input, L'/'))
+			else if (IsChar(input, U'\\') || IsChar(input, U'/'))
 			{
 				Ptr<CharSetExpression> expression = new CharSetExpression;
 				expression->reverse = false;
 				switch (*input)
 				{
-				case L'.':
-					expression->ranges.Add(CharRange(1, 65535));
+				case U'.':
+					expression->ranges.Add(CharRange(1, 0x10FFFF));
 					break;
-				case L'r':
-					expression->ranges.Add(CharRange(L'\r', L'\r'));
+				case U'r':
+					expression->ranges.Add(CharRange(U'\r', U'\r'));
 					break;
-				case L'n':
-					expression->ranges.Add(CharRange(L'\n', L'\n'));
+				case U'n':
+					expression->ranges.Add(CharRange(U'\n', U'\n'));
 					break;
-				case L't':
-					expression->ranges.Add(CharRange(L'\t', L'\t'));
+				case U't':
+					expression->ranges.Add(CharRange(U'\t', U'\t'));
 					break;
-				case L'\\':case L'/':case L'(':case L')':case L'+':case L'*':case L'?':case L'|':
-				case L'{':case L'}':case L'[':case L']':case L'<':case L'>':
-				case L'^':case L'$':case L'!':case L'=':
+				case U'\\':case U'/':case U'(':case U')':case U'+':case U'*':case U'?':case U'|':
+				case U'{':case U'}':case U'[':case U']':case U'<':case U'>':
+				case U'^':case U'$':case U'!':case U'=':
 					expression->ranges.Add(CharRange(*input, *input));
 					break;
-				case L'S':
+				case U'S':
 					expression->reverse = true;
-				case L's':
-					expression->ranges.Add(CharRange(L' ', L' '));
-					expression->ranges.Add(CharRange(L'\r', L'\r'));
-					expression->ranges.Add(CharRange(L'\n', L'\n'));
-					expression->ranges.Add(CharRange(L'\t', L'\t'));
+				case U's':
+					expression->ranges.Add(CharRange(U' ', U' '));
+					expression->ranges.Add(CharRange(U'\r', U'\r'));
+					expression->ranges.Add(CharRange(U'\n', U'\n'));
+					expression->ranges.Add(CharRange(U'\t', U'\t'));
 					break;
-				case L'D':
+				case U'D':
 					expression->reverse = true;
-				case L'd':
-					expression->ranges.Add(CharRange(L'0', L'9'));
+				case U'd':
+					expression->ranges.Add(CharRange(U'0', U'9'));
 					break;
-				case L'L':
+				case U'L':
 					expression->reverse = true;
-				case L'l':
-					expression->ranges.Add(CharRange(L'_', L'_'));
-					expression->ranges.Add(CharRange(L'A', L'Z'));
-					expression->ranges.Add(CharRange(L'a', L'z'));
+				case U'l':
+					expression->ranges.Add(CharRange(U'_', U'_'));
+					expression->ranges.Add(CharRange(U'A', U'Z'));
+					expression->ranges.Add(CharRange(U'a', U'z'));
 					break;
-				case L'W':
+				case U'W':
 					expression->reverse = true;
-				case L'w':
-					expression->ranges.Add(CharRange(L'_', L'_'));
-					expression->ranges.Add(CharRange(L'0', L'9'));
-					expression->ranges.Add(CharRange(L'A', L'Z'));
-					expression->ranges.Add(CharRange(L'a', L'z'));
+				case U'w':
+					expression->ranges.Add(CharRange(U'_', U'_'));
+					expression->ranges.Add(CharRange(U'0', U'9'));
+					expression->ranges.Add(CharRange(U'A', U'Z'));
+					expression->ranges.Add(CharRange(U'a', U'z'));
 					break;
 				default:
 					throw ArgumentException(L"Regular expression syntax error: Illegal character escaping.", L"vl::regex_internal::ParseCharSet", L"input");
@@ -231,10 +222,10 @@ Helper Functions
 				input++;
 				return expression;
 			}
-			else if (IsChar(input, L'['))
+			else if (IsChar(input, U'['))
 			{
 				Ptr<CharSetExpression> expression = new CharSetExpression;
-				if (IsChar(input, L'^'))
+				if (IsChar(input, U'^'))
 				{
 					expression->reverse = true;
 				}
@@ -243,25 +234,25 @@ Helper Functions
 					expression->reverse = false;
 				}
 				bool midState = false;
-				wchar_t a = L'\0';
-				wchar_t b = L'\0';
+				char32_t a = U'\0';
+				char32_t b = U'\0';
 				while (true)
 				{
-					if (IsChar(input, L'\\') || IsChar(input, L'/'))
+					if (IsChar(input, U'\\') || IsChar(input, U'/'))
 					{
-						wchar_t c = L'\0';
+						char32_t c = U'\0';
 						switch (*input)
 						{
-						case L'r':
-							c = L'\r';
+						case U'r':
+							c = U'\r';
 							break;
-						case L'n':
-							c = L'\n';
+						case U'n':
+							c = U'\n';
 							break;
-						case L't':
-							c = L'\t';
+						case U't':
+							c = U'\t';
 							break;
-						case L'-':case L'[':case L']':case L'\\':case L'/':case L'^':case L'$':
+						case U'-':case U'[':case U']':case U'\\':case U'/':case U'^':case U'$':
 							c = *input;
 							break;
 						default:
@@ -271,7 +262,7 @@ Helper Functions
 						midState ? b = c : a = c;
 						midState = !midState;
 					}
-					else if (IsChars(input, L"-]"))
+					else if (IsChars(input, U"-]"))
 					{
 						goto THROW_EXCEPTION;
 					}
@@ -284,7 +275,7 @@ Helper Functions
 					{
 						goto THROW_EXCEPTION;
 					}
-					if (IsChar(input, L']'))
+					if (IsChar(input, U']'))
 					{
 						if (midState)
 						{
@@ -296,7 +287,7 @@ Helper Functions
 						}
 						break;
 					}
-					else if (IsChar(input, L'-'))
+					else if (IsChar(input, U'-'))
 					{
 						if (!midState)
 						{
@@ -323,7 +314,7 @@ Helper Functions
 			THROW_EXCEPTION:
 				throw ArgumentException(L"Regular expression syntax error: Illegal character set definition.");
 			}
-			else if (IsChars(input, L"()+*?{}|"))
+			else if (IsChars(input, U"()+*?{}|"))
 			{
 				input--;
 				return 0;
@@ -338,12 +329,12 @@ Helper Functions
 			}
 		}
 
-		Ptr<Expression> ParseFunction(const wchar_t*& input)
+		Ptr<Expression> ParseFunction(const char32_t*& input)
 		{
-			if (IsStr(input, L"(="))
+			if (IsStr(input, U"(="))
 			{
 				Ptr<Expression> sub = ParseExpression(input);
-				if (!IsChar(input, L')'))
+				if (!IsChar(input, U')'))
 				{
 					goto NEED_RIGHT_BRACKET;
 				}
@@ -351,10 +342,10 @@ Helper Functions
 				expression->expression = sub;
 				return expression;
 			}
-			else if (IsStr(input, L"(!"))
+			else if (IsStr(input, U"(!"))
 			{
 				Ptr<Expression> sub = ParseExpression(input);
-				if (!IsChar(input, L')'))
+				if (!IsChar(input, U')'))
 				{
 					goto NEED_RIGHT_BRACKET;
 				}
@@ -362,18 +353,18 @@ Helper Functions
 				expression->expression = sub;
 				return expression;
 			}
-			else if (IsStr(input, L"(<&"))
+			else if (IsStr(input, U"(<&"))
 			{
-				WString name;
+				U32String name;
 				if (!IsName(input, name))
 				{
 					goto NEED_NAME;
 				}
-				if (!IsChar(input, L'>'))
+				if (!IsChar(input, U'>'))
 				{
 					goto NEED_GREATER;
 				}
-				if (!IsChar(input, L')'))
+				if (!IsChar(input, U')'))
 				{
 					goto NEED_RIGHT_BRACKET;
 				}
@@ -381,13 +372,13 @@ Helper Functions
 				expression->name = name;
 				return expression;
 			}
-			else if (IsStr(input, L"(<$"))
+			else if (IsStr(input, U"(<$"))
 			{
-				WString name;
+				U32String name;
 				vint index = -1;
 				if (IsName(input, name))
 				{
-					if (IsChar(input, L';'))
+					if (IsChar(input, U';'))
 					{
 						if (!IsPositiveInteger(input, index))
 						{
@@ -399,11 +390,11 @@ Helper Functions
 				{
 					goto NEED_NUMBER;
 				}
-				if (!IsChar(input, L'>'))
+				if (!IsChar(input, U'>'))
 				{
 					goto NEED_GREATER;
 				}
-				if (!IsChar(input, L')'))
+				if (!IsChar(input, U')'))
 				{
 					goto NEED_RIGHT_BRACKET;
 				}
@@ -412,19 +403,19 @@ Helper Functions
 				expression->index = index;
 				return expression;
 			}
-			else if (IsStr(input, L"(<"))
+			else if (IsStr(input, U"(<"))
 			{
-				WString name;
+				U32String name;
 				if (!IsName(input, name))
 				{
 					goto NEED_NAME;
 				}
-				if (!IsChar(input, L'>'))
+				if (!IsChar(input, U'>'))
 				{
 					goto NEED_GREATER;
 				}
 				Ptr<Expression> sub = ParseExpression(input);
-				if (!IsChar(input, L')'))
+				if (!IsChar(input, U')'))
 				{
 					goto NEED_RIGHT_BRACKET;
 				}
@@ -433,10 +424,10 @@ Helper Functions
 				expression->expression = sub;
 				return expression;
 			}
-			else if (IsStr(input, L"(?"))
+			else if (IsStr(input, U"(?"))
 			{
 				Ptr<Expression> sub = ParseExpression(input);
-				if (!IsChar(input, L')'))
+				if (!IsChar(input, U')'))
 				{
 					goto NEED_RIGHT_BRACKET;
 				}
@@ -444,10 +435,10 @@ Helper Functions
 				expression->expression = sub;
 				return expression;
 			}
-			else if (IsChar(input, L'('))
+			else if (IsChar(input, U'('))
 			{
 				Ptr<Expression> sub = ParseExpression(input);
-				if (!IsChar(input, L')'))
+				if (!IsChar(input, U')'))
 				{
 					goto NEED_RIGHT_BRACKET;
 				}
@@ -467,7 +458,7 @@ Helper Functions
 			throw ArgumentException(L"Regular expression syntax error: Number expected.", L"vl::regex_internal::ParseFunction", L"input");
 		}
 
-		Ptr<Expression> ParseUnit(const wchar_t*& input)
+		Ptr<Expression> ParseUnit(const char32_t*& input)
 		{
 			Ptr<Expression> unit = ParseCharSet(input);
 			if (!unit)
@@ -487,7 +478,7 @@ Helper Functions
 			return unit;
 		}
 
-		Ptr<Expression> ParseJoin(const wchar_t*& input)
+		Ptr<Expression> ParseJoin(const char32_t*& input)
 		{
 			Ptr<Expression> expression = ParseUnit(input);
 			while (true)
@@ -508,12 +499,12 @@ Helper Functions
 			return expression;
 		}
 
-		Ptr<Expression> ParseAlt(const wchar_t*& input)
+		Ptr<Expression> ParseAlt(const char32_t*& input)
 		{
 			Ptr<Expression> expression = ParseJoin(input);
 			while (true)
 			{
-				if (IsChar(input, L'|'))
+				if (IsChar(input, U'|'))
 				{
 					Ptr<Expression> right = ParseJoin(input);
 					if (right)
@@ -536,37 +527,37 @@ Helper Functions
 			return expression;
 		}
 
-		Ptr<Expression> ParseExpression(const wchar_t*& input)
+		Ptr<Expression> ParseExpression(const char32_t*& input)
 		{
 			return ParseAlt(input);
 		}
 
-		RegexExpression::Ref ParseRegexExpression(const WString& code)
+		RegexExpression::Ref ParseRegexExpression(const U32String& code)
 		{
 			RegexExpression::Ref regex = new RegexExpression;
-			const wchar_t* start = code.Buffer();
-			const wchar_t* input = start;
+			const char32_t* start = code.Buffer();
+			const char32_t* input = start;
 			try
 			{
-				while (IsStr(input, L"(<#"))
+				while (IsStr(input, U"(<#"))
 				{
-					WString name;
+					U32String name;
 					if (!IsName(input, name))
 					{
 						throw ArgumentException(L"Regular expression syntax error: Identifier expected.", L"vl::regex_internal::ParseRegexExpression", L"code");
 					}
-					if (!IsChar(input, L'>'))
+					if (!IsChar(input, U'>'))
 					{
 						throw ArgumentException(L"Regular expression syntax error: \">\" expected.", L"vl::regex_internal::ParseFunction", L"input");
 					}
 					Ptr<Expression> sub = ParseExpression(input);
-					if (!IsChar(input, L')'))
+					if (!IsChar(input, U')'))
 					{
 						throw ArgumentException(L"Regular expression syntax error: \")\" expected.", L"vl::regex_internal::ParseFunction", L"input");
 					}
 					if (regex->definitions.Keys().Contains(name))
 					{
-						throw ArgumentException(L"Regular expression syntax error: Found duplicated sub expression name: \"" + name + L"\". ", L"vl::regex_internal::ParseFunction", L"input");
+						throw ArgumentException(L"Regular expression syntax error: Found duplicated sub expression name: \"" + u32tow(name) + L"\". ", L"vl::regex_internal::ParseFunction", L"input");
 					}
 					else
 					{
@@ -586,46 +577,46 @@ Helper Functions
 			}
 			catch (const ArgumentException& e)
 			{
-				throw ParsingException(e.Message(), code, input - start);
+				throw RegexException(e.Message(), code, input - start);
 			}
 		}
 
-		WString EscapeTextForRegex(const WString& literalString)
+		U32String EscapeTextForRegex(const U32String& literalString)
 		{
-			WString result;
+			U32String result;
 			for (vint i = 0; i < literalString.Length(); i++)
 			{
-				wchar_t c = literalString[i];
+				char32_t c = literalString[i];
 				switch (c)
 				{
-				case L'\\':case L'/':case L'(':case L')':case L'+':case L'*':case L'?':case L'|':
-				case L'{':case L'}':case L'[':case L']':case L'<':case L'>':
-				case L'^':case L'$':case L'!':case L'=':
-					result += WString(L"\\") + WString::FromChar(c);
+				case U'\\':case U'/':case U'(':case U')':case U'+':case U'*':case U'?':case U'|':
+				case U'{':case U'}':case U'[':case U']':case U'<':case U'>':
+				case U'^':case U'$':case U'!':case U'=':
+					result += U32String(U"\\") + U32String::FromChar(c);
 					break;
-				case L'\r':
-					result += L"\\r";
+				case U'\r':
+					result += U"\\r";
 					break;
-				case L'\n':
-					result += L"\\n";
+				case U'\n':
+					result += U"\\n";
 					break;
-				case L'\t':
-					result += L"\\t";
+				case U'\t':
+					result += U"\\t";
 					break;
 				default:
-					result += WString::FromChar(c);
+					result += U32String::FromChar(c);
 				}
 			}
 			return result;
 		}
 
-		WString UnescapeTextForRegex(const WString& escapedText)
+		U32String UnescapeTextForRegex(const U32String& escapedText)
 		{
-			WString result;
+			U32String result;
 			for (vint i = 0; i < escapedText.Length(); i++)
 			{
-				wchar_t c = escapedText[i];
-				if (c == L'\\' || c == L'/')
+				char32_t c = escapedText[i];
+				if (c == U'\\' || c == U'/')
 				{
 					if (i < escapedText.Length() - 1)
 					{
@@ -633,53 +624,53 @@ Helper Functions
 						c = escapedText[i];
 						switch (c)
 						{
-						case L'r':
-							result += L"\r";
+						case U'r':
+							result += U"\r";
 							break;
-						case L'n':
-							result += L"\n";
+						case U'n':
+							result += U"\n";
 							break;
-						case L't':
-							result += L"\t";
+						case U't':
+							result += U"\t";
 							break;
 						default:
-							result += WString::FromChar(c);
+							result += U32String::FromChar(c);
 						}
 						continue;
 					}
 				}
-				result += WString::FromChar(c);
+				result += U32String::FromChar(c);
 			}
 			return result;
 		}
 
-		WString NormalizeEscapedTextForRegex(const WString& escapedText)
+		U32String NormalizeEscapedTextForRegex(const U32String& escapedText)
 		{
-			WString result;
+			U32String result;
 			for (vint i = 0; i < escapedText.Length(); i++)
 			{
-				wchar_t c = escapedText[i];
-				if (c == L'\\' || c == L'/')
+				char32_t c = escapedText[i];
+				if (c == U'\\' || c == U'/')
 				{
 					if (i < escapedText.Length() - 1)
 					{
 						i++;
 						c = escapedText[i];
-						result += WString(L"\\") + WString::FromChar(c);
+						result += U32String(U"\\") + U32String::FromChar(c);
 						continue;
 					}
 				}
-				result += WString::FromChar(c);
+				result += U32String::FromChar(c);
 			}
 			return result;
 		}
 
-		bool IsRegexEscapedLiteralString(const WString& regex)
+		bool IsRegexEscapedLiteralString(const U32String& regex)
 		{
 			for (vint i = 0; i < regex.Length(); i++)
 			{
-				wchar_t c = regex[i];
-				if (c == L'\\' || c == L'/')
+				char32_t c = regex[i];
+				if (c == U'\\' || c == U'/')
 				{
 					i++;
 				}
@@ -687,9 +678,9 @@ Helper Functions
 				{
 					switch (c)
 					{
-					case L'\\':case L'/':case L'(':case L')':case L'+':case L'*':case L'?':case L'|':
-					case L'{':case L'}':case L'[':case L']':case L'<':case L'>':
-					case L'^':case L'$':case L'!':case L'=':
+					case U'\\':case U'/':case U'(':case U')':case U'+':case U'*':case U'?':case U'|':
+					case U'{':case U'}':case U'[':case U']':case U'<':case U'>':
+					case U'^':case U'$':case U'!':case U'=':
 						return false;
 					}
 				}

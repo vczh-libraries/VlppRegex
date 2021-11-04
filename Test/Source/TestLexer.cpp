@@ -89,10 +89,10 @@ TEST_FILE
 
 	TEST_CASE(L"Test RegexLexer 1")
 	{
-		List<WString> codes;
-		codes.Add(L"/d+");
-		codes.Add(L"/s+");
-		codes.Add(L"[a-zA-Z_]/w*");
+		List<U32String> codes;
+		codes.Add(U"/d+");
+		codes.Add(U"/s+");
+		codes.Add(U"[a-zA-Z_]/w*");
 		RegexLexer lexer(codes, {});
 
 		{
@@ -270,10 +270,10 @@ TEST_FILE
 
 	TEST_CASE(L"Test RegexLexer 2")
 	{
-		List<WString> codes;
-		codes.Add(L"/d+");
-		codes.Add(L"[a-zA-Z_]/w*");
-		codes.Add(L"\"[^\"]*\"");
+		List<U32String> codes;
+		codes.Add(U"/d+");
+		codes.Add(U"[a-zA-Z_]/w*");
+		codes.Add(U"\"[^\"]*\"");
 		RegexLexer lexer(codes, {});
 
 		WString input =
@@ -295,9 +295,9 @@ TEST_FILE
 	TEST_CASE(L"Test RegexLexer 3")
 	{
 		{
-			List<WString> codes;
-			codes.Add(L"unit");
-			codes.Add(L"/w+");
+			List<U32String> codes;
+			codes.Add(U"unit");
+			codes.Add(U"/w+");
 			RegexLexer lexer(codes, {});
 			{
 				WString input = L"unit";
@@ -327,9 +327,9 @@ TEST_FILE
 			}
 		}
 		{
-			List<WString> codes;
-			codes.Add(L"/w+");
-			codes.Add(L"unit");
+			List<U32String> codes;
+			codes.Add(U"/w+");
+			codes.Add(U"unit");
 			RegexLexer lexer(codes, {});
 			{
 				WString input = L"unit";
@@ -363,9 +363,9 @@ TEST_FILE
 	TEST_CASE(L"Test RegexLexer 4")
 	{
 		{
-			List<WString> codes;
-			codes.Add(L"=");
-			codes.Add(L"==");
+			List<U32String> codes;
+			codes.Add(U"=");
+			codes.Add(U"==");
 			RegexLexer lexer(codes, {});
 			{
 				WString input = L"=";
@@ -395,9 +395,9 @@ TEST_FILE
 			}
 		}
 		{
-			List<WString> codes;
-			codes.Add(L"==");
-			codes.Add(L"=");
+			List<U32String> codes;
+			codes.Add(U"==");
+			codes.Add(U"=");
 			RegexLexer lexer(codes, {});
 			{
 				WString input = L"=";
@@ -453,9 +453,9 @@ TEST_FILE
 
 	TEST_CASE(L"Test RegexLexer 5")
 	{
-		List<WString> codes;
-		codes.Add(L"/d+");
-		codes.Add(L"\"[^\"]*\"");
+		List<U32String> codes;
+		codes.Add(U"/d+");
+		codes.Add(U"\"[^\"]*\"");
 		RegexLexer lexer(codes, {});
 
 		WString input = L"123\"456";

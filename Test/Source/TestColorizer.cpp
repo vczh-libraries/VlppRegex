@@ -4,10 +4,10 @@ TEST_FILE
 {
 	TEST_CASE(L"Test RegexLexerColorizer 1")
 	{
-		List<WString> codes;
-		codes.Add(L"/d+(./d+)?");
-		codes.Add(L"[a-zA-Z_]/w*");
-		codes.Add(L"\"[^\"]*\"");
+		List<U32String> codes;
+		codes.Add(U"/d+(./d+)?");
+		codes.Add(U"[a-zA-Z_]/w*");
+		codes.Add(U"\"[^\"]*\"");
 
 		vint colors[100];
 		RegexProc proc;
@@ -32,10 +32,10 @@ TEST_FILE
 
 	TEST_CASE(L"Test RegexLexerColorizer 2")
 	{
-		List<WString> codes;
-		codes.Add(L"/w+");
-		codes.Add(L"\"[^\"]*\"");
-		codes.Add(L"/s+");
+		List<U32String> codes;
+		codes.Add(U"/w+");
+		codes.Add(U"\"[^\"]*\"");
+		codes.Add(U"/s+");
 
 		vint colors[100];
 		RegexProc proc;

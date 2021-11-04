@@ -20,10 +20,10 @@ TEST_FILE
 
 	TEST_CASE(L"Test RegexLexerWalker")
 	{
-		List<WString> codes;
-		codes.Add(L"/d+(./d+)?");
-		codes.Add(L"[a-zA-Z_]/w*");
-		codes.Add(L"\"[^\"]*\"");
+		List<U32String> codes;
+		codes.Add(U"/d+(./d+)?");
+		codes.Add(U"[a-zA-Z_]/w*");
+		codes.Add(U"\"[^\"]*\"");
 		RegexLexer lexer(codes, {});
 		RegexLexerWalker walker = lexer.Walk();
 

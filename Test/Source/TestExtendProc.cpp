@@ -149,11 +149,11 @@ TEST_FILE
 
 	TEST_CASE(L"Test RegexLexer with ExtendProc")
 	{
-		List<WString> codes;
-		codes.Add(L"/d+");
-		codes.Add(L"\"[^\"]*\"");
-		codes.Add(L"/$\"=*/(");
-		codes.Add(L"/t+");
+		List<U32String> codes;
+		codes.Add(U"/d+");
+		codes.Add(U"\"[^\"]*\"");
+		codes.Add(U"/$\"=*/(");
+		codes.Add(U"/t+");
 
 		RegexProc proc;
 		proc.deleter = TestExtendProc_Deleter;
@@ -179,11 +179,11 @@ abcde
 
 	TEST_CASE(L"Test RegexLexerColorizer with ExtendProc")
 	{
-		List<WString> codes;
-		codes.Add(L"/d+");
-		codes.Add(L"\"[^\"]*\"");
-		codes.Add(L"/$\"=*/(");
-		codes.Add(L"/s+");
+		List<U32String> codes;
+		codes.Add(U"/d+");
+		codes.Add(U"\"[^\"]*\"");
+		codes.Add(U"/$\"=*/(");
+		codes.Add(U"/s+");
 
 		vint colors[100];
 		RegexProc proc;

@@ -112,7 +112,7 @@ RegexNode
 Regex Writer
 ***********************************************************************/
 
-		RegexNode rCapture(const WString& name, const RegexNode& node)
+		RegexNode rCapture(const U32String& name, const RegexNode& node)
 		{
 			CaptureExpression* target = new CaptureExpression;
 			target->name = name;
@@ -120,14 +120,14 @@ Regex Writer
 			return RegexNode(target);
 		}
 
-		RegexNode rUsing(const WString& name)
+		RegexNode rUsing(const U32String& name)
 		{
 			UsingExpression* target = new UsingExpression;
 			target->name = name;
 			return RegexNode(target);
 		}
 
-		RegexNode rMatch(const WString& name, vint index)
+		RegexNode rMatch(const U32String& name, vint index)
 		{
 			MatchExpression* target = new MatchExpression;
 			target->name = name;
@@ -152,7 +152,7 @@ Regex Writer
 			return RegexNode(new EndExpression);
 		}
 
-		RegexNode rC(wchar_t a, wchar_t b)
+		RegexNode rC(char32_t a, char32_t b)
 		{
 			if (!b)b = a;
 			CharSetExpression* target = new CharSetExpression;
@@ -163,22 +163,22 @@ Regex Writer
 
 		RegexNode r_d()
 		{
-			return rC(L'0', L'9');
+			return rC(U'0', U'9');
 		}
 
 		RegexNode r_l()
 		{
-			return rC(L'a', L'z') % rC(L'A', L'Z') % rC(L'_');
+			return rC(U'a', U'z') % rC(U'A', U'Z') % rC(U'_');
 		}
 
 		RegexNode r_w()
 		{
-			return rC(L'0', L'9') % rC(L'a', L'z') % rC(L'A', L'Z') % rC(L'_');
+			return rC(U'0', U'9') % rC(U'a', U'z') % rC(U'A', U'Z') % rC(U'_');
 		}
 
 		RegexNode rAnyChar()
 		{
-			return rC(1, 65535);
+			return rC(1, 0x10FFFF);
 		}
 	}
 }

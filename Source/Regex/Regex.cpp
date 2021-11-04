@@ -176,7 +176,7 @@ Regex
 			}
 		}
 		
-		Regex::Regex(const WString& code, bool preferPure)
+		Regex::Regex(const U32String& code, bool preferPure)
 		{
 			CharRange::List subsets;
 			RegexExpression::Ref regex = ParseRegexExpression(code);
@@ -897,18 +897,15 @@ RegexLexerColorizer
 RegexLexer
 ***********************************************************************/
 
-		RegexLexer::RegexLexer(const collections::IEnumerable<WString>& tokens, RegexProc _proc)
+		RegexLexer::RegexLexer(const collections::IEnumerable<U32String>& tokens, RegexProc _proc)
 			:proc(_proc)
 		{
 			// Build DFA for all tokens
 			List<Expression::Ref> expressions;
 			List<Automaton::Ref> dfas;
 			CharRange::List subsets;
-			Ptr<IEnumerator<WString>> enumerator = tokens.CreateEnumerator();
-			while (enumerator->Next())
+			for (auto&& code : tokens)
 			{
-				const WString& code = enumerator->Current();
-
 				RegexExpression::Ref regex = ParseRegexExpression(code);
 				Expression::Ref expression = regex->Merge();
 				expression->CollectCharSet(subsets);

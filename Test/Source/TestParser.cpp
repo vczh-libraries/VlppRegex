@@ -7,9 +7,9 @@ using namespace vl::regex_internal;
 
 TEST_FILE
 {
-	auto RegexAssert = [](const wchar_t* input, RegexNode node, bool pure)
+	auto RegexAssert = [](const char32_t* input, RegexNode node, bool pure)
 	{
-		TEST_CASE(input)
+		TEST_CASE(u32tow(input))
 		{
 			Expression::Ref exp = ParseExpression(input);
 			TEST_ASSERT(exp->IsEqual(node.expression.Obj()));
@@ -19,108 +19,108 @@ TEST_FILE
 
 	TEST_CATEGORY(L"Parser: charset")
 	{
-		RegexAssert(L"a", rC(L'a'), true);
-		RegexAssert(L"vczh", rC(L'v') + rC(L'c') + rC(L'z') + rC(L'h'), true);
+		RegexAssert(U"a", rC(U'a'), true);
+		RegexAssert(U"vczh", rC(U'v') + rC(U'c') + rC(U'z') + rC(U'h'), true);
 
-		RegexAssert(L"/d", r_d(), true);
-		RegexAssert(L"/l", r_l(), true);
-		RegexAssert(L"/w", r_w(), true);
-		RegexAssert(L"/D", !r_d(), true);
-		RegexAssert(L"/L", !r_l(), true);
-		RegexAssert(L"/W", !r_w(), true);
-		RegexAssert(L"/r", rC(L'\r'), true);
-		RegexAssert(L"/n", rC(L'\n'), true);
-		RegexAssert(L"/t", rC(L'\t'), true);
+		RegexAssert(U"/d", r_d(), true);
+		RegexAssert(U"/l", r_l(), true);
+		RegexAssert(U"/w", r_w(), true);
+		RegexAssert(U"/D", !r_d(), true);
+		RegexAssert(U"/L", !r_l(), true);
+		RegexAssert(U"/W", !r_w(), true);
+		RegexAssert(U"/r", rC(L'\r'), true);
+		RegexAssert(U"/n", rC(L'\n'), true);
+		RegexAssert(U"/t", rC(L'\t'), true);
 
-		RegexAssert(L"\\d", r_d(), true);
-		RegexAssert(L"\\l", r_l(), true);
-		RegexAssert(L"\\w", r_w(), true);
-		RegexAssert(L"\\D", !r_d(), true);
-		RegexAssert(L"\\L", !r_l(), true);
-		RegexAssert(L"\\W", !r_w(), true);
-		RegexAssert(L"\\r", rC(L'\r'), true);
-		RegexAssert(L"\\n", rC(L'\n'), true);
-		RegexAssert(L"\\t", rC(L'\t'), true);
+		RegexAssert(U"\\d", r_d(), true);
+		RegexAssert(U"\\l", r_l(), true);
+		RegexAssert(U"\\w", r_w(), true);
+		RegexAssert(U"\\D", !r_d(), true);
+		RegexAssert(U"\\L", !r_l(), true);
+		RegexAssert(U"\\W", !r_w(), true);
+		RegexAssert(U"\\r", rC(L'\r'), true);
+		RegexAssert(U"\\n", rC(L'\n'), true);
+		RegexAssert(U"\\t", rC(L'\t'), true);
 
-		RegexAssert(L"^", rBegin(), false);
-		RegexAssert(L"$", rEnd(), false);
-		RegexAssert(L"[abc]", rC(L'a') % rC(L'b') % rC(L'c'), true);
-		RegexAssert(L"[0-9]", r_d(), true);
-		RegexAssert(L"[a-zA-Z_]", r_l(), true);
-		RegexAssert(L"[a-zA-Z0-9_]", r_w(), true);
-		RegexAssert(L"[^0-9]", !r_d(), true);
-		RegexAssert(L"[^a-zA-Z_]", !r_l(), true);
-		RegexAssert(L"[^a-zA-Z0-9_]", !r_w(), true);
+		RegexAssert(U"^", rBegin(), false);
+		RegexAssert(U"$", rEnd(), false);
+		RegexAssert(U"[abc]", rC(U'a') % rC(U'b') % rC(U'c'), true);
+		RegexAssert(U"[0-9]", r_d(), true);
+		RegexAssert(U"[a-zA-Z_]", r_l(), true);
+		RegexAssert(U"[a-zA-Z0-9_]", r_w(), true);
+		RegexAssert(U"[^0-9]", !r_d(), true);
+		RegexAssert(U"[^a-zA-Z_]", !r_l(), true);
+		RegexAssert(U"[^a-zA-Z0-9_]", !r_w(), true);
 	});
 
 	TEST_CATEGORY(L"Parser: looping")
 	{
-		RegexAssert(L"/d+", r_d().Some(), true);
-		RegexAssert(L"/d*", r_d().Any(), true);
-		RegexAssert(L"/d?", r_d().Opt(), true);
-		RegexAssert(L"/d{3}", r_d().Loop(3, 3), true);
-		RegexAssert(L"/d{3,5}", r_d().Loop(3, 5), true);
-		RegexAssert(L"/d{4,}", r_d().AtLeast(4), true);
+		RegexAssert(U"/d+", r_d().Some(), true);
+		RegexAssert(U"/d*", r_d().Any(), true);
+		RegexAssert(U"/d?", r_d().Opt(), true);
+		RegexAssert(U"/d{3}", r_d().Loop(3, 3), true);
+		RegexAssert(U"/d{3,5}", r_d().Loop(3, 5), true);
+		RegexAssert(U"/d{4,}", r_d().AtLeast(4), true);
 
-		RegexAssert(L"\\d+", r_d().Some(), true);
-		RegexAssert(L"\\d*", r_d().Any(), true);
-		RegexAssert(L"\\d?", r_d().Opt(), true);
-		RegexAssert(L"\\d{3}", r_d().Loop(3, 3), true);
-		RegexAssert(L"\\d{3,5}", r_d().Loop(3, 5), true);
-		RegexAssert(L"\\d{4,}", r_d().AtLeast(4), true);
+		RegexAssert(U"\\d+", r_d().Some(), true);
+		RegexAssert(U"\\d*", r_d().Any(), true);
+		RegexAssert(U"\\d?", r_d().Opt(), true);
+		RegexAssert(U"\\d{3}", r_d().Loop(3, 3), true);
+		RegexAssert(U"\\d{3,5}", r_d().Loop(3, 5), true);
+		RegexAssert(U"\\d{4,}", r_d().AtLeast(4), true);
 	});
 
 	TEST_CATEGORY(L"Parser: function")
 	{
-		RegexAssert(L"(<name>/d+)", rCapture(L"name", r_d().Some()), true);
-		RegexAssert(L"(<&name>)", rUsing(L"name"), false);
-		RegexAssert(L"(<$name>)", rMatch(L"name"), false);
-		RegexAssert(L"(<$name;3>)", rMatch(L"name", 3), false);
-		RegexAssert(L"(<$3>)", rMatch(3), false);
-		RegexAssert(L"(=/d+)", +r_d().Some(), false);
-		RegexAssert(L"(!/d+)", -r_d().Some(), false);
-		RegexAssert(L"(=\\d+)", +r_d().Some(), false);
-		RegexAssert(L"(!\\d+)", -r_d().Some(), false);
+		RegexAssert(U"(<name>/d+)", rCapture(U"name", r_d().Some()), true);
+		RegexAssert(U"(<&name>)", rUsing(U"name"), false);
+		RegexAssert(U"(<$name>)", rMatch(U"name"), false);
+		RegexAssert(U"(<$name;3>)", rMatch(U"name", 3), false);
+		RegexAssert(U"(<$3>)", rMatch(3), false);
+		RegexAssert(U"(=/d+)", +r_d().Some(), false);
+		RegexAssert(U"(!/d+)", -r_d().Some(), false);
+		RegexAssert(U"(=\\d+)", +r_d().Some(), false);
+		RegexAssert(U"(!\\d+)", -r_d().Some(), false);
 	});
 
 	TEST_CATEGORY(L"Parser: complex string")
 	{
-		RegexAssert(L"a+(bc)*", rC(L'a').Some() + (rC(L'b') + rC(L'c')).Any(), true);
-		RegexAssert(L"(1+2)*(3+4)", (rC(L'1').Some() + rC(L'2')).Any() + (rC(L'3').Some() + rC(L'4')), true);
-		RegexAssert(L"[a-zA-Z_][a-zA-Z0-9_]*", r_l() + r_w().Any(), true);
-		RegexAssert(L"((<part>/d+).){3}(<part>/d+)", (rCapture(L"part", r_d().Some()) + rC(L'.')).Loop(3, 3) + rCapture(L"part", r_d().Some()), true);
-		RegexAssert(L"ab|ac", (rC(L'a') + rC(L'b')) | (rC(L'a') + rC(L'c')), true);
-		RegexAssert(L"a(b|c)", rC(L'a') + (rC(L'b') | rC(L'c')), true);
-		RegexAssert(L"/.*[/r/n/t]", rAnyChar().Any() + (rC(L'\r') % rC(L'\n') % rC(L'\t')), true);
+		RegexAssert(U"a+(bc)*", rC(U'a').Some() + (rC(U'b') + rC(U'c')).Any(), true);
+		RegexAssert(U"(1+2)*(3+4)", (rC(U'1').Some() + rC(U'2')).Any() + (rC(U'3').Some() + rC(U'4')), true);
+		RegexAssert(U"[a-zA-Z_][a-zA-Z0-9_]*", r_l() + r_w().Any(), true);
+		RegexAssert(U"((<part>/d+).){3}(<part>/d+)", (rCapture(U"part", r_d().Some()) + rC(U'.')).Loop(3, 3) + rCapture(U"part", r_d().Some()), true);
+		RegexAssert(U"ab|ac", (rC(U'a') + rC(U'b')) | (rC(U'a') + rC(U'c')), true);
+		RegexAssert(U"a(b|c)", rC(U'a') + (rC(U'b') | rC(U'c')), true);
+		RegexAssert(U"/.*[/r/n/t]", rAnyChar().Any() + (rC(L'\r') % rC(L'\n') % rC(L'\t')), true);
 
-		RegexAssert(L"((<part>\\d+).){3}(<part>\\d+)", (rCapture(L"part", r_d().Some()) + rC(L'.')).Loop(3, 3) + rCapture(L"part", r_d().Some()), true);
-		RegexAssert(L"\\.*[\\r\\n\\t]", rAnyChar().Any() + (rC(L'\r') % rC(L'\n') % rC(L'\t')), true);
+		RegexAssert(U"((<part>\\d+).){3}(<part>\\d+)", (rCapture(U"part", r_d().Some()) + rC(U'.')).Loop(3, 3) + rCapture(U"part", r_d().Some()), true);
+		RegexAssert(U"\\.*[\\r\\n\\t]", rAnyChar().Any() + (rC(L'\r') % rC(L'\n') % rC(L'\t')), true);
 	});
 
 	TEST_CASE(L"Parser: integration 1")
 	{
-		WString code = L"(<#part>/d+)(<#capture>(<section>(<&part>)))((<&capture>).){3}(<&capture>)";
+		U32String code = U"(<#part>/d+)(<#capture>(<section>(<&part>)))((<&capture>).){3}(<&capture>)";
 		RegexExpression::Ref regex = ParseRegexExpression(code);
 
 		Expression::Ref part = r_d().Some().expression;
-		Expression::Ref capture = rCapture(L"section", rUsing(L"part")).expression;
-		Expression::Ref main = ((rUsing(L"capture") + rC(L'.')).Loop(3, 3) + rUsing(L"capture")).expression;
+		Expression::Ref capture = rCapture(U"section", rUsing(U"part")).expression;
+		Expression::Ref main = ((rUsing(U"capture") + rC(U'.')).Loop(3, 3) + rUsing(U"capture")).expression;
 
 		TEST_ASSERT(regex->definitions.Count() == 2);
-		TEST_ASSERT(regex->definitions.Keys()[0] == L"capture");
-		TEST_ASSERT(regex->definitions.Keys()[1] == L"part");
+		TEST_ASSERT(regex->definitions.Keys()[0] == U"capture");
+		TEST_ASSERT(regex->definitions.Keys()[1] == U"part");
 
-		TEST_ASSERT(regex->definitions[L"part"]->IsEqual(part.Obj()));
-		TEST_ASSERT(regex->definitions[L"capture"]->IsEqual(capture.Obj()));
+		TEST_ASSERT(regex->definitions[U"part"]->IsEqual(part.Obj()));
+		TEST_ASSERT(regex->definitions[U"capture"]->IsEqual(capture.Obj()));
 		TEST_ASSERT(regex->expression->IsEqual(main.Obj()));
 	});
 
 	TEST_CASE(L"Parser: integration 2")
 	{
-		WString code = L"((<part>\\d+).){3}(<part>\\d+)";
+		U32String code = U"((<part>\\d+).){3}(<part>\\d+)";
 		RegexExpression::Ref regex = ParseRegexExpression(code);
 
-		Expression::Ref main = ((rCapture(L"part", r_d().Some()) + rC(L'.')).Loop(3, 3) + rCapture(L"part", r_d().Some())).expression;
+		Expression::Ref main = ((rCapture(U"part", r_d().Some()) + rC(U'.')).Loop(3, 3) + rCapture(U"part", r_d().Some())).expression;
 
 		TEST_ASSERT(regex->definitions.Count() == 0);
 		TEST_ASSERT(regex->expression->IsEqual(main.Obj()));

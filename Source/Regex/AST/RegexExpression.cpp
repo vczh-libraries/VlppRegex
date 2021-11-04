@@ -109,7 +109,7 @@ MergeAlgorithm
 					}
 					else
 					{
-						throw ArgumentException(L"Regular expression syntax error: Found reference loops in\"" + expression->name + L"\".", L"vl::regex_internal::RegexExpression::Merge", L"");
+						throw ArgumentException(L"Regular expression syntax error: Found reference loops in\"" + u32tow(expression->name) + L"\".", L"vl::regex_internal::RegexExpression::Merge", L"");
 					}
 				}
 				else if (target->regex->definitions.Keys().Contains(expression->name))
@@ -121,7 +121,7 @@ MergeAlgorithm
 				}
 				else
 				{
-					throw ArgumentException(L"Regular expression syntax error: Cannot find sub expression reference\"" + expression->name + L"\".", L"vl::regex_internal::RegexExpression::Merge", L"");
+					throw ArgumentException(L"Regular expression syntax error: Cannot find sub expression reference\"" + u32tow(expression->name) + L"\".", L"vl::regex_internal::RegexExpression::Merge", L"");
 				}
 			}
 		};

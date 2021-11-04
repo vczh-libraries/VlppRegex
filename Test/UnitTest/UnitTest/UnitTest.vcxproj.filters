@@ -84,9 +84,6 @@
     <ClCompile Include="..\..\..\Source\Regex\Automaton\RegexAutomaton.cpp">
       <Filter>Regex\Automaton</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Source\Regex\Automaton\RegexData.cpp">
-      <Filter>Regex\Automaton</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\Source\Regex\AST\RegexExpression_CanTreatAsPure.cpp">
       <Filter>Regex\AST</Filter>
     </ClCompile>
