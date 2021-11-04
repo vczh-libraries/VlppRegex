@@ -3,7 +3,6 @@
 ## 2.0
 
 - Ensure positions in results are in input character format.
-  - Test `Regex`
   - Test `RegexLexerWalker`
   - Test `RegexLexerColorizer`
 - Ensure there is no way to say a specific character in regex which does not fall in UTF-16 range (0 - 10FFFF).

@@ -280,6 +280,56 @@ TEST_FILE
 		}
 	});
 
+	TEST_CATEGORY(L"Unicode")
+	{
+		Regex_<char8_t> regex(u8"/./.(?[𣂕𣴑𣱳𦁚]+)/./.");
+
+		TEST_CASE(L"char8_t")
+		{
+			auto input = u8"𩰪㦲𦰗𠀼 𣂕𣴑𣱳𦁚 Vczh is genius!@我是天才";
+			auto matched = u8"𠀼 𣂕𣴑𣱳𦁚 V";
+			auto captured = u8"𣂕𣴑𣱳𦁚";
+			auto match = regex.Match(input);
+			TEST_ASSERT(match->Result().Start() == 11);
+			TEST_ASSERT(match->Result().Length() == 23);
+			TEST_ASSERT(match->Result().Value() == matched);
+			TEST_ASSERT(match->Captures().Count() == 1);
+			TEST_ASSERT(match->Captures()[0].Start() == 16);
+			TEST_ASSERT(match->Captures()[0].Length() == 16);
+			TEST_ASSERT(match->Captures()[0].Value() == captured);
+		});
+
+		TEST_CASE(L"char16_t")
+		{
+			auto input = u"𩰪㦲𦰗𠀼 𣂕𣴑𣱳𦁚 Vczh is genius!@我是天才";
+			auto matched = u"𠀼 𣂕𣴑𣱳𦁚 V";
+			auto captured = u"𣂕𣴑𣱳𦁚";
+			auto match = regex.Match(input);
+			TEST_ASSERT(match->Result().Start() == 5);
+			TEST_ASSERT(match->Result().Length() == 13);
+			TEST_ASSERT(match->Result().Value() == matched);
+			TEST_ASSERT(match->Captures().Count() == 1);
+			TEST_ASSERT(match->Captures()[0].Start() == 8);
+			TEST_ASSERT(match->Captures()[0].Length() == 8);
+			TEST_ASSERT(match->Captures()[0].Value() == captured);
+		});
+
+		TEST_CASE(L"char32_t")
+		{
+			auto input = U"𩰪㦲𦰗𠀼 𣂕𣴑𣱳𦁚 Vczh is genius!@我是天才";
+			auto matched = U"𠀼 𣂕𣴑𣱳𦁚 V";
+			auto captured = U"𣂕𣴑𣱳𦁚";
+			auto match = regex.Match(input);
+			TEST_ASSERT(match->Result().Start() == 3);
+			TEST_ASSERT(match->Result().Length() == 8);
+			TEST_ASSERT(match->Result().Value() == matched);
+			TEST_ASSERT(match->Captures().Count() == 1);
+			TEST_ASSERT(match->Captures()[0].Start() == 5);
+			TEST_ASSERT(match->Captures()[0].Length() == 4);
+			TEST_ASSERT(match->Captures()[0].Value() == captured);
+		});
+	});
+
 #ifdef NDEBUG
 	auto FindRows = [](WString* lines, int count, const WString& pattern)
 	{
