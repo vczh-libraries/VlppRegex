@@ -5,6 +5,7 @@ DEVELOPER: Zihan Chen(vczh)
 #include "Vlpp.h"
 
 #include "..\..\Source\Regex\Regex.h"
+#include "..\..\Source\Regex\RegexCharReader.h"
 #include "..\..\Source\Regex\Automaton\RegexData.h"
 #include "..\..\Source\Regex\Automaton\RegexAutomaton.h"
 #include "..\..\Source\Regex\AST\RegexExpression.h"
