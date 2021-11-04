@@ -36,10 +36,10 @@ Data Structure
 			vint										length = 0;
 
 		public:
-			RegexString() = default;
-			RegexString(vint _start) : start(_start) {}
+			RegexString_() = default;
+			RegexString_(vint _start) : start(_start) {}
 
-			RegexString(const ObjectString<T>& _string, vint _start, vint _length)
+			RegexString_(const ObjectString<T>& _string, vint _start, vint _length)
 				: start(_start)
 				, length(_length > 0 ? _length : 0)
 			{
@@ -59,32 +59,34 @@ Data Structure
 			/// <returns>The sub string.</returns>
 			const ObjectString<T>& Value() const { return value; }
 
-			bool operator==(const RegexString<T>& string) const
+			bool operator==(const RegexString_<T>& string) const
 			{
 				return start == string.start && length == string.length && value == string.value;
 			}
 		};
 
 		/// <summary>A match produces by a <see cref="Regex"/>.</summary>
-		class RegexMatch : public Object
+		/// <typeparam name="T>The character type</typeparam>
+		template<typename T>
+		class RegexMatch_ : public Object
 		{
 			friend class Regex;
 		public:
-			typedef Ptr<RegexMatch>										Ref;
-			typedef collections::List<Ref>								List;
-			typedef collections::List<RegexString>						CaptureList;
-			typedef collections::Group<U32String, RegexString>			CaptureGroup;
+			typedef Ptr<RegexMatch_<T>>										Ref;
+			typedef collections::List<Ref>									List;
+			typedef collections::List<RegexString_<T>>						CaptureList;
+			typedef collections::Group<ObjectString<T>, RegexString_<T>>	CaptureGroup;
 		protected:
-			collections::List<RegexString>				captures;
-			collections::Group<U32String, RegexString>	groups;
-			bool										success;
-			RegexString									result;
+			collections::List<RegexString_<T>>								captures;
+			collections::Group<vint, RegexString_<T>>						groups;
+			bool															success;
+			RegexString_<T>													result;
 
-			RegexMatch(const U32String& _string, regex_internal::PureResult* _result);
-			RegexMatch(const U32String& _string, regex_internal::RichResult* _result, regex_internal::RichInterpretor* _rich);
-			RegexMatch(const RegexString& _result);
+			RegexMatch_(const ObjectString<T>& _string, regex_internal::PureResult* _result);
+			RegexMatch_(const ObjectString<T>& _string, regex_internal::RichResult* _result);
+			RegexMatch_(const RegexString_<T>& _result);
 		public:
-			NOT_COPYABLE(RegexMatch);
+			NOT_COPYABLE(RegexMatch_<T>);
 			
 			/// <summary>
 			/// Test if this match is a succeeded match or a failed match.
@@ -92,10 +94,10 @@ Data Structure
 			/// In other cases, failed matches are either not included in the result.
 			/// </summary>
 			/// <returns>Returns true if this match is a succeeded match.</returns>
-			bool										Success()const;
+			bool															Success()const;
 			/// <summary>Get the matched sub string.</summary>
 			/// <returns>The matched sub string.</returns>
-			const RegexString&							Result()const;
+			const RegexString_<T>&											Result()const;
 			/// <summary>Get all sub strings that are captured anonymously.</summary>
 			/// <returns>All sub strings that are captured anonymously.</returns>
 			/// <example><![CDATA[
@@ -109,7 +111,7 @@ Data Structure
 			///     }
 			/// }
 			/// ]]></example>
-			const CaptureList&							Captures()const;
+			const CaptureList&												Captures()const;
 			/// <summary>Get all sub strings that are captured by named groups.</summary>
 			/// <returns>All sub strings that are captured by named groups.</returns>
 			/// <example><![CDATA[
@@ -117,13 +119,13 @@ Data Structure
 			/// {
 			///     Regex regex(L"^/.*?((<lang>C/S+)(/.*?))+$");
 			///     auto match = regex.MatchHead(L"C++ and C# are my favorite programing languages");
-			///     for (auto capture : match->Groups().Get(L"lang"))
+			///     for (auto capture : match->Groups().Get(regex.CaptureNames().IndexOf(L"lang")))
 			///     {
 			///         Console::WriteLine(capture.Value());
 			///     }
 			/// }
 			/// ]]></example>
-			const CaptureGroup&							Groups()const;
+			const CaptureGroup&												Groups()const;
 		};
 
 /***********************************************************************
@@ -239,6 +241,10 @@ Regex
 			/// <param name="preferPure">Set to true to use DFA if possible.</param>
 			Regex(const U32String& code, bool preferPure = true);
 			~Regex();
+
+			/// <summary>Get all names of named captures</summary>
+			/// <returns>All names of named captures.</summary>
+			const List<U32String>&						CaptureNames()const;
 
 			/// <summary>Test is a DFA used to match a string.</summary>
 			/// <returns>Returns true if a DFA is used.</returns>
@@ -1057,6 +1063,12 @@ Template Instantiation
 		extern template class RegexString_<char16_t>;
 		extern template class RegexString_<char32_t>;
 		using RegexString = RegexString_<wchar_t>;
+
+		extern template class RegexMatch_<wchar_t>;
+		extern template class RegexMatch_<char8_t>;
+		extern template class RegexMatch_<char16_t>;
+		extern template class RegexMatch_<char32_t>;
+		using RegexMatch = RegexMatch_<wchar_t>;
 	}
 }
 

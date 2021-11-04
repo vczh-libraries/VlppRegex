@@ -19,13 +19,15 @@ namespace vl
 RegexMatch
 ***********************************************************************/
 		
-		RegexMatch::RegexMatch(const U32String& _string, PureResult* _result)
+		template<typename T>
+		RegexMatch_<T>::RegexMatch_(const ObjectString<T>& _string, PureResult* _result)
 			:success(true)
 			, result(_string, _result->start, _result->length)
 		{
 		}
 
-		RegexMatch::RegexMatch(const U32String& _string, RichResult* _result, RichInterpretor* _rich)
+		template<typename T>
+		RegexMatch_<T>::RegexMatch_(const ObjectString<T>& _string, RichResult* _result)
 			: success(true)
 			, result(_string, _result->start, _result->length)
 		{
@@ -38,33 +40,38 @@ RegexMatch
 				}
 				else
 				{
-					groups.Add(_rich->CaptureNames().Get(capture.capture), RegexString(_string, capture.start, capture.length));
+					groups.Add(capture.capture, RegexString(_string, capture.start, capture.length));
 				}
 			}
 		}
 
-		RegexMatch::RegexMatch(const RegexString& _result)
+		template<typename T>
+		RegexMatch_<T>::RegexMatch_(const RegexString_<T>& _result)
 			:success(false)
 			, result(_result)
 		{
 		}
-			
-		bool RegexMatch::Success()const
+
+		template<typename T>
+		bool RegexMatch_<T>::Success()const
 		{
 			return success;
 		}
 
-		const RegexString& RegexMatch::Result()const
+		template<typename T>
+		const RegexString_<T>& RegexMatch_<T>::Result()const
 		{
 			return result;
 		}
 
-		const RegexMatch::CaptureList& RegexMatch::Captures()const
+		template<typename T>
+		const RegexMatch_<T>::CaptureList& RegexMatch_<T>::Captures()const
 		{
 			return captures;
 		}
 
-		const RegexMatch::CaptureGroup& RegexMatch::Groups()const
+		template<typename T>
+		const RegexMatch_<T>::CaptureGroup& RegexMatch_<T>::Groups()const
 		{
 			return groups;
 		}
