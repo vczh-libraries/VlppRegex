@@ -384,10 +384,10 @@ RegexTokens_<T>
 ***********************************************************************/
 
 		template<typename T>
-		class RegexTokenEnumerator : public Object, public IEnumerator<RegexToken>
+		class RegexTokenEnumerator : public Object, public IEnumerator<RegexToken_<T>>
 		{
 		protected:
-			RegexToken				token;
+			RegexToken_<T>			token;
 			vint					index = -1;
 
 			PureInterpretor*		pure;
@@ -400,7 +400,7 @@ RegexTokens_<T>
 			vint					rowStart = 0;
 			vint					columnStart = 0;
 			bool					cacheAvailable = false;
-			RegexToken				cacheToken;
+			RegexToken_<T>			cacheToken;
 
 		public:
 			RegexTokenEnumerator(const RegexTokenEnumerator& enumerator)
@@ -430,12 +430,12 @@ RegexTokens_<T>
 			{
 			}
 
-			IEnumerator<RegexToken>* Clone()const
+			IEnumerator<RegexToken_<T>>* Clone()const
 			{
 				return new RegexTokenEnumerator<T>(*this);
 			}
 
-			const RegexToken& Current()const
+			const RegexToken_<T>& Current()const
 			{
 				return token;
 			}
@@ -567,7 +567,7 @@ RegexTokens_<T>
 				cacheAvailable = false;
 			}
 
-			void ReadToEnd(List<RegexToken>& tokens, bool(*discard)(vint))
+			void ReadToEnd(List<RegexToken_<T>>& tokens, bool(*discard)(vint))
 			{
 				while (Next())
 				{
@@ -913,11 +913,40 @@ RegexLexerColorizer_<T>
 		}
 
 /***********************************************************************
-RegexLexer
+RegexLexerBase_
 ***********************************************************************/
 
-		RegexLexer::RegexLexer(const collections::IEnumerable<U32String>& tokens, RegexProc _proc)
-			:proc(_proc)
+		RegexLexerBase_::~RegexLexerBase_()
+		{
+			if (pure) delete pure;
+		}
+
+		template<typename T>
+		RegexTokens_<T> RegexLexerBase_::Parse(const ObjectString<T>& code, RegexProc_<T> proc, vint codeIndex)const
+		{
+			pure->PrepareForRelatedFinalStateTable();
+			return RegexTokens_<T>(pure, stateTokens, code, codeIndex, proc);
+		}
+
+		template<typename T>
+		RegexLexerWalker_<T> RegexLexerBase_::Walk()const
+		{
+			pure->PrepareForRelatedFinalStateTable();
+			return RegexLexerWalker_<T>(pure, stateTokens);
+		}
+
+		template<typename T>
+		RegexLexerColorizer_<T> RegexLexerBase_::Colorize(RegexProc_<T> proc)const
+		{
+			return RegexLexerColorizer_<T>(Walk<T>(), proc);
+		}
+
+/***********************************************************************
+RegexLexer_<T>
+***********************************************************************/
+
+		template<typename T>
+		RegexLexer_<T>::RegexLexer_(const collections::IEnumerable<ObjectString<T>>& tokens)
 		{
 			// Build DFA for all tokens
 			List<Expression::Ref> expressions;
@@ -925,7 +954,7 @@ RegexLexer
 			CharRange::List subsets;
 			for (auto&& code : tokens)
 			{
-				RegexExpression::Ref regex = ParseRegexExpression(code);
+				RegexExpression::Ref regex = ParseRegexExpression(Regex_<T>::ToU32(code));
 				Expression::Ref expression = regex->Merge();
 				expression->CollectCharSet(subsets);
 				expressions.Add(expression);
@@ -1006,28 +1035,6 @@ RegexLexer
 			}
 		}
 
-		RegexLexer::~RegexLexer()
-		{
-			if (pure) delete pure;
-		}
-
-		RegexTokens RegexLexer::Parse(const U32String& code, vint codeIndex)const
-		{
-			pure->PrepareForRelatedFinalStateTable();
-			return RegexTokens(pure, stateTokens, code, codeIndex, proc);
-		}
-
-		RegexLexerWalker RegexLexer::Walk()const
-		{
-			pure->PrepareForRelatedFinalStateTable();
-			return RegexLexerWalker(pure, stateTokens);
-		}
-
-		RegexLexerColorizer RegexLexer::Colorize()const
-		{
-			return RegexLexerColorizer(Walk(), proc);
-		}
-
 /***********************************************************************
 Template Instantiation
 ***********************************************************************/
@@ -1093,5 +1100,26 @@ Template Instantiation
 		template class RegexLexerColorizer_<char8_t>;
 		template class RegexLexerColorizer_<char16_t>;
 		template class RegexLexerColorizer_<char32_t>;
+
+		template RegexTokens_<wchar_t>				RegexLexerBase_::Parse		(const ObjectString<wchar_t>& code, RegexProc_<wchar_t> _proc, vint codeIndex)const;
+		template RegexLexerWalker_<wchar_t>			RegexLexerBase_::Walk		()const;
+		template RegexLexerColorizer_<wchar_t>		RegexLexerBase_::Colorize	(RegexProc_<wchar_t> _proc)const;
+
+		template RegexTokens_<char8_t>				RegexLexerBase_::Parse		(const ObjectString<char8_t>& code, RegexProc_<char8_t> _proc, vint codeIndex)const;
+		template RegexLexerWalker_<char8_t>			RegexLexerBase_::Walk		()const;
+		template RegexLexerColorizer_<char8_t>		RegexLexerBase_::Colorize	(RegexProc_<char8_t> _proc)const;
+
+		template RegexTokens_<char16_t>				RegexLexerBase_::Parse		(const ObjectString<char16_t>& code, RegexProc_<char16_t> _proc, vint codeIndex)const;
+		template RegexLexerWalker_<char16_t>		RegexLexerBase_::Walk		()const;
+		template RegexLexerColorizer_<char16_t>		RegexLexerBase_::Colorize	(RegexProc_<char16_t> _proc)const;
+
+		template RegexTokens_<char32_t>				RegexLexerBase_::Parse		(const ObjectString<char32_t>& code, RegexProc_<char32_t> _proc, vint codeIndex)const;
+		template RegexLexerWalker_<char32_t>		RegexLexerBase_::Walk		()const;
+		template RegexLexerColorizer_<char32_t>		RegexLexerBase_::Colorize	(RegexProc_<char32_t> _proc)const;
+
+		template class RegexLexer_<wchar_t>;
+		template class RegexLexer_<char8_t>;
+		template class RegexLexer_<char16_t>;
+		template class RegexLexer_<char32_t>;
 	}
 }

@@ -21,6 +21,10 @@ namespace vl
 	namespace regex
 	{
 		class RegexBase_;
+		class RegexLexerBase_;
+
+		template<typename T>
+		class RegexLexer_;
 
 /***********************************************************************
 Data Structure
@@ -133,7 +137,7 @@ Data Structure
 Regex
 ***********************************************************************/
 
-		class RegexBase_ : public Object
+		class RegexBase_ abstract : public Object
 		{
 		protected:
 			regex_internal::PureInterpretor*			pure = nullptr;
@@ -369,6 +373,8 @@ Regex
 		template<typename T>
 		class Regex_ : public RegexBase_
 		{
+			template<typename T2>
+			friend class RegexLexer_;
 		protected:
 			collections::List<ObjectString<T>>			captureNames;
 
@@ -711,11 +717,11 @@ Tokenizer
 		template<typename T>
 		class RegexTokens_ : public collections::EnumerableBase<RegexToken_<T>>
 		{
-			friend class RegexLexer;
+			friend class RegexLexerBase_;
 		protected:
 			regex_internal::PureInterpretor*			pure;
 			const collections::Array<vint>&				stateTokens;
-			U32String									code;
+			ObjectString<T>								code;
 			vint										codeIndex;
 			RegexProc_<T>								proc;
 			
@@ -827,7 +833,7 @@ RegexLexerWalker
 		template<typename T>
 		class RegexLexerWalker_ : public Object
 		{
-			friend class RegexLexer;
+			friend class RegexLexerBase_;
 		protected:
 			regex_internal::PureInterpretor*			pure;
 			const collections::Array<vint>&				stateTokens;
@@ -1037,7 +1043,7 @@ RegexLexerColorizer
 		template<typename T>
 		class RegexLexerColorizer_ : public Object
 		{
-			friend class RegexLexer;
+			friend class RegexLexerBase_;
 		public:
 			struct InternalState
 			{
@@ -1097,6 +1103,56 @@ RegexLexerColorizer
 		};
 
 /***********************************************************************
+RegexLexer
+***********************************************************************/
+
+		class RegexLexerBase_ abstract : public Object
+		{
+		protected:
+			regex_internal::PureInterpretor*			pure = nullptr;
+			collections::Array<vint>					ids;
+			collections::Array<vint>					stateTokens;
+
+		public:
+			~RegexLexerBase_();
+
+			/// <summary>Tokenize an input text.</summary>
+			/// <typeparam name="T>The character type of the text to parse.</typeparam>
+			/// <returns>All tokens, including recognized tokens or unrecognized tokens. For unrecognized tokens, [F:vl.regex.RegexToken.token] will be -1.</returns>
+			/// <param name="code">The text to tokenize.</param>
+			/// <param name="proc">Configuration of all callbacks.</param>
+			/// <param name="codeIndex">Extra information that will be copied to [F:vl.regex.RegexToken.codeIndex].</param>
+			/// <remarks>Callbacks in <see cref="RegexProc"/> will be called when iterating through tokens, which is from the second argument of the constructor of <see cref="RegexLexer"/>.</remarks>
+			template<typename T>
+			RegexTokens_<T>								Parse(const ObjectString<T>& code, RegexProc_<T> proc, vint codeIndex=-1)const;
+			/// <summary>Create a equivalence walker from this lexical analyzer. A walker enable you to walk throught characters one by one,</summary>
+			/// <typeparam name="TInput>The character type of the text to parse.</typeparam>
+			/// <returns>The walker.</returns>
+			template<typename T>
+			RegexLexerWalker_<T>						Walk()const;
+			/// <summary>Create a equivalence colorizer from this lexical analyzer.</summary>
+			/// <typeparam name="TInput>The character type of the text to parse.</typeparam>
+			/// <returns>The colorizer.</returns>
+			/// <param name="proc">Configuration of all callbacks.</param>
+			template<typename T>
+			RegexLexerColorizer_<T>						Colorize(RegexProc_<T> proc)const;
+		};
+
+		/// <summary>Lexical analyzer.</summary>
+		/// <typeparam name="T>The character type of the regular expression itself.</typeparam>
+		template<typename T>
+		class RegexLexer_ : public RegexLexerBase_
+		{
+		public:
+			NOT_COPYABLE(RegexLexer_<T>);
+			/// <summary>Create a lexical analyzer by a set of regular expressions. [F:vl.regex.RegexToken.token] will be the index of the matched regular expression in the first argument.</summary>
+			/// <param name="tokens">ALl regular expression, each one represent a kind of tokens.</param>
+			
+			RegexLexer_(const collections::IEnumerable<ObjectString<T>>& tokens);
+			~RegexLexer_() = default;
+		};
+
+/***********************************************************************
 Template Instantiation
 ***********************************************************************/
 
@@ -1110,37 +1166,37 @@ Template Instantiation
 		extern template class RegexMatch_<char16_t>;
 		extern template class RegexMatch_<char32_t>;
 
-		extern template RegexMatch_<wchar_t>::Ref	RegexBase_::MatchHead<wchar_t>	(const ObjectString<wchar_t>& text)const;
-		extern template RegexMatch_<wchar_t>::Ref	RegexBase_::Match<wchar_t>		(const ObjectString<wchar_t>& text)const;
-		extern template bool						RegexBase_::TestHead<wchar_t>	(const ObjectString<wchar_t>& text)const;
-		extern template bool						RegexBase_::Test<wchar_t>		(const ObjectString<wchar_t>& text)const;
-		extern template void						RegexBase_::Search<wchar_t>		(const ObjectString<wchar_t>& text, RegexMatch_<wchar_t>::List& matches)const;
-		extern template void						RegexBase_::Split<wchar_t>		(const ObjectString<wchar_t>& text, bool keepEmptyMatch, RegexMatch_<wchar_t>::List& matches)const;
-		extern template void						RegexBase_::Cut<wchar_t>		(const ObjectString<wchar_t>& text, bool keepEmptyMatch, RegexMatch_<wchar_t>::List& matches)const;
+		extern template RegexMatch_<wchar_t>::Ref			RegexBase_::MatchHead<wchar_t>	(const ObjectString<wchar_t>& text)const;
+		extern template RegexMatch_<wchar_t>::Ref			RegexBase_::Match<wchar_t>		(const ObjectString<wchar_t>& text)const;
+		extern template bool								RegexBase_::TestHead<wchar_t>	(const ObjectString<wchar_t>& text)const;
+		extern template bool								RegexBase_::Test<wchar_t>		(const ObjectString<wchar_t>& text)const;
+		extern template void								RegexBase_::Search<wchar_t>		(const ObjectString<wchar_t>& text, RegexMatch_<wchar_t>::List& matches)const;
+		extern template void								RegexBase_::Split<wchar_t>		(const ObjectString<wchar_t>& text, bool keepEmptyMatch, RegexMatch_<wchar_t>::List& matches)const;
+		extern template void								RegexBase_::Cut<wchar_t>		(const ObjectString<wchar_t>& text, bool keepEmptyMatch, RegexMatch_<wchar_t>::List& matches)const;
 
-		extern template RegexMatch_<char8_t>::Ref	RegexBase_::MatchHead<char8_t>	(const ObjectString<char8_t>& text)const;
-		extern template RegexMatch_<char8_t>::Ref	RegexBase_::Match<char8_t>		(const ObjectString<char8_t>& text)const;
-		extern template bool						RegexBase_::TestHead<char8_t>	(const ObjectString<char8_t>& text)const;
-		extern template bool						RegexBase_::Test<char8_t>		(const ObjectString<char8_t>& text)const;
-		extern template void						RegexBase_::Search<char8_t>		(const ObjectString<char8_t>& text, RegexMatch_<char8_t>::List& matches)const;
-		extern template void						RegexBase_::Split<char8_t>		(const ObjectString<char8_t>& text, bool keepEmptyMatch, RegexMatch_<char8_t>::List& matches)const;
-		extern template void						RegexBase_::Cut<char8_t>		(const ObjectString<char8_t>& text, bool keepEmptyMatch, RegexMatch_<char8_t>::List& matches)const;
+		extern template RegexMatch_<char8_t>::Ref			RegexBase_::MatchHead<char8_t>	(const ObjectString<char8_t>& text)const;
+		extern template RegexMatch_<char8_t>::Ref			RegexBase_::Match<char8_t>		(const ObjectString<char8_t>& text)const;
+		extern template bool								RegexBase_::TestHead<char8_t>	(const ObjectString<char8_t>& text)const;
+		extern template bool								RegexBase_::Test<char8_t>		(const ObjectString<char8_t>& text)const;
+		extern template void								RegexBase_::Search<char8_t>		(const ObjectString<char8_t>& text, RegexMatch_<char8_t>::List& matches)const;
+		extern template void								RegexBase_::Split<char8_t>		(const ObjectString<char8_t>& text, bool keepEmptyMatch, RegexMatch_<char8_t>::List& matches)const;
+		extern template void								RegexBase_::Cut<char8_t>		(const ObjectString<char8_t>& text, bool keepEmptyMatch, RegexMatch_<char8_t>::List& matches)const;
 
-		extern template RegexMatch_<char16_t>::Ref	RegexBase_::MatchHead<char16_t>	(const ObjectString<char16_t>& text)const;
-		extern template RegexMatch_<char16_t>::Ref	RegexBase_::Match<char16_t>		(const ObjectString<char16_t>& text)const;
-		extern template bool						RegexBase_::TestHead<char16_t>	(const ObjectString<char16_t>& text)const;
-		extern template bool						RegexBase_::Test<char16_t>		(const ObjectString<char16_t>& text)const;
-		extern template void						RegexBase_::Search<char16_t>	(const ObjectString<char16_t>& text, RegexMatch_<char16_t>::List& matches)const;
-		extern template void						RegexBase_::Split<char16_t>		(const ObjectString<char16_t>& text, bool keepEmptyMatch, RegexMatch_<char16_t>::List& matches)const;
-		extern template void						RegexBase_::Cut<char16_t>		(const ObjectString<char16_t>& text, bool keepEmptyMatch, RegexMatch_<char16_t>::List& matches)const;
+		extern template RegexMatch_<char16_t>::Ref			RegexBase_::MatchHead<char16_t>	(const ObjectString<char16_t>& text)const;
+		extern template RegexMatch_<char16_t>::Ref			RegexBase_::Match<char16_t>		(const ObjectString<char16_t>& text)const;
+		extern template bool								RegexBase_::TestHead<char16_t>	(const ObjectString<char16_t>& text)const;
+		extern template bool								RegexBase_::Test<char16_t>		(const ObjectString<char16_t>& text)const;
+		extern template void								RegexBase_::Search<char16_t>	(const ObjectString<char16_t>& text, RegexMatch_<char16_t>::List& matches)const;
+		extern template void								RegexBase_::Split<char16_t>		(const ObjectString<char16_t>& text, bool keepEmptyMatch, RegexMatch_<char16_t>::List& matches)const;
+		extern template void								RegexBase_::Cut<char16_t>		(const ObjectString<char16_t>& text, bool keepEmptyMatch, RegexMatch_<char16_t>::List& matches)const;
 
-		extern template RegexMatch_<char32_t>::Ref	RegexBase_::MatchHead<char32_t>	(const ObjectString<char32_t>& text)const;
-		extern template RegexMatch_<char32_t>::Ref	RegexBase_::Match<char32_t>		(const ObjectString<char32_t>& text)const;
-		extern template bool						RegexBase_::TestHead<char32_t>	(const ObjectString<char32_t>& text)const;
-		extern template bool						RegexBase_::Test<char32_t>		(const ObjectString<char32_t>& text)const;
-		extern template void						RegexBase_::Search<char32_t>	(const ObjectString<char32_t>& text, RegexMatch_<char32_t>::List& matches)const;
-		extern template void						RegexBase_::Split<char32_t>		(const ObjectString<char32_t>& text, bool keepEmptyMatch, RegexMatch_<char32_t>::List& matches)const;
-		extern template void						RegexBase_::Cut<char32_t>		(const ObjectString<char32_t>& text, bool keepEmptyMatch, RegexMatch_<char32_t>::List& matches)const;
+		extern template RegexMatch_<char32_t>::Ref			RegexBase_::MatchHead<char32_t>	(const ObjectString<char32_t>& text)const;
+		extern template RegexMatch_<char32_t>::Ref			RegexBase_::Match<char32_t>		(const ObjectString<char32_t>& text)const;
+		extern template bool								RegexBase_::TestHead<char32_t>	(const ObjectString<char32_t>& text)const;
+		extern template bool								RegexBase_::Test<char32_t>		(const ObjectString<char32_t>& text)const;
+		extern template void								RegexBase_::Search<char32_t>	(const ObjectString<char32_t>& text, RegexMatch_<char32_t>::List& matches)const;
+		extern template void								RegexBase_::Split<char32_t>		(const ObjectString<char32_t>& text, bool keepEmptyMatch, RegexMatch_<char32_t>::List& matches)const;
+		extern template void								RegexBase_::Cut<char32_t>		(const ObjectString<char32_t>& text, bool keepEmptyMatch, RegexMatch_<char32_t>::List& matches)const;
 
 		extern template class Regex_<wchar_t>;
 		extern template class Regex_<char8_t>;
@@ -1161,6 +1217,27 @@ Template Instantiation
 		extern template class RegexLexerColorizer_<char8_t>;
 		extern template class RegexLexerColorizer_<char16_t>;
 		extern template class RegexLexerColorizer_<char32_t>;
+
+		extern template RegexTokens_<wchar_t>				RegexLexerBase_::Parse			(const ObjectString<wchar_t>& code, RegexProc_<wchar_t> _proc, vint codeIndex)const;
+		extern template RegexLexerWalker_<wchar_t>			RegexLexerBase_::Walk			()const;
+		extern template RegexLexerColorizer_<wchar_t>		RegexLexerBase_::Colorize		(RegexProc_<wchar_t> _proc)const;
+
+		extern template RegexTokens_<char8_t>				RegexLexerBase_::Parse			(const ObjectString<char8_t>& code, RegexProc_<char8_t> _proc, vint codeIndex)const;
+		extern template RegexLexerWalker_<char8_t>			RegexLexerBase_::Walk			()const;
+		extern template RegexLexerColorizer_<char8_t>		RegexLexerBase_::Colorize		(RegexProc_<char8_t> _proc)const;
+
+		extern template RegexTokens_<char16_t>				RegexLexerBase_::Parse			(const ObjectString<char16_t>& code, RegexProc_<char16_t> _proc, vint codeIndex)const;
+		extern template RegexLexerWalker_<char16_t>			RegexLexerBase_::Walk			()const;
+		extern template RegexLexerColorizer_<char16_t>		RegexLexerBase_::Colorize		(RegexProc_<char16_t> _proc)const;
+
+		extern template RegexTokens_<char32_t>				RegexLexerBase_::Parse			(const ObjectString<char32_t>& code, RegexProc_<char32_t> _proc, vint codeIndex)const;
+		extern template RegexLexerWalker_<char32_t>			RegexLexerBase_::Walk			()const;
+		extern template RegexLexerColorizer_<char32_t>		RegexLexerBase_::Colorize		(RegexProc_<char32_t> _proc)const;
+
+		extern template class RegexLexer_<wchar_t>;
+		extern template class RegexLexer_<char8_t>;
+		extern template class RegexLexer_<char16_t>;
+		extern template class RegexLexer_<char32_t>;
 		
 		using RegexString = RegexString_<wchar_t>;
 		using RegexMatch = RegexMatch_<wchar_t>;
@@ -1170,41 +1247,7 @@ Template Instantiation
 		using RegexTokens = RegexTokens_<wchar_t>;
 		using RegexLexerWalker = RegexLexerWalker_<wchar_t>;
 		using RegexLexerColorizer = RegexLexerColorizer_<wchar_t>;
-
-/***********************************************************************
-RegexLexer
-***********************************************************************/
-
-		/// <summary>Lexical analyzer.</summary>
-		class RegexLexer : public Object
-		{
-		protected:
-			regex_internal::PureInterpretor*			pure = nullptr;
-			collections::Array<vint>					ids;
-			collections::Array<vint>					stateTokens;
-			RegexProc									proc;
-
-		public:
-			NOT_COPYABLE(RegexLexer);
-			/// <summary>Create a lexical analyzer by a set of regular expressions. [F:vl.regex.RegexToken.token] will be the index of the matched regular expression in the first argument.</summary>
-			/// <param name="tokens">ALl regular expression, each one represent a kind of tokens.</param>
-			/// <param name="_proc">Configuration of all callbacks.</param>
-			RegexLexer(const collections::IEnumerable<U32String>& tokens, RegexProc _proc);
-			~RegexLexer();
-
-			/// <summary>Tokenize an input text.</summary>
-			/// <returns>All tokens, including recognized tokens or unrecognized tokens. For unrecognized tokens, [F:vl.regex.RegexToken.token] will be -1.</returns>
-			/// <param name="code">The text to tokenize.</param>
-			/// <param name="codeIndex">Extra information that will be copied to [F:vl.regex.RegexToken.codeIndex].</param>
-			/// <remarks>Callbacks in <see cref="RegexProc"/> will be called when iterating through tokens, which is from the second argument of the constructor of <see cref="RegexLexer"/>.</remarks>
-			RegexTokens									Parse(const U32String& code, vint codeIndex=-1)const;
-			/// <summary>Create a equivalence walker from this lexical analyzer. A walker enable you to walk throught characters one by one,</summary>
-			/// <returns>The walker.</returns>
-			RegexLexerWalker							Walk()const;
-			/// <summary>Create a equivalence colorizer from this lexical analyzer.</summary>
-			/// <returns>The colorizer.</returns>
-			RegexLexerColorizer							Colorize()const;
-		};
+		using RegexLexer = RegexLexer_<wchar_t>;
 	}
 }
 
