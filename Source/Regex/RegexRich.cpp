@@ -4,6 +4,7 @@ Licensed under https://github.com/vczh-libraries/License
 ***********************************************************************/
 
 #include "RegexRich.h"
+#include "RegexCharReader.h"
 
 namespace vl
 {
@@ -160,7 +161,8 @@ RichInterpretor
 			delete[] datas;
 		}
 
-		bool RichInterpretor::MatchHead(const char32_t* input, const char32_t* start, RichResult& result)
+		template<typename TChar>
+		bool RichInterpretor::MatchHead(const TChar* input, const TChar* start, RichResult& result)
 		{
 			List<StateSaver> stateSavers;
 			List<ExtensionSaver> extensionSavers;
@@ -428,16 +430,16 @@ RichInterpretor
 			}
 		}
 
-		bool RichInterpretor::Match(const char32_t* input, const char32_t* start, RichResult& result)
+		template<typename TChar>
+		bool RichInterpretor::Match(const TChar* input, const TChar* start, RichResult& result)
 		{
-			const char32_t* read = input;
-			while (*read)
+			CharReader<TChar> reader(input);
+			while (reader.Read())
 			{
-				if (MatchHead(read, start, result))
+				if (MatchHead(reader.Reading(), start, result))
 				{
 					return true;
 				}
-				read++;
 			}
 			return false;
 		}
@@ -446,5 +448,15 @@ RichInterpretor
 		{
 			return dfa->captureNames;
 		}
+
+		template bool			RichInterpretor::MatchHead<wchar_t>(const wchar_t* input, const wchar_t* start, RichResult& result);
+		template bool			RichInterpretor::MatchHead<char8_t>(const char8_t* input, const char8_t* start, RichResult& result);
+		template bool			RichInterpretor::MatchHead<char16_t>(const char16_t* input, const char16_t* start, RichResult& result);
+		template bool			RichInterpretor::MatchHead<char32_t>(const char32_t* input, const char32_t* start, RichResult& result);
+								
+		template bool			RichInterpretor::Match<wchar_t>(const wchar_t* input, const wchar_t* start, RichResult& result);
+		template bool			RichInterpretor::Match<char8_t>(const char8_t* input, const char8_t* start, RichResult& result);
+		template bool			RichInterpretor::Match<char16_t>(const char16_t* input, const char16_t* start, RichResult& result);
+		template bool			RichInterpretor::Match<char32_t>(const char32_t* input, const char32_t* start, RichResult& result);
 	}
 }
