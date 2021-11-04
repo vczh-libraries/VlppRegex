@@ -35,7 +35,7 @@ TEST_FILE
 			rC(U'0', U'9') % rC(U'A', U'Z') % rC(U'_') % rC(U'a', U'b') % rC(U'c') % rC(U'd', U'g') % rC(U'h') % rC(U'i', U'u') % rC(U'v') % rC(U'w', U'y') % rC(U'z')
 			).Some() + rC(U'v') + rC(U'c') + rC(U'z') + rC(U'h'));
 		NormalizedRegexAssert(U"[0-2][1-3][2-4]", (rC(U'0') % rC(U'1') % rC(U'2')) + (rC(U'1') % rC(U'2') % rC(U'3')) + (rC(U'2') % rC(U'3') % rC(U'4')));
-		NormalizedRegexAssert(U"[^C-X][A-Z]", (rC(1, U'A' - 1) % rC(U'A', U'B') % rC(U'Y', U'Z') % rC(U'Z' + 1, 65535)) + (rC(U'A', U'B') % rC(U'C', U'X') % rC(U'Y', U'Z')));
+		NormalizedRegexAssert(U"[^C-X][A-Z]", (rC(1, U'A' - 1) % rC(U'A', U'B') % rC(U'Y', U'Z') % rC(U'Z' + 1, 0x10FFFF)) + (rC(U'A', U'B') % rC(U'C', U'X') % rC(U'Y', U'Z')));
 	});
 
 	TEST_CASE(L"Test expression merging")

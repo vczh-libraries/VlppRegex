@@ -540,8 +540,8 @@ TEST_FILE
 			TEST_ASSERT(tokens[1].columnEnd == 15);
 			TEST_ASSERT(tokens[1].completeToken == true);
 
-			TEST_ASSERT(tokens[2].start == 9);
-			TEST_ASSERT(tokens[2].length == 28);
+			TEST_ASSERT(tokens[2].start == 16);
+			TEST_ASSERT(tokens[2].length == 21);
 			TEST_ASSERT(tokens[2].token == 1);
 			TEST_ASSERT(tokens[2].rowStart == 0);
 			TEST_ASSERT(tokens[2].columnStart == 16);
@@ -570,8 +570,8 @@ TEST_FILE
 			TEST_ASSERT(tokens[1].start == 5);
 			TEST_ASSERT(tokens[1].length == 4);
 			TEST_ASSERT(tokens[1].token == 0);
-			TEST_ASSERT(tokens[1].rowStart == 5);
-			TEST_ASSERT(tokens[1].columnStart == 16);
+			TEST_ASSERT(tokens[1].rowStart == 0);
+			TEST_ASSERT(tokens[1].columnStart == 5);
 			TEST_ASSERT(tokens[1].rowEnd == 0);
 			TEST_ASSERT(tokens[1].columnEnd == 8);
 			TEST_ASSERT(tokens[1].completeToken == true);

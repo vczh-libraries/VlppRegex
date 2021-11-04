@@ -38,9 +38,9 @@ CharSetAlgorithm
 						}
 						begin = range.end + 1;
 					}
-					if (begin <= 65535)
+					if (begin <= MaxChar32)
 					{
-						Process(expression, target, CharRange(begin, 65535));
+						Process(expression, target, CharRange(begin, MaxChar32));
 					}
 				}
 				else
