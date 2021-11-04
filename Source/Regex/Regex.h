@@ -1124,12 +1124,15 @@ RegexLexer
 			/// <param name="codeIndex">Extra information that will be copied to [F:vl.regex.RegexToken.codeIndex].</param>
 			/// <remarks>Callbacks in <see cref="RegexProc"/> will be called when iterating through tokens, which is from the second argument of the constructor of <see cref="RegexLexer"/>.</remarks>
 			template<typename T>
-			RegexTokens_<T>								Parse(const ObjectString<T>& code, RegexProc_<T> proc, vint codeIndex=-1)const;
+			RegexTokens_<T>								Parse(const ObjectString<T>& code, RegexProc_<T> proc = {}, vint codeIndex = -1)const;
+			template<typename T>
+			RegexTokens_<T>								Parse(const T* code, RegexProc_<T> proc = {}, vint codeIndex = -1) const { return Parse<T>(ObjectString<T>(code), proc, codeIndex); }
 			/// <summary>Create a equivalence walker from this lexical analyzer. A walker enable you to walk throught characters one by one,</summary>
 			/// <typeparam name="TInput>The character type of the text to parse.</typeparam>
 			/// <returns>The walker.</returns>
 			template<typename T>
 			RegexLexerWalker_<T>						Walk()const;
+			RegexLexerWalker_<wchar_t>					Walk()const;
 			/// <summary>Create a equivalence colorizer from this lexical analyzer.</summary>
 			/// <typeparam name="TInput>The character type of the text to parse.</typeparam>
 			/// <returns>The colorizer.</returns>

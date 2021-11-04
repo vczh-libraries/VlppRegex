@@ -935,6 +935,12 @@ RegexLexerBase_
 			return RegexLexerWalker_<T>(pure, stateTokens);
 		}
 
+		RegexLexerWalker_<wchar_t> RegexLexerBase_::Walk()const
+		{
+			pure->PrepareForRelatedFinalStateTable();
+			return RegexLexerWalker_<wchar_t>(pure, stateTokens);
+		}
+
 		template<typename T>
 		RegexLexerColorizer_<T> RegexLexerBase_::Colorize(RegexProc_<T> proc)const
 		{

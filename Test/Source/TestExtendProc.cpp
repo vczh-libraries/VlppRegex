@@ -158,7 +158,7 @@ TEST_FILE
 		RegexProc proc;
 		proc.deleter = TestExtendProc_Deleter;
 		proc.extendProc = TestExtendProc_ExtendProc;
-		RegexLexer lexer(codes, proc);
+		RegexLexer lexer(codes);
 
 		WString input = LR"test_input(123 456
 "simple text"
@@ -167,12 +167,12 @@ abcde
 -)==="456$"===()test_input";
 		{
 			List<RegexToken> tokens;
-			CopyFrom(tokens, lexer.Parse(input));
+			CopyFrom(tokens, lexer.Parse(input, proc));
 			TestRegexLexer6Validation(tokens);
 		}
 		{
 			List<RegexToken> tokens;
-			lexer.Parse(input).ReadToEnd(tokens);
+			lexer.Parse(input, proc).ReadToEnd(tokens);
 			TestRegexLexer6Validation(tokens);
 		}
 	});
@@ -191,8 +191,8 @@ abcde
 		proc.extendProc = &TestExtendProc_ExtendProc;
 		proc.colorizeProc = &ColorizerProc;
 		proc.argument = colors;
-		RegexLexer lexer(codes, proc);
-		RegexLexerColorizer colorizer = lexer.Colorize();
+		RegexLexer lexer(codes);
+		RegexLexerColorizer colorizer = lexer.Colorize(proc);
 
 		void* lastInterTokenState = nullptr;
 		{

@@ -24,7 +24,7 @@ TEST_FILE
 		codes.Add(L"/d+(./d+)?");
 		codes.Add(L"[a-zA-Z_]/w*");
 		codes.Add(L"\"[^\"]*\"");
-		RegexLexer lexer(codes, {});
+		RegexLexer lexer(codes);
 		RegexLexerWalker walker = lexer.Walk();
 
 		vint state = -1;

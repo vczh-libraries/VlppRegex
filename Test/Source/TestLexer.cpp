@@ -93,7 +93,7 @@ TEST_FILE
 		codes.Add(L"/d+");
 		codes.Add(L"/s+");
 		codes.Add(L"[a-zA-Z_]/w*");
-		RegexLexer lexer(codes, {});
+		RegexLexer lexer(codes);
 
 		{
 			List<RegexToken> tokens;
@@ -274,7 +274,7 @@ TEST_FILE
 		codes.Add(L"/d+");
 		codes.Add(L"[a-zA-Z_]/w*");
 		codes.Add(L"\"[^\"]*\"");
-		RegexLexer lexer(codes, {});
+		RegexLexer lexer(codes);
 
 		WString input =
 			L"12345vczh is a genius!"		L"\r\n"
@@ -298,7 +298,7 @@ TEST_FILE
 			List<WString> codes;
 			codes.Add(L"unit");
 			codes.Add(L"/w+");
-			RegexLexer lexer(codes, {});
+			RegexLexer lexer(codes);
 			{
 				WString input = L"unit";
 				List<RegexToken> tokens;
@@ -330,7 +330,7 @@ TEST_FILE
 			List<WString> codes;
 			codes.Add(L"/w+");
 			codes.Add(L"unit");
-			RegexLexer lexer(codes, {});
+			RegexLexer lexer(codes);
 			{
 				WString input = L"unit";
 				List<RegexToken> tokens;
@@ -366,7 +366,7 @@ TEST_FILE
 			List<WString> codes;
 			codes.Add(L"=");
 			codes.Add(L"==");
-			RegexLexer lexer(codes, {});
+			RegexLexer lexer(codes);
 			{
 				WString input = L"=";
 				List<RegexToken> tokens;
@@ -398,7 +398,7 @@ TEST_FILE
 			List<WString> codes;
 			codes.Add(L"==");
 			codes.Add(L"=");
-			RegexLexer lexer(codes, {});
+			RegexLexer lexer(codes);
 			{
 				WString input = L"=";
 				List<RegexToken> tokens;
@@ -456,7 +456,7 @@ TEST_FILE
 		List<WString> codes;
 		codes.Add(L"/d+");
 		codes.Add(L"\"[^\"]*\"");
-		RegexLexer lexer(codes, {});
+		RegexLexer lexer(codes);
 
 		WString input = L"123\"456";
 		{

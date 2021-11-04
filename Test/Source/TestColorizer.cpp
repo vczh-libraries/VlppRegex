@@ -13,8 +13,8 @@ TEST_FILE
 		RegexProc proc;
 		proc.colorizeProc = &ColorizerProc;
 		proc.argument = colors;
-		RegexLexer lexer(codes, proc);
-		RegexLexerColorizer colorizer = lexer.Colorize();
+		RegexLexer lexer(codes);
+		RegexLexerColorizer colorizer = lexer.Colorize(proc);
 
 		{
 			const wchar_t input[] = L" genius 10..10.10   \"a";
@@ -41,8 +41,8 @@ TEST_FILE
 		RegexProc proc;
 		proc.colorizeProc = &ColorizerProc;
 		proc.argument = colors;
-		RegexLexer lexer(codes, proc);
-		RegexLexerColorizer colorizer = lexer.Colorize();
+		RegexLexer lexer(codes);
+		RegexLexerColorizer colorizer = lexer.Colorize(proc);
 
 		colorizer.Pass(L'\r');
 		colorizer.Pass(L'\n');

@@ -9,9 +9,6 @@
   - Test `RegexLexerWalker`
   - Test `RegexLexerColorizer`
 - Ensure there is no way to say a specific character in regex which does not fall in UTF-16 range (0 - 10FFFF).
-- Update all classes in `Regex.h` to template class.
-  - `Regex` will become `RegexUtf<T>`.
-  - `using Regex = RegexUtf<wchar_t>`.
 - Merge branch `utf32` back to `master`
   - Undo all unit tests except `TestParser.cpp` and new added source files.
   - Ensure `wchar_t` version still work.
