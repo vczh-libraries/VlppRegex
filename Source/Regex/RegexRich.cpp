@@ -15,49 +15,78 @@ namespace vl
 Data Structures for Backtracking
 ***********************************************************************/
 
+		enum class StateStoreType
+		{
+			Positive,
+			Negative,
+			Other
+		};
+
+		template<typename TChar>
 		class StateSaver
 		{
 		public:
-			enum StateStoreType
-			{
-				Positive,
-				Negative,
-				Other
-			};
 
-			const char32_t*			reading;					// Current reading position
-			State*					currentState;				// Current state
-			vint					minTransition;				// The first transition to backtrack
-			vint					captureCount;				// Available capture count			(the list size may larger than this)
-			vint					stateSaverCount;			// Available saver count			(the list size may larger than this)
-			vint					extensionSaverAvailable;	// Available extension saver count	(the list size may larger than this)
-			vint					extensionSaverCount;		// Available extension saver count	(during executing)
-			StateStoreType			storeType;					// Reason to keep this record
+			CharReader<TChar>		reader;										// Current reading position
+			char32_t				ch;											// Current character
+			State*					currentState;								// Current state
+			vint					minTransition = 0;							// The first transition to backtrack
+			vint					captureCount = 0;							// Available capture count			(the list size may larger than this)
+			vint					stateSaverCount = 0;						// Available saver count			(the list size may larger than this)
+			vint					extensionSaverAvailable = -1;				// Available extension saver count	(the list size may larger than this)
+			vint					extensionSaverCount = 0;					// Available extension saver count	(during executing)
+			StateStoreType			storeType = StateStoreType::Other;			// Reason to keep this record
+
+			StateSaver(const TChar* input, State* _currentState)
+				: reader(input)
+				, currentState(_currentState)
+			{
+				ch = reader.Read();
+			}
+
+			StateSaver(const StateSaver&) = default;
+			StateSaver& operator=(const StateSaver&) = default;
 
 			bool operator==(const StateSaver& saver)const
 			{
-				return
-					reading == saver.reading &&
-					currentState == saver.currentState &&
-					minTransition == saver.minTransition &&
-					captureCount == saver.captureCount;
+				CHECK_FAIL(L"This function is only created to satisfy List<T>.");
+			}
+
+			void RestoreReaderTo(StateSaver<TChar>& saver)
+			{
+				saver.reader = reader;
+				saver.ch = ch;
 			}
 		};
 
+		template<typename TChar>
 		class ExtensionSaver
 		{
 		public:
-			vint					previous;					// Previous extension saver index
-			vint					captureListIndex;			// Where to write the captured text
-			Transition*				transition;					// The extension begin transition (Capture, Positive, Negative)
-			const char32_t*			reading;					// The reading position
+			CharReader<TChar>		reader;										// The reading position
+			char32_t				ch;											// Current character
+			vint					previous;									// Previous extension saver index
+			vint					captureListIndex;							// Where to write the captured text
+			Transition*				transition;									// The extension begin transition (Capture, Positive, Negative)
+
+			ExtensionSaver(const StateSaver<TChar>& saver)
+				: reader(saver.reader)
+				, ch(saver.ch)
+			{
+			}
+
+			ExtensionSaver(const ExtensionSaver&) = default;
+			ExtensionSaver& operator=(const ExtensionSaver&) = default;
 
 			bool operator==(const ExtensionSaver& saver)const
 			{
-				return
-					captureListIndex == saver.captureListIndex &&
-					transition == saver.transition &&
-					reading == saver.reading;
+				CHECK_FAIL(L"This function is only created to satisfy List<T>.");
+			}
+
+			void RestoreReaderTo(StateSaver<TChar>& saver)
+			{
+				saver.reader = reader;
+				saver.ch = ch;
 			}
 		};
 	}
@@ -66,7 +95,8 @@ Data Structures for Backtracking
 	{
 		using namespace collections;
 
-		void Push(List<ExtensionSaver>& elements, vint& available, vint& count, const ExtensionSaver& element)
+		template<typename TChar>
+		void Push(List<ExtensionSaver<TChar>>& elements, vint& available, vint& count, const ExtensionSaver<TChar>& element)
 		{
 			if (elements.Count() == count)
 			{
@@ -76,14 +106,15 @@ Data Structures for Backtracking
 			{
 				elements[count] = element;
 			}
-			ExtensionSaver& current = elements[count];
+			auto& current = elements[count];
 			current.previous = available;
 			available = count++;
 		}
 
-		ExtensionSaver Pop(List<ExtensionSaver>& elements, vint& available, vint& count)
+		template<typename TChar>
+		ExtensionSaver<TChar> Pop(List<ExtensionSaver<TChar>>& elements, vint& available, vint& count)
 		{
-			ExtensionSaver& current = elements[available];
+			auto& current = elements[available];
 			available = current.previous;
 			return current;
 		}
@@ -164,23 +195,15 @@ RichInterpretor
 		template<typename TChar>
 		bool RichInterpretor::MatchHead(const TChar* input, const TChar* start, RichResult& result)
 		{
-			List<StateSaver> stateSavers;
-			List<ExtensionSaver> extensionSavers;
+			List<StateSaver<TChar>> stateSavers;
+			List<ExtensionSaver<TChar>> extensionSavers;
 
-			StateSaver currentState;
-			currentState.captureCount = 0;
-			currentState.currentState = dfa->startState;
-			currentState.extensionSaverAvailable = -1;
-			currentState.extensionSaverCount = 0;
-			currentState.minTransition = 0;
-			currentState.reading = input;
-			currentState.stateSaverCount = 0;
-			currentState.storeType = StateSaver::Other;
+			StateSaver<TChar> currentState(input, dfa->startState);
 
 			while (!currentState.currentState->finalState)
 			{
 				bool found = false; // true means at least one transition matches the input
-				StateSaver oldState = currentState;
+				StateSaver<TChar> oldState = currentState;
 				// Iterate through all transitions from the current state
 				for (vint i = currentState.minTransition; i < currentState.currentState->transitions.Count(); i++)
 				{
@@ -192,24 +215,24 @@ RichInterpretor
 							// match the input if the current character fall into the range
 							CharRange range = transition->range;
 							found =
-								range.begin <= *currentState.reading &&
-								range.end >= *currentState.reading;
+								range.begin <= currentState.ch &&
+								range.end >= currentState.ch;
 							if (found)
 							{
-								currentState.reading++;
+								currentState.ch = currentState.reader.Read();
 							}
 						}
 						break;
 					case Transition::BeginString:
 						{
 							// match the input if this is the first character, and it is not consumed
-							found = currentState.reading == start;
+							found = currentState.reader.Index() == 0;
 						}
 						break;
 					case Transition::EndString:
 						{
 							// match the input if this is after the last character, and it is not consumed
-							found = *currentState.reading == L'\0';
+							found = currentState.ch == 0;
 						}
 						break;
 					case Transition::Nop:
@@ -221,16 +244,15 @@ RichInterpretor
 					case Transition::Capture:
 						{
 							// Push the capture information
-							ExtensionSaver saver;
+							ExtensionSaver<TChar> saver(currentState);
 							saver.captureListIndex = currentState.captureCount;
-							saver.reading = currentState.reading;
 							saver.transition = transition;
 							Push(extensionSavers, currentState.extensionSaverAvailable, currentState.extensionSaverCount, saver);
 
 							// Push the capture record, and it will be written if the input matches the regex
 							CaptureRecord capture;
 							capture.capture = transition->capture;
-							capture.start = currentState.reading - start;
+							capture.start = currentState.reader.Index();
 							capture.length = -1;
 							PushNonSaver(result.captures, currentState.captureCount, capture);
 
@@ -250,10 +272,15 @@ RichInterpretor
 									if (capture.length != -1 && (transition->index == -1 || transition->index == index))
 									{
 										// If the captured text matched
-										if (memcmp(start + capture.start, currentState.reading, sizeof(char32_t) * capture.length) == 0)
+										if (memcmp(start + capture.start, input + currentState.reader.Index(), sizeof(TChar) * capture.length) == 0)
 										{
 											// Consume so much input
-											currentState.reading += capture.length;
+											vint targetIndex = currentState.reader.Index() + capture.length;
+											while (currentState.reader.Index() < targetIndex)
+											{
+												currentState.ch = currentState.reader.Read();
+											}
+											CHECK_ERROR(currentState.reader.Index() == targetIndex, L"vl::regex_internal::RichInterpretor::MatchHead<TChar>(const TChar*, const TChar*, RichResult&)#Input code could be an incorrect unicode sequence.");
 											found = true;
 											break;
 										}
@@ -275,14 +302,13 @@ RichInterpretor
 					case Transition::Positive:
 						{
 							// Push the positive lookahead information
-							ExtensionSaver saver;
+							ExtensionSaver<TChar> saver(currentState);
 							saver.captureListIndex = -1;
-							saver.reading = currentState.reading;
 							saver.transition = transition;
 							Push(extensionSavers, currentState.extensionSaverAvailable, currentState.extensionSaverCount, saver);
 
 							// Set found = true so that PushNonSaver(oldState) happens later
-							oldState.storeType = StateSaver::Positive;
+							oldState.storeType = StateStoreType::Positive;
 							found = true;
 						}
 						break;
@@ -290,14 +316,13 @@ RichInterpretor
 						{
 							// Push the positive lookahead information
 
-							ExtensionSaver saver;
+							ExtensionSaver<TChar> saver(currentState);
 							saver.captureListIndex = -1;
-							saver.reading = currentState.reading;
 							saver.transition = transition;
 							Push(extensionSavers, currentState.extensionSaverAvailable, currentState.extensionSaverCount, saver);
 
 							// Set found = true so that PushNonSaver(oldState) happens later
-							oldState.storeType = StateSaver::Negative;
+							oldState.storeType = StateStoreType::Negative;
 							found = true;
 						}
 						break;
@@ -316,7 +341,7 @@ RichInterpretor
 								{
 									// Write the captured text
 									CaptureRecord& capture = result.captures[extensionSaver.captureListIndex];
-									capture.length = (currentState.reading - start) - capture.start;
+									capture.length = currentState.reader.Index();
 									found = true;
 								}
 								break;
@@ -324,13 +349,13 @@ RichInterpretor
 								// Find the last positive lookahead state saver
 								for (vint j = currentState.stateSaverCount - 1; j >= 0; j--)
 								{
-									StateSaver& stateSaver = stateSavers[j];
-									if (stateSaver.storeType == StateSaver::Positive)
+									auto& stateSaver = stateSavers[j];
+									if (stateSaver.storeType == StateStoreType::Positive)
 									{
 										// restore the parsing state just before matching the positive lookahead, since positive lookahead doesn't consume input
-										oldState.reading = stateSaver.reading;
+										stateSaver.RestoreReaderTo(oldState);
 										oldState.stateSaverCount = j;
-										currentState.reading = stateSaver.reading;
+										stateSaver.RestoreReaderTo(currentState);
 										currentState.stateSaverCount = j;
 										break;
 									}
@@ -341,14 +366,14 @@ RichInterpretor
 								// Find the last negative lookahead state saver
 								for (vint j = currentState.stateSaverCount - 1; j >= 0; j--)
 								{
-									StateSaver& stateSaver = stateSavers[j];
-									if (stateSaver.storeType == StateSaver::Negative)
+									auto& stateSaver = stateSavers[j];
+									if (stateSaver.storeType == StateStoreType::Negative)
 									{
 										// restore the parsing state just before matching the negative lookahead, since positive lookahead doesn't consume input
 										oldState = stateSaver;
-										oldState.storeType = StateSaver::Other;
+										oldState.storeType = StateStoreType::Other;
 										currentState = stateSaver;
-										currentState.storeType = StateSaver::Other;
+										currentState.storeType = StateStoreType::Other;
 										i = currentState.minTransition - 1;
 										break;
 									}
@@ -398,7 +423,7 @@ RichInterpretor
 									// Restore the state to the target of NegativeFail to let the parsing continue
 									currentState.currentState = transition->target;
 									currentState.minTransition = 0;
-									currentState.storeType = StateSaver::Other;
+									currentState.storeType = StateStoreType::Other;
 									break;
 								}
 							}
@@ -415,7 +440,7 @@ RichInterpretor
 			{
 				// Keep available captures if succeeded
 				result.start = input - start;
-				result.length = (currentState.reading - start) - result.start;
+				result.length = currentState.reader.Index();
 				for (vint i = result.captures.Count() - 1; i >= currentState.captureCount; i--)
 				{
 					result.captures.RemoveAt(i);
