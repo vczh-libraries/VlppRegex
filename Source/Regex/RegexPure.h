@@ -24,7 +24,7 @@ namespace vl
 		class PureInterpretor : public Object
 		{
 		protected:
-			static const vint	SupportedCharCount = 0x110000;
+			static const vint	SupportedCharCount = MaxChar32 + 1;
 
 			vint				charMap[SupportedCharCount];		// char -> char set index
 			vint**				transition;							// (state * char set index) -> state*
@@ -37,11 +37,11 @@ namespace vl
 			PureInterpretor(Automaton::Ref dfa, CharRange::List& subsets);
 			~PureInterpretor();
 
-			bool				MatchHead(const wchar_t* input, const wchar_t* start, PureResult& result);
-			bool				Match(const wchar_t* input, const wchar_t* start, PureResult& result);
+			bool				MatchHead(const char32_t* input, const char32_t* start, PureResult& result);
+			bool				Match(const char32_t* input, const char32_t* start, PureResult& result);
 
 			vint				GetStartState();
-			vint				Transit(wchar_t input, vint state);
+			vint				Transit(char32_t input, vint state);
 			bool				IsFinalState(vint state);
 			bool				IsDeadState(vint state);
 

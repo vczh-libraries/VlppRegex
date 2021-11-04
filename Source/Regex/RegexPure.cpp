@@ -31,8 +31,9 @@ PureInterpretor
 			for (vint i = 0; i < subsets.Count(); i++)
 			{
 				CharRange range = subsets[i];
-				for (vint j = range.begin; j <= range.end; j++)
+				for (char32_t j = range.begin; j <= range.end; j++)
 				{
+					if (j > MaxChar32) break;
 					charMap[j] = i;
 				}
 			}
@@ -88,7 +89,7 @@ PureInterpretor
 			delete[] transition;
 		}
 
-		bool PureInterpretor::MatchHead(const wchar_t* input, const wchar_t* start, PureResult& result)
+		bool PureInterpretor::MatchHead(const char32_t* input, const char32_t* start, PureResult& result)
 		{
 			result.start = input - start;
 			result.length = -1;
@@ -98,7 +99,7 @@ PureInterpretor
 			vint currentState = startState;
 			vint terminateState = -1;
 			vint terminateLength = -1;
-			const wchar_t* read = input;
+			const char32_t* read = input;
 			while (currentState != -1)
 			{
 				terminateState = currentState;
@@ -131,9 +132,9 @@ PureInterpretor
 			}
 		}
 
-		bool PureInterpretor::Match(const wchar_t* input, const wchar_t* start, PureResult& result)
+		bool PureInterpretor::Match(const char32_t* input, const char32_t* start, PureResult& result)
 		{
-			const wchar_t* read = input;
+			const char32_t* read = input;
 			while (*read)
 			{
 				if (MatchHead(read, start, result))
@@ -150,9 +151,9 @@ PureInterpretor
 			return startState;
 		}
 
-		vint PureInterpretor::Transit(wchar_t input, vint state)
+		vint PureInterpretor::Transit(char32_t input, vint state)
 		{
-			if (0 <= state && state < stateCount)
+			if (0 <= state && state < stateCount && 0 <= input && input <= MaxChar32)
 			{
 				vint charIndex = charMap[input];
 				vint nextState = transition[state][charIndex];

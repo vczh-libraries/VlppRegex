@@ -134,7 +134,7 @@ CharSetExpression
 		{
 			if (range.begin > range.end)
 			{
-				wchar_t t = range.begin;
+				char32_t t = range.begin;
 				range.begin = range.end;
 				range.end = t;
 			}

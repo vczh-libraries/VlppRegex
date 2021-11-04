@@ -178,7 +178,7 @@ Regex Writer
 
 		RegexNode rAnyChar()
 		{
-			return rC(1, 0x10FFFF);
+			return rC(1, MaxChar32);
 		}
 	}
 }

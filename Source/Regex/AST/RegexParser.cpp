@@ -172,7 +172,7 @@ Helper Functions
 				switch (*input)
 				{
 				case U'.':
-					expression->ranges.Add(CharRange(1, 0x10FFFF));
+					expression->ranges.Add(CharRange(1, MaxChar32));
 					break;
 				case U'r':
 					expression->ranges.Add(CharRange(U'\r', U'\r'));

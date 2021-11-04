@@ -12,6 +12,8 @@ namespace vl
 {
 	namespace regex_internal
 	{
+		constexpr char32_t						MaxChar32 = 0x10FFFF;
+
 		class State;
 		class Transition;
 

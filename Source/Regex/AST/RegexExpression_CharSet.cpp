@@ -28,7 +28,7 @@ CharSetAlgorithm
 			{
 				if (expression->reverse)
 				{
-					wchar_t begin = 1;
+					char32_t begin = 1;
 					for (vint i = 0; i < ranges.Count(); i++)
 					{
 						CharRange range = ranges[i];
