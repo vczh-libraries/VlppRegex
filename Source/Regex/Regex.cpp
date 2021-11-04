@@ -580,7 +580,7 @@ RegexTokens_<T>
 		};
 
 		template<typename T>
-		RegexTokens_<T>::RegexTokens_(PureInterpretor* _pure, const Array<vint>& _stateTokens, const U32String& _code, vint _codeIndex, RegexProc_<T> _proc)
+		RegexTokens_<T>::RegexTokens_(PureInterpretor* _pure, const Array<vint>& _stateTokens, const ObjectString<T>& _code, vint _codeIndex, RegexProc_<T> _proc)
 			:pure(_pure)
 			, stateTokens(_stateTokens)
 			, code(_code)
@@ -602,7 +602,7 @@ RegexTokens_<T>
 		template<typename T>
 		IEnumerator<RegexToken_<T>>* RegexTokens_<T>::CreateEnumerator() const
 		{
-			return new RegexTokenEnumerator(pure, stateTokens, code.Buffer(), codeIndex, proc);
+			return new RegexTokenEnumerator<T>(pure, stateTokens, code.Buffer(), codeIndex, proc);
 		}
 
 		bool DefaultDiscard(vint token)
@@ -721,47 +721,43 @@ RegexLexerWalker_<T>
 		}
 
 /***********************************************************************
-RegexLexerColorizer
+RegexLexerColorizer_<T>
 ***********************************************************************/
 
-		RegexLexerColorizer::RegexLexerColorizer(const RegexLexerWalker& _walker, RegexProc _proc)
+		template<typename T>
+		RegexLexerColorizer_<T>::RegexLexerColorizer_(const RegexLexerWalker_<T>& _walker, RegexProc_<T> _proc)
 			:walker(_walker)
 			, proc(_proc)
 		{
 			internalState.currentState = walker.GetStartState();
 		}
 
-		RegexLexerColorizer::RegexLexerColorizer(const RegexLexerColorizer& colorizer)
-			:walker(colorizer.walker)
-			, proc(colorizer.proc)
-			, internalState(colorizer.internalState)
-		{
-		}
-
-		RegexLexerColorizer::~RegexLexerColorizer()
-		{
-		}
-
-		RegexLexerColorizer::InternalState RegexLexerColorizer::GetInternalState()
+		template<typename T>
+		typename RegexLexerColorizer_<T>::InternalState RegexLexerColorizer_<T>::GetInternalState()
 		{
 			return internalState;
 		}
-		void RegexLexerColorizer::SetInternalState(InternalState state)
+
+		template<typename T>
+		void RegexLexerColorizer_<T>::SetInternalState(InternalState state)
 		{
 			internalState = state;
 		}
 
-		void RegexLexerColorizer::Pass(char32_t input)
+		template<typename T>
+		void RegexLexerColorizer_<T>::Pass(T input)
 		{
 			WalkOneToken(&input, 1, 0, false);
 		}
 
-		vint RegexLexerColorizer::GetStartState()const
+		template<typename T>
+		vint RegexLexerColorizer_<T>::GetStartState()const
 		{
 			return walker.GetStartState();
 		}
 
-		void RegexLexerColorizer::CallExtendProcAndColorizeProc(const char32_t* input, vint length, RegexProcessingToken& token, bool colorize)
+		template<typename T>
+		void RegexLexerColorizer_<T>::CallExtendProcAndColorizeProc(const T* input, vint length, RegexProcessingToken& token, bool colorize)
 		{
 			vint oldTokenLength = token.length;
 			proc.extendProc(proc.argument, input + token.start, length - token.start, false, token);
@@ -796,7 +792,8 @@ RegexLexerColorizer
 			}
 		}
 
-		vint RegexLexerColorizer::WalkOneToken(const char32_t* input, vint length, vint start, bool colorize)
+		template<typename T>
+		vint RegexLexerColorizer_<T>::WalkOneToken(const T* input, vint length, vint start, bool colorize)
 		{
 			if (internalState.interTokenState)
 			{
@@ -904,7 +901,8 @@ RegexLexerColorizer
 			return length;
 		}
 
-		void* RegexLexerColorizer::Colorize(const char32_t* input, vint length)
+		template<typename T>
+		void* RegexLexerColorizer_<T>::Colorize(const T* input, vint length)
 		{
 			vint index = 0;
 			while (index != length)
@@ -1090,5 +1088,10 @@ Template Instantiation
 		template class RegexLexerWalker_<char8_t>;
 		template class RegexLexerWalker_<char16_t>;
 		template class RegexLexerWalker_<char32_t>;
+
+		template class RegexLexerColorizer_<wchar_t>;
+		template class RegexLexerColorizer_<char8_t>;
+		template class RegexLexerColorizer_<char16_t>;
+		template class RegexLexerColorizer_<char32_t>;
 	}
 }

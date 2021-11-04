@@ -719,7 +719,7 @@ Tokenizer
 			vint										codeIndex;
 			RegexProc_<T>								proc;
 			
-			RegexTokens_(regex_internal::PureInterpretor* _pure, const collections::Array<vint>& _stateTokens, const U32String& _code, vint _codeIndex, RegexProc_<T> _proc);
+			RegexTokens_(regex_internal::PureInterpretor* _pure, const collections::Array<vint>& _stateTokens, const ObjectString<T>& _code, vint _codeIndex, RegexProc_<T> _proc);
 		public:
 			RegexTokens_(const RegexTokens_<T>& tokens);
 			~RegexTokens_() = default;
@@ -974,6 +974,129 @@ RegexLexerWalker
 		};
 
 /***********************************************************************
+RegexLexerColorizer
+***********************************************************************/
+
+		/// <summary>Lexical colorizer. Call <see cref="RegexLexer::Colorize"/> to create this object.</summary>
+		/// <typeparam name="T>The character type.</typeparam>
+		/// <example><![CDATA[
+		/// int main()
+		/// {
+		///     List<WString> tokenDefs;
+		///     tokenDefs.Add(L"/d+");
+		///     tokenDefs.Add(L"[a-zA-Z_]/w*");
+		///     tokenDefs.Add(L"[(){};]");
+		///     tokenDefs.Add(L"/s+");
+		///     tokenDefs.Add(L"///*+([^//*]|/*+[^//])*/*+//");
+		/// 
+		///     const wchar_t* lines[] = {
+		///         L"/*********************",
+		///         L"MAIN.CPP",
+		///         L"*********************/",
+		///         L"",
+		///         L"int main()",
+		///         L"{",
+		///         L"    return 0;",
+		///         L"}",
+		///     };
+		/// 
+		///     struct Argument
+		///     {
+		///         // for a real colorizer, you can put a color buffer here.
+		///         // the buffer is reused for every line of code.
+		///         // but for the demo, I put the current processing text instead.
+		///         // so that I am able to print what is processed.
+		///         const wchar_t* processingText = nullptr;
+		///     } argument;
+		/// 
+		///     RegexProc proc;
+		///     proc.argument = &argument;
+		///     proc.colorizeProc = [](void* argument, vint start, vint length, vint token)
+		///     {
+		///         // this is guaranteed by "proc.argument = &argument;"
+		///         auto text = reinterpret_cast<Argument*>(argument)->processingText;
+		///         Console::WriteLine(itow(token) + L": <" + WString(text + start, length) + L">");
+		///     };
+		/// 
+		///     RegexLexer lexer(tokenDefs, proc);
+		///     RegexLexerColorizer colorizer = lexer.Colorize();
+		/// 
+		///     for (auto [line, index] : indexed(From(lines)))
+		///     {
+		///         Console::WriteLine(L"Begin line " + itow(index));
+		///         argument.processingText = line;
+		///         colorizer.Colorize(line, wcslen(line));
+		/// 
+		///         argument.processingText = nullptr;
+		///         colorizer.Pass(L'\r');
+		///         colorizer.Pass(L'\n');
+		///         Console::WriteLine(L"");
+		///     }
+		/// }
+		/// ]]></example>
+		template<typename T>
+		class RegexLexerColorizer_ : public Object
+		{
+			friend class RegexLexer;
+		public:
+			struct InternalState
+			{
+				vint									currentState = -1;
+				vint									interTokenId = -1;
+				void*									interTokenState = nullptr;
+			};
+
+		protected:
+			RegexLexerWalker_<T>						walker;
+			RegexProc_<T>								proc;
+			InternalState								internalState;
+
+			void										CallExtendProcAndColorizeProc(const T* input, vint length, RegexProcessingToken& token, bool colorize);
+			vint										WalkOneToken(const T* input, vint length, vint start, bool colorize);
+
+			RegexLexerColorizer_(const RegexLexerWalker_<T>& _walker, RegexProc_<T> _proc);
+		public:
+			RegexLexerColorizer_(const RegexLexerColorizer_<T>& colorizer) = default;
+			~RegexLexerColorizer_() = default;
+
+			/// <summary>Get the internal state.</summary>
+			/// <returns>The internal state.</returns>
+			/// <remarks>
+			/// <p>
+			/// If <see cref="Colorize"/> has not been called, the return value of this function is the start state.
+			/// </p>
+			/// <p>
+			/// If a text is multi-lined, <see cref="Colorize"/> could be called line by line, and the internal state is changed.
+			/// </p>
+			/// <p>
+			/// In order to colorize another piece of multi-lined text,
+			/// you can either save the start state and call <see cref="SetInternalState"/> to reset the state,
+			/// or call <see cref="RegexLexer::Colorize"/> for a new colorizer.
+			/// </p>
+			/// </remarks>
+			InternalState								GetInternalState();
+			/// <summary>Restore the colorizer to a specified state.</summary>
+			/// <param name="state">The state to restore.</param>
+			void										SetInternalState(InternalState state);
+			/// <summary>Step forward by one character.</summary>
+			/// <param name="input">The input character.</param>
+			/// <remarks>Callbacks in <see cref="RegexProc"/> will be called <b>except colorizeProc</b>, which is from the second argument of the constructor of <see cref="RegexLexer"/>.</remarks>
+			void										Pass(T input);
+			/// <summary>Get the start DFA state number, which represents the correct state before colorizing any characters.</summary>
+			/// <returns>The DFA state number.</returns>
+			vint										GetStartState()const;
+			/// <summary>Colorize a text.</summary>
+			/// <returns>An inter token state at the end of this line. It could be the same object to which is returned from the previous call.</returns>
+			/// <param name="input">The text to colorize.</param>
+			/// <param name="length">Size of the text in characters.</param>
+			/// <remarks>
+			/// <p>See <see cref="RegexProcessingToken::interTokenState"/> and <see cref="RegexProc::extendProc"/> for more information about the return value.</p>
+			/// <p>Callbacks in <see cref="RegexProc"/> will be called, which is from the second argument of the constructor of <see cref="RegexLexer"/>.</p>
+			/// </remarks>
+			void*										Colorize(const T* input, vint length);
+		};
+
+/***********************************************************************
 Template Instantiation
 ***********************************************************************/
 
@@ -1033,6 +1156,11 @@ Template Instantiation
 		extern template class RegexLexerWalker_<char8_t>;
 		extern template class RegexLexerWalker_<char16_t>;
 		extern template class RegexLexerWalker_<char32_t>;
+
+		extern template class RegexLexerColorizer_<wchar_t>;
+		extern template class RegexLexerColorizer_<char8_t>;
+		extern template class RegexLexerColorizer_<char16_t>;
+		extern template class RegexLexerColorizer_<char32_t>;
 		
 		using RegexString = RegexString_<wchar_t>;
 		using RegexMatch = RegexMatch_<wchar_t>;
@@ -1041,127 +1169,7 @@ Template Instantiation
 		using RegexProc = RegexProc_<wchar_t>;
 		using RegexTokens = RegexTokens_<wchar_t>;
 		using RegexLexerWalker = RegexLexerWalker_<wchar_t>;
-
-/***********************************************************************
-RegexLexerColorizer
-***********************************************************************/
-
-		/// <summary>Lexical colorizer. Call <see cref="RegexLexer::Colorize"/> to create this object.</summary>
-		/// <example><![CDATA[
-		/// int main()
-		/// {
-		///     List<WString> tokenDefs;
-		///     tokenDefs.Add(L"/d+");
-		///     tokenDefs.Add(L"[a-zA-Z_]/w*");
-		///     tokenDefs.Add(L"[(){};]");
-		///     tokenDefs.Add(L"/s+");
-		///     tokenDefs.Add(L"///*+([^//*]|/*+[^//])*/*+//");
-		/// 
-		///     const wchar_t* lines[] = {
-		///         L"/*********************",
-		///         L"MAIN.CPP",
-		///         L"*********************/",
-		///         L"",
-		///         L"int main()",
-		///         L"{",
-		///         L"    return 0;",
-		///         L"}",
-		///     };
-		/// 
-		///     struct Argument
-		///     {
-		///         // for a real colorizer, you can put a color buffer here.
-		///         // the buffer is reused for every line of code.
-		///         // but for the demo, I put the current processing text instead.
-		///         // so that I am able to print what is processed.
-		///         const wchar_t* processingText = nullptr;
-		///     } argument;
-		/// 
-		///     RegexProc proc;
-		///     proc.argument = &argument;
-		///     proc.colorizeProc = [](void* argument, vint start, vint length, vint token)
-		///     {
-		///         // this is guaranteed by "proc.argument = &argument;"
-		///         auto text = reinterpret_cast<Argument*>(argument)->processingText;
-		///         Console::WriteLine(itow(token) + L": <" + WString(text + start, length) + L">");
-		///     };
-		/// 
-		///     RegexLexer lexer(tokenDefs, proc);
-		///     RegexLexerColorizer colorizer = lexer.Colorize();
-		/// 
-		///     for (auto [line, index] : indexed(From(lines)))
-		///     {
-		///         Console::WriteLine(L"Begin line " + itow(index));
-		///         argument.processingText = line;
-		///         colorizer.Colorize(line, wcslen(line));
-		/// 
-		///         argument.processingText = nullptr;
-		///         colorizer.Pass(L'\r');
-		///         colorizer.Pass(L'\n');
-		///         Console::WriteLine(L"");
-		///     }
-		/// }
-		/// ]]></example>
-		class RegexLexerColorizer : public Object
-		{
-			friend class RegexLexer;
-		public:
-			struct InternalState
-			{
-				vint									currentState = -1;
-				vint									interTokenId = -1;
-				void*									interTokenState = nullptr;
-			};
-
-		protected:
-			RegexLexerWalker							walker;
-			RegexProc									proc;
-			InternalState								internalState;
-
-			void										CallExtendProcAndColorizeProc(const char32_t* input, vint length, RegexProcessingToken& token, bool colorize);
-			vint										WalkOneToken(const char32_t* input, vint length, vint start, bool colorize);
-
-			RegexLexerColorizer(const RegexLexerWalker& _walker, RegexProc _proc);
-		public:
-			RegexLexerColorizer(const RegexLexerColorizer& colorizer);
-			~RegexLexerColorizer();
-
-			/// <summary>Get the internal state.</summary>
-			/// <returns>The internal state.</returns>
-			/// <remarks>
-			/// <p>
-			/// If <see cref="Colorize"/> has not been called, the return value of this function is the start state.
-			/// </p>
-			/// <p>
-			/// If a text is multi-lined, <see cref="Colorize"/> could be called line by line, and the internal state is changed.
-			/// </p>
-			/// <p>
-			/// In order to colorize another piece of multi-lined text,
-			/// you can either save the start state and call <see cref="SetInternalState"/> to reset the state,
-			/// or call <see cref="RegexLexer::Colorize"/> for a new colorizer.
-			/// </p>
-			/// </remarks>
-			InternalState								GetInternalState();
-			/// <summary>Restore the colorizer to a specified state.</summary>
-			/// <param name="state">The state to restore.</param>
-			void										SetInternalState(InternalState state);
-			/// <summary>Step forward by one character.</summary>
-			/// <param name="input">The input character.</param>
-			/// <remarks>Callbacks in <see cref="RegexProc"/> will be called <b>except colorizeProc</b>, which is from the second argument of the constructor of <see cref="RegexLexer"/>.</remarks>
-			void										Pass(char32_t input);
-			/// <summary>Get the start DFA state number, which represents the correct state before colorizing any characters.</summary>
-			/// <returns>The DFA state number.</returns>
-			vint										GetStartState()const;
-			/// <summary>Colorize a text.</summary>
-			/// <returns>An inter token state at the end of this line. It could be the same object to which is returned from the previous call.</returns>
-			/// <param name="input">The text to colorize.</param>
-			/// <param name="length">Size of the text in characters.</param>
-			/// <remarks>
-			/// <p>See <see cref="RegexProcessingToken::interTokenState"/> and <see cref="RegexProc::extendProc"/> for more information about the return value.</p>
-			/// <p>Callbacks in <see cref="RegexProc"/> will be called, which is from the second argument of the constructor of <see cref="RegexLexer"/>.</p>
-			/// </remarks>
-			void*										Colorize(const char32_t* input, vint length);
-		};
+		using RegexLexerColorizer = RegexLexerColorizer_<wchar_t>;
 
 /***********************************************************************
 RegexLexer
