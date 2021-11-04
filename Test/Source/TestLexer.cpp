@@ -470,4 +470,120 @@ TEST_FILE
 			TestRegexLexer5Validation(tokens);
 		}
 	});
+
+	TEST_CATEGORY(L"Unicode")
+	{
+		List<U8String> codes;
+		codes.Add(u8"[𣂕𣴑𣱳𦁚]+");
+		codes.Add(u8"[^𣂕𣴑𣱳𦁚]+");
+		RegexLexer_<char8_t> lexer(codes);
+
+		TEST_CASE(L"char8_t")
+		{
+			auto input = u8"𩰪㦲𦰗𠀼 𣂕𣴑𣱳𦁚 Vczh is genius!@我是天才";
+			List<RegexToken_<char8_t>> tokens;
+			CopyFrom(tokens, lexer.Parse(input));
+
+			TEST_ASSERT(tokens.Count() == 3);
+
+			TEST_ASSERT(tokens[0].start == 0);
+			TEST_ASSERT(tokens[0].length == 16);
+			TEST_ASSERT(tokens[0].token == 1);
+			TEST_ASSERT(tokens[0].rowStart == 0);
+			TEST_ASSERT(tokens[0].columnStart == 0);
+			TEST_ASSERT(tokens[0].rowEnd == 0);
+			TEST_ASSERT(tokens[0].columnEnd == 15);
+			TEST_ASSERT(tokens[0].completeToken == true);
+
+			TEST_ASSERT(tokens[1].start == 16);
+			TEST_ASSERT(tokens[1].length == 16);
+			TEST_ASSERT(tokens[1].token == 0);
+			TEST_ASSERT(tokens[1].rowStart == 0);
+			TEST_ASSERT(tokens[1].columnStart == 16);
+			TEST_ASSERT(tokens[1].rowEnd == 0);
+			TEST_ASSERT(tokens[1].columnEnd == 31);
+			TEST_ASSERT(tokens[1].completeToken == true);
+
+			TEST_ASSERT(tokens[2].start == 32);
+			TEST_ASSERT(tokens[2].length == 29);
+			TEST_ASSERT(tokens[2].token == 1);
+			TEST_ASSERT(tokens[2].rowStart == 0);
+			TEST_ASSERT(tokens[2].columnStart == 32);
+			TEST_ASSERT(tokens[2].rowEnd == 0);
+			TEST_ASSERT(tokens[2].columnEnd == 60);
+			TEST_ASSERT(tokens[2].completeToken == true);
+		});
+
+		TEST_CASE(L"char16_t")
+		{
+			auto input = u"𩰪㦲𦰗𠀼 𣂕𣴑𣱳𦁚 Vczh is genius!@我是天才";
+			List<RegexToken_<char16_t>> tokens;
+			CopyFrom(tokens, lexer.Parse(input));
+
+			TEST_ASSERT(tokens.Count() == 3);
+
+			TEST_ASSERT(tokens[0].start == 0);
+			TEST_ASSERT(tokens[0].length == 8);
+			TEST_ASSERT(tokens[0].token == 1);
+			TEST_ASSERT(tokens[0].rowStart == 0);
+			TEST_ASSERT(tokens[0].columnStart == 0);
+			TEST_ASSERT(tokens[0].rowEnd == 0);
+			TEST_ASSERT(tokens[0].columnEnd == 7);
+			TEST_ASSERT(tokens[0].completeToken == true);
+
+			TEST_ASSERT(tokens[1].start == 8);
+			TEST_ASSERT(tokens[1].length == 8);
+			TEST_ASSERT(tokens[1].token == 0);
+			TEST_ASSERT(tokens[1].rowStart == 0);
+			TEST_ASSERT(tokens[1].columnStart == 8);
+			TEST_ASSERT(tokens[1].rowEnd == 0);
+			TEST_ASSERT(tokens[1].columnEnd == 15);
+			TEST_ASSERT(tokens[1].completeToken == true);
+
+			TEST_ASSERT(tokens[2].start == 9);
+			TEST_ASSERT(tokens[2].length == 28);
+			TEST_ASSERT(tokens[2].token == 1);
+			TEST_ASSERT(tokens[2].rowStart == 0);
+			TEST_ASSERT(tokens[2].columnStart == 16);
+			TEST_ASSERT(tokens[2].rowEnd == 0);
+			TEST_ASSERT(tokens[2].columnEnd == 36);
+			TEST_ASSERT(tokens[2].completeToken == true);
+		});
+
+		TEST_CASE(L"char32_t")
+		{
+			auto input = U"𩰪㦲𦰗𠀼 𣂕𣴑𣱳𦁚 Vczh is genius!@我是天才";
+			List<RegexToken_<char32_t>> tokens;
+			CopyFrom(tokens, lexer.Parse(input));
+
+			TEST_ASSERT(tokens.Count() == 3);
+
+			TEST_ASSERT(tokens[0].start == 0);
+			TEST_ASSERT(tokens[0].length == 5);
+			TEST_ASSERT(tokens[0].token == 1);
+			TEST_ASSERT(tokens[0].rowStart == 0);
+			TEST_ASSERT(tokens[0].columnStart == 0);
+			TEST_ASSERT(tokens[0].rowEnd == 0);
+			TEST_ASSERT(tokens[0].columnEnd == 4);
+			TEST_ASSERT(tokens[0].completeToken == true);
+
+			TEST_ASSERT(tokens[1].start == 5);
+			TEST_ASSERT(tokens[1].length == 4);
+			TEST_ASSERT(tokens[1].token == 0);
+			TEST_ASSERT(tokens[1].rowStart == 5);
+			TEST_ASSERT(tokens[1].columnStart == 16);
+			TEST_ASSERT(tokens[1].rowEnd == 0);
+			TEST_ASSERT(tokens[1].columnEnd == 8);
+			TEST_ASSERT(tokens[1].completeToken == true);
+
+			TEST_ASSERT(tokens[2].start == 9);
+			TEST_ASSERT(tokens[2].length == 21);
+			TEST_ASSERT(tokens[2].token == 1);
+			TEST_ASSERT(tokens[2].rowStart == 0);
+			TEST_ASSERT(tokens[2].columnStart == 9);
+			TEST_ASSERT(tokens[2].rowEnd == 0);
+			TEST_ASSERT(tokens[2].columnEnd == 29);
+			TEST_ASSERT(tokens[2].completeToken == true);
+		});
+	});
 }
