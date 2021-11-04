@@ -9,7 +9,7 @@ TEST_FILE
 {
 	auto RunPureInterpretor = [](const char32_t* code, const char32_t* input, vint start, vint length)
 	{
-		TEST_CASE(u32tow(code) + WString(L" on ") + input)
+		TEST_CASE(u32tow(code) + WString(L" on ") + u32tow(input))
 		{
 			CharRange::List subsets;
 			Dictionary<State*, State*> nfaStateMap;
