@@ -279,7 +279,7 @@ TEST_FILE
 	});
 
 #ifdef NDEBUG
-	auto FindRows = [](WString* lines, int count, const WString& pattern)
+	auto FindRows = [](U32String* lines, int count, const U32String& pattern)
 	{
 		Regex regex(pattern);
 		DateTime dt1 = DateTime::LocalTime();
@@ -293,20 +293,20 @@ TEST_FILE
 		}
 		DateTime dt2 = DateTime::LocalTime();
 		vuint64_t ms = dt2.totalMilliseconds - dt1.totalMilliseconds;
-		unittest::UnitTest::PrintMessage(U"Running 10000000 times of Regex::TestHead uses: " + i64tow(ms) + L" milliseconds.", unittest::UnitTest::MessageKind::Info);
+		unittest::UnitTest::PrintMessage(L"Running 10000000 times of Regex::TestHead uses: " + i64tow(ms) + L" milliseconds.", unittest::UnitTest::MessageKind::Info);
 	};
 
 	TEST_CASE(L"Test performance")
 	{
-		WString pattern = L"(\\.*A\\.*B\\.*C|\\.*A\\.*C\\.*B|\\.*B\\.*A\\.*C|\\.*B\\.*C\\.*A|\\.*C\\.*A\\.*B|\\.*C\\.*B\\.*A)";
-		WString lines[] =
+		U32String pattern = U"(\\.*A\\.*B\\.*C|\\.*A\\.*C\\.*B|\\.*B\\.*A\\.*C|\\.*B\\.*C\\.*A|\\.*C\\.*A\\.*B|\\.*C\\.*B\\.*A)";
+		U32String lines[] =
 		{
-			L"XAYBZC",
-			L"XAYCZB",
-			L"XBYAZC",
-			L"XBYCZA",
-			L"XCYAZB",
-			L"XCYBZA",
+			U"XAYBZC",
+			U"XAYCZB",
+			U"XBYAZC",
+			U"XBYCZA",
+			U"XCYAZB",
+			U"XCYBZA",
 		};
 		FindRows(lines, sizeof(lines) / sizeof(*lines), pattern);
 		FindRows(lines, sizeof(lines) / sizeof(*lines), pattern);
