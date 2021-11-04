@@ -383,11 +383,7 @@ Regex_<T>
 RegexTokens
 ***********************************************************************/
 
-		bool RegexToken::operator==(const RegexToken& _token)const
-		{
-			return length == _token.length && token == _token.token && reading == _token.reading;
-		}
-
+		template<typename T>
 		class RegexTokenEnumerator : public Object, public IEnumerator<RegexToken>
 		{
 		protected:
@@ -396,11 +392,11 @@ RegexTokens
 
 			PureInterpretor*		pure;
 			const Array<vint>&		stateTokens;
-			const char32_t*			start;
+			const T*				start;
 			vint					codeIndex;
-			RegexProc				proc;
+			RegexProc_<T>			proc;
 
-			const char32_t*			reading;
+			const T*				reading;
 			vint					rowStart = 0;
 			vint					columnStart = 0;
 			bool					cacheAvailable = false;
@@ -423,7 +419,7 @@ RegexTokens
 			{
 			}
 
-			RegexTokenEnumerator(PureInterpretor* _pure, const Array<vint>& _stateTokens, const char32_t* _start, vint _codeIndex, RegexProc _proc)
+			RegexTokenEnumerator(PureInterpretor* _pure, const Array<vint>& _stateTokens, const T* _start, vint _codeIndex, RegexProc_<T> _proc)
 				:index(-1)
 				, pure(_pure)
 				, stateTokens(_stateTokens)
@@ -436,7 +432,7 @@ RegexTokens
 
 			IEnumerator<RegexToken>* Clone()const
 			{
-				return new RegexTokenEnumerator(*this);
+				return new RegexTokenEnumerator<T>(*this);
 			}
 
 			const RegexToken& Current()const
@@ -583,7 +579,8 @@ RegexTokens
 			}
 		};
 
-		RegexTokens::RegexTokens(PureInterpretor* _pure, const Array<vint>& _stateTokens, const U32String& _code, vint _codeIndex, RegexProc _proc)
+		template<typename T>
+		RegexTokens_<T>::RegexTokens_(PureInterpretor* _pure, const Array<vint>& _stateTokens, const U32String& _code, vint _codeIndex, RegexProc_<T> _proc)
 			:pure(_pure)
 			, stateTokens(_stateTokens)
 			, code(_code)
@@ -592,7 +589,8 @@ RegexTokens
 		{
 		}
 
-		RegexTokens::RegexTokens(const RegexTokens& tokens)
+		template<typename T>
+		RegexTokens_<T>::RegexTokens_(const RegexTokens_<T>& tokens)
 			:pure(tokens.pure)
 			, stateTokens(tokens.stateTokens)
 			, code(tokens.code)
@@ -601,7 +599,8 @@ RegexTokens
 		{
 		}
 
-		IEnumerator<RegexToken>* RegexTokens::CreateEnumerator() const
+		template<typename T>
+		IEnumerator<RegexToken_<T>>* RegexTokens_<T>::CreateEnumerator() const
 		{
 			return new RegexTokenEnumerator(pure, stateTokens, code.Buffer(), codeIndex, proc);
 		}
@@ -611,13 +610,14 @@ RegexTokens
 			return false;
 		}
 
-		void RegexTokens::ReadToEnd(collections::List<RegexToken>& tokens, bool(*discard)(vint))const
+		template<typename T>
+		void RegexTokens_<T>::ReadToEnd(collections::List<RegexToken_<T>>& tokens, bool(*discard)(vint))const
 		{
-			if(discard==0)
+			if (discard == 0)
 			{
-				discard=&DefaultDiscard;
+				discard = &DefaultDiscard;
 			}
-			RegexTokenEnumerator(pure, stateTokens, code.Buffer(), codeIndex, proc).ReadToEnd(tokens, discard);
+			RegexTokenEnumerator<T>(pure, stateTokens, code.Buffer(), codeIndex, proc).ReadToEnd(tokens, discard);
 		}
 
 /***********************************************************************
@@ -637,10 +637,6 @@ RegexLexerWalker
 		}
 
 		RegexLexerWalker::~RegexLexerWalker()
-		{
-		}
-
-		RegexTokens::~RegexTokens()
 		{
 		}
 
@@ -1080,5 +1076,10 @@ Template Instantiation
 		template class Regex_<char8_t>;
 		template class Regex_<char16_t>;
 		template class Regex_<char32_t>;
+
+		template class RegexTokens_<wchar_t>;
+		template class RegexTokens_<char8_t>;
+		template class RegexTokens_<char16_t>;
+		template class RegexTokens_<char32_t>;
 	}
 }
