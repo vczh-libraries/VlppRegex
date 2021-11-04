@@ -404,16 +404,16 @@ RegexTokens_<T>
 
 		public:
 			RegexTokenEnumerator(const RegexTokenEnumerator& enumerator)
-				:token(enumerator.token)
+				: token(enumerator.token)
 				, index(enumerator.index)
 				, pure(enumerator.pure)
 				, stateTokens(enumerator.stateTokens)
+				, start(enumerator.start)
+				, codeIndex(enumerator.codeIndex)
 				, proc(enumerator.proc)
 				, reading(enumerator.reading)
-				, start(enumerator.start)
 				, rowStart(enumerator.rowStart)
 				, columnStart(enumerator.columnStart)
-				, codeIndex(enumerator.codeIndex)
 				, cacheAvailable(enumerator.cacheAvailable)
 				, cacheToken(enumerator.cacheToken)
 			{
