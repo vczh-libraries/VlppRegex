@@ -24,7 +24,7 @@ Data Structures for Backtracking
 				Other
 			};
 
-			const wchar_t*			reading;					// Current reading position
+			const char32_t*			reading;					// Current reading position
 			State*					currentState;				// Current state
 			vint					minTransition;				// The first transition to backtrack
 			vint					captureCount;				// Available capture count			(the list size may larger than this)
@@ -49,7 +49,7 @@ Data Structures for Backtracking
 			vint					previous;					// Previous extension saver index
 			vint					captureListIndex;			// Where to write the captured text
 			Transition*				transition;					// The extension begin transition (Capture, Positive, Negative)
-			const wchar_t*			reading;					// The reading position
+			const char32_t*			reading;					// The reading position
 
 			bool operator==(const ExtensionSaver& saver)const
 			{
@@ -160,7 +160,7 @@ RichInterpretor
 			delete[] datas;
 		}
 
-		bool RichInterpretor::MatchHead(const wchar_t* input, const wchar_t* start, RichResult& result)
+		bool RichInterpretor::MatchHead(const char32_t* input, const char32_t* start, RichResult& result)
 		{
 			List<StateSaver> stateSavers;
 			List<ExtensionSaver> extensionSavers;
@@ -248,7 +248,7 @@ RichInterpretor
 									if (capture.length != -1 && (transition->index == -1 || transition->index == index))
 									{
 										// If the captured text matched
-										if (wcsncmp(start + capture.start, currentState.reading, capture.length) == 0)
+										if (memcmp(start + capture.start, currentState.reading, sizeof(char32_t) * capture.length) == 0)
 										{
 											// Consume so much input
 											currentState.reading += capture.length;
@@ -428,9 +428,9 @@ RichInterpretor
 			}
 		}
 
-		bool RichInterpretor::Match(const wchar_t* input, const wchar_t* start, RichResult& result)
+		bool RichInterpretor::Match(const char32_t* input, const char32_t* start, RichResult& result)
 		{
-			const wchar_t* read = input;
+			const char32_t* read = input;
 			while (*read)
 			{
 				if (MatchHead(read, start, result))
@@ -442,7 +442,7 @@ RichInterpretor
 			return false;
 		}
 
-		const List<WString>& RichInterpretor::CaptureNames()
+		const List<U32String>& RichInterpretor::CaptureNames()
 		{
 			return dfa->captureNames;
 		}

@@ -59,7 +59,7 @@ namespace vl
 
 			collections::List<Ptr<State>>		states;
 			collections::List<Ptr<Transition>>	transitions;
-			collections::List<WString>			captureNames;
+			collections::List<U32String>		captureNames;
 			State*								startState;
 
 			Automaton();
