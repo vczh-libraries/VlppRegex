@@ -2,7 +2,6 @@
 
 ## 2.0
 
-- Update `RichInterpretor` to accept `wchar_t`, `char8_t`, `char16_t`, `char32_t` as input.
 - Token will have char component position and `char32_t` component position at the same time.
   - Test `PureInterpretor`
   - Test `RichInterpretor`
