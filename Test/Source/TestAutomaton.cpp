@@ -68,12 +68,12 @@ void PrintAutomaton(WString fileName, Automaton::Ref automaton)
 				break;
 			case Transition::Capture:
 				writer.WriteString(L"<Capture : ");
-				writer.WriteString(automaton->captureNames[transition->capture]);
+				writer.WriteString(u32tow(automaton->captureNames[transition->capture]));
 				writer.WriteLine(L" >");
 				break;
 			case Transition::Match:
 				writer.WriteString(L"<Match : ");
-				writer.WriteString(automaton->captureNames[transition->capture]);
+				writer.WriteString(u32tow(automaton->captureNames[transition->capture]));
 				writer.WriteString(L";");
 				ITOW_S(transition->index, intbuf, sizeof(intbuf) / sizeof(*intbuf), 10);
 				writer.WriteString(intbuf);

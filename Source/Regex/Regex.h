@@ -29,13 +29,13 @@ Data Structure
 		class RegexString : public Object
 		{
 		protected:
-			WString										value;
+			U32String									value;
 			vint										start;
 			vint										length;
 
 		public:
 			RegexString(vint _start=0);
-			RegexString(const WString& _string, vint _start, vint _length);
+			RegexString(const U32String& _string, vint _start, vint _length);
 
 			/// <summary>The position of the input string in characters.</summary>
 			/// <returns>The position.</returns>
@@ -43,9 +43,9 @@ Data Structure
 			/// <summary>The size of the sub string in characters.</summary>
 			/// <returns>The size.</returns>
 			vint										Length()const;
-			/// <summary>Get the sub string as a <see cref="WString"/>.</summary>
+			/// <summary>Get the sub string as a <see cref="U32String"/>.</summary>
 			/// <returns>The sub string.</returns>
-			const WString&								Value()const;
+			const U32String&							Value()const;
 			bool										operator==(const RegexString& string)const;
 		};
 
@@ -57,15 +57,15 @@ Data Structure
 			typedef Ptr<RegexMatch>										Ref;
 			typedef collections::List<Ref>								List;
 			typedef collections::List<RegexString>						CaptureList;
-			typedef collections::Group<WString, RegexString>			CaptureGroup;
+			typedef collections::Group<U32String, RegexString>			CaptureGroup;
 		protected:
 			collections::List<RegexString>				captures;
-			collections::Group<WString, RegexString>	groups;
+			collections::Group<U32String, RegexString>	groups;
 			bool										success;
 			RegexString									result;
 
-			RegexMatch(const WString& _string, regex_internal::PureResult* _result);
-			RegexMatch(const WString& _string, regex_internal::RichResult* _result, regex_internal::RichInterpretor* _rich);
+			RegexMatch(const U32String& _string, regex_internal::PureResult* _result);
+			RegexMatch(const U32String& _string, regex_internal::RichResult* _result, regex_internal::RichInterpretor* _rich);
 			RegexMatch(const RegexString& _result);
 		public:
 			NOT_COPYABLE(RegexMatch);
@@ -215,7 +215,7 @@ Regex
 			regex_internal::PureInterpretor*			pure = nullptr;
 			regex_internal::RichInterpretor*			rich = nullptr;
 
-			void										Process(const WString& text, bool keepEmpty, bool keepSuccess, bool keepFail, RegexMatch::List& matches)const;
+			void										Process(const U32String& text, bool keepEmpty, bool keepSuccess, bool keepFail, RegexMatch::List& matches)const;
 		public:
 			NOT_COPYABLE(Regex);
 			/// <summary>Create a regular expression. It will crash if the regular expression produces syntax error.</summary>
@@ -242,7 +242,7 @@ Regex
 			///     Console::WriteLine(match->Result().Value());
 			/// }
 			/// ]]></example>
-			RegexMatch::Ref								MatchHead(const WString& text)const;
+			RegexMatch::Ref								MatchHead(const U32String& text)const;
 			/// <summary>Match a sub string of the text.</summary>
 			/// <returns>Returns the first match. Returns null if failed.</returns>
 			/// <param name="text">The text to match.</param>
@@ -254,15 +254,15 @@ Regex
 			///     Console::WriteLine(match->Result().Value());
 			/// }
 			/// ]]></example>
-			RegexMatch::Ref								Match(const WString& text)const;
+			RegexMatch::Ref								Match(const U32String& text)const;
 			/// <summary>Match a prefix of the text, ignoring all capturing.</summary>
 			/// <returns>Returns true if it succeeded.</returns>
 			/// <param name="text">The text to match.</param>
-			bool										TestHead(const WString& text)const;
+			bool										TestHead(const U32String& text)const;
 			/// <summary>Match a sub string of the text, ignoring all capturing.</summary>
 			/// <returns>Returns true if succeeded.</returns>
 			/// <param name="text">The text to match.</param>
-			bool										Test(const WString& text)const;
+			bool										Test(const U32String& text)const;
 			/// <summary>Find all matched fragments in the given text, returning all matched sub strings.</summary>
 			/// <param name="text">The text to match.</param>
 			/// <param name="matches">Returns all succeeded matches.</param>
@@ -278,7 +278,7 @@ Regex
 			///     }
 			/// }
 			/// ]]></example>
-			void										Search(const WString& text, RegexMatch::List& matches)const;
+			void										Search(const U32String& text, RegexMatch::List& matches)const;
 			/// <summary>Split the text by matched sub strings, returning all unmatched sub strings.</summary>
 			/// <param name="text">The text to match.</param>
 			/// <param name="keepEmptyMatch">Set to true to keep all empty unmatched sub strings. This could happen when there is nothing between two matched sub strings.</param>
@@ -295,7 +295,7 @@ Regex
 			///     }
 			/// }
 			/// ]]></example>
-			void										Split(const WString& text, bool keepEmptyMatch, RegexMatch::List& matches)const;
+			void										Split(const U32String& text, bool keepEmptyMatch, RegexMatch::List& matches)const;
 			/// <summary>Cut the text by matched sub strings, returning all matched and unmatched sub strings.</summary>
 			/// <param name="text">The text to match.</param>
 			/// <param name="keepEmptyMatch">Set to true to keep all empty matches. This could happen when there is nothing between two matched sub strings.</param>
@@ -312,7 +312,7 @@ Regex
 			///     }
 			/// }
 			/// ]]></example>
-			void										Cut(const WString& text, bool keepEmptyMatch, RegexMatch::List& matches)const;
+			void										Cut(const U32String& text, bool keepEmptyMatch, RegexMatch::List& matches)const;
 		};
 
 /***********************************************************************
@@ -329,8 +329,8 @@ Tokenizer
 			/// <summary>The token id, begins at 0, represents the regular expression in the list (the first argument in the contructor of <see cref="RegexLexer"/>) that matches this token. -1 means this token is produced by an error.</summary>
 			vint										token;
 			/// <summary>The pointer to where this token starts in the input string .</summary>
-			/// <remarks>This pointer comes from a <see cref="WString"/> that used to be analyzed. You should keep a variable to that string alive, so that to keep this pointer alive.</remarks>
-			const wchar_t*								reading;
+			/// <remarks>This pointer comes from a <see cref="U32String"/> that used to be analyzed. You should keep a variable to that string alive, so that to keep this pointer alive.</remarks>
+			const char32_t*								reading;
 			/// <summary>The "codeIndex" argument from [M:vl.regex.RegexLexer.Parse].</summary>
 			vint										codeIndex;
 			/// <summary>True if this token is complete. False if this token does not end here. This could happend when colorizing a text line by line.</summary>
@@ -346,7 +346,6 @@ Tokenizer
 			vint										columnEnd;
 
 			bool										operator==(const RegexToken& _token)const;
-			bool										operator==(const wchar_t* _token)const;
 		};
 
 		/// <summary>Token information for <see cref="RegexProc::extendProc"/>.</summary>
@@ -393,7 +392,7 @@ Tokenizer
 		};
 
 		using RegexInterTokenStateDeleter = void(*)(void* interTokenState);
-		using RegexTokenExtendProc = void(*)(void* argument, const wchar_t* reading, vint length, bool completeText, RegexProcessingToken& processingToken);
+		using RegexTokenExtendProc = void(*)(void* argument, const char32_t* reading, vint length, bool completeText, RegexProcessingToken& processingToken);
 		using RegexTokenColorizeProc =  void(*)(void* argument, vint start, vint length, vint token);
 
 		/// <summary>Callback procedures</summary>
@@ -633,11 +632,11 @@ Tokenizer
 		protected:
 			regex_internal::PureInterpretor*			pure;
 			const collections::Array<vint>&				stateTokens;
-			WString										code;
+			U32String									code;
 			vint										codeIndex;
 			RegexProc									proc;
 			
-			RegexTokens(regex_internal::PureInterpretor* _pure, const collections::Array<vint>& _stateTokens, const WString& _code, vint _codeIndex, RegexProc _proc);
+			RegexTokens(regex_internal::PureInterpretor* _pure, const collections::Array<vint>& _stateTokens, const U32String& _code, vint _codeIndex, RegexProc _proc);
 		public:
 			RegexTokens(const RegexTokens& tokens);
 			~RegexTokens();
@@ -776,12 +775,12 @@ Tokenizer
 			/// See the example for <see cref="RegexLexerWalker"/> about how to use this function.
 			/// </p>
 			/// </remarks>
-			void										Walk(wchar_t input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const;
+			void										Walk(char32_t input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const;
 			/// <summary>Step forward by one character.</summary>
 			/// <returns>Returns the new current state. It is used to walk the next character.</returns>
 			/// <param name="input">The input character.</param>
 			/// <param name="state">The current state.</param>
-			vint										Walk(wchar_t input, vint state)const;
+			vint										Walk(char32_t input, vint state)const;
 			/// <summary>Test if the input text is a closed token.</summary>
 			/// <returns>Returns true if the input text is a closed token.</returns>
 			/// <param name="input">The input text.</param>
@@ -832,7 +831,7 @@ Tokenizer
 			///     }
 			/// }
 			/// ]]></example>
-			bool										IsClosedToken(const wchar_t* input, vint length)const;
+			bool										IsClosedToken(const char32_t* input, vint length)const;
 			/// <summary>Test if the input is a closed token.</summary>
 			/// <returns>Returns true if the input text is a closed token.</returns>
 			/// <param name="input">The input text.</param>
@@ -882,7 +881,7 @@ Tokenizer
 			///     }
 			/// }
 			/// ]]></example>
-			bool										IsClosedToken(const WString& input)const;
+			bool										IsClosedToken(const U32String& input)const;
 		};
 
 		/// <summary>Lexical colorizer. Call <see cref="RegexLexer::Colorize"/> to create this object.</summary>
@@ -957,8 +956,8 @@ Tokenizer
 			RegexProc									proc;
 			InternalState								internalState;
 
-			void										CallExtendProcAndColorizeProc(const wchar_t* input, vint length, RegexProcessingToken& token, bool colorize);
-			vint										WalkOneToken(const wchar_t* input, vint length, vint start, bool colorize);
+			void										CallExtendProcAndColorizeProc(const char32_t* input, vint length, RegexProcessingToken& token, bool colorize);
+			vint										WalkOneToken(const char32_t* input, vint length, vint start, bool colorize);
 
 			RegexLexerColorizer(const RegexLexerWalker& _walker, RegexProc _proc);
 		public:
@@ -987,7 +986,7 @@ Tokenizer
 			/// <summary>Step forward by one character.</summary>
 			/// <param name="input">The input character.</param>
 			/// <remarks>Callbacks in <see cref="RegexProc"/> will be called <b>except colorizeProc</b>, which is from the second argument of the constructor of <see cref="RegexLexer"/>.</remarks>
-			void										Pass(wchar_t input);
+			void										Pass(char32_t input);
 			/// <summary>Get the start DFA state number, which represents the correct state before colorizing any characters.</summary>
 			/// <returns>The DFA state number.</returns>
 			vint										GetStartState()const;
@@ -999,7 +998,7 @@ Tokenizer
 			/// <p>See <see cref="RegexProcessingToken::interTokenState"/> and <see cref="RegexProc::extendProc"/> for more information about the return value.</p>
 			/// <p>Callbacks in <see cref="RegexProc"/> will be called, which is from the second argument of the constructor of <see cref="RegexLexer"/>.</p>
 			/// </remarks>
-			void*										Colorize(const wchar_t* input, vint length);
+			void*										Colorize(const char32_t* input, vint length);
 		};
 
 		/// <summary>Lexical analyzer.</summary>
@@ -1024,7 +1023,7 @@ Tokenizer
 			/// <param name="code">The text to tokenize.</param>
 			/// <param name="codeIndex">Extra information that will be copied to [F:vl.regex.RegexToken.codeIndex].</param>
 			/// <remarks>Callbacks in <see cref="RegexProc"/> will be called when iterating through tokens, which is from the second argument of the constructor of <see cref="RegexLexer"/>.</remarks>
-			RegexTokens									Parse(const WString& code, vint codeIndex=-1)const;
+			RegexTokens									Parse(const U32String& code, vint codeIndex=-1)const;
 			/// <summary>Create a equivalence walker from this lexical analyzer. A walker enable you to walk throught characters one by one,</summary>
 			/// <returns>The walker.</returns>
 			RegexLexerWalker							Walk()const;

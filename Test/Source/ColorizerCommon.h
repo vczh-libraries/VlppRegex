@@ -14,7 +14,7 @@ inline void ColorizerProc(void* argument, vint start, vint length, vint token)
 }
 
 template<int Size, int Length>
-inline void* AssertColorizer(vint(&actual)[Size], vint(&expect)[Length], RegexLexerColorizer& colorizer, const wchar_t(&input)[Length + 1], bool firstLine)
+inline void* AssertColorizer(vint(&actual)[Size], vint(&expect)[Length], RegexLexerColorizer& colorizer, const char32_t(&input)[Length + 1], bool firstLine)
 {
 	for (vint i = 0; i < Size; i++)
 	{

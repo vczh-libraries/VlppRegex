@@ -168,11 +168,11 @@ EpsilonNfaAlgorithm
 				vint capture = -1;
 				if (expression->name != U32String::Empty)
 				{
-					capture = target->captureNames.IndexOf(u32tow(expression->name));
+					capture = target->captureNames.IndexOf(expression->name);
 					if (capture == -1)
 					{
 						capture = target->captureNames.Count();
-						target->captureNames.Add(u32tow(expression->name));
+						target->captureNames.Add(expression->name);
 					}
 				}
 
@@ -187,11 +187,11 @@ EpsilonNfaAlgorithm
 				vint capture = -1;
 				if (expression->name != U32String::Empty)
 				{
-					capture = target->captureNames.IndexOf(u32tow(expression->name));
+					capture = target->captureNames.IndexOf(expression->name);
 					if (capture == -1)
 					{
 						capture = target->captureNames.Count();
-						target->captureNames.Add(u32tow(expression->name));
+						target->captureNames.Add(expression->name);
 					}
 				}
 				EpsilonNfa result;

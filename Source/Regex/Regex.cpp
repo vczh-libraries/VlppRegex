@@ -25,11 +25,14 @@ RegexString
 		{
 		}
 
-		RegexString::RegexString(const WString& _string, vint _start, vint _length)
-			: value(_length == 0 ? L"" : _string.Sub(_start, _length))
-			, start(_start)
-			, length(_length)
+		RegexString::RegexString(const U32String& _string, vint _start, vint _length)
+			: start(_start)
+			, length(_length > 0 ? _length : 0)
 		{
+			if (_length > 0)
+			{
+				value = _string.Sub(_start, _length);
+			}
 		}
 
 		vint RegexString::Start()const
@@ -42,7 +45,7 @@ RegexString
 			return length;
 		}
 
-		const WString& RegexString::Value()const
+		const U32String& RegexString::Value()const
 		{
 			return value;
 		}
@@ -56,13 +59,13 @@ RegexString
 RegexMatch
 ***********************************************************************/
 		
-		RegexMatch::RegexMatch(const WString& _string, PureResult* _result)
+		RegexMatch::RegexMatch(const U32String& _string, PureResult* _result)
 			:success(true)
 			, result(_string, _result->start, _result->length)
 		{
 		}
 
-		RegexMatch::RegexMatch(const WString& _string, RichResult* _result, RichInterpretor* _rich)
+		RegexMatch::RegexMatch(const U32String& _string, RichResult* _result, RichInterpretor* _rich)
 			: success(true)
 			, result(_string, _result->start, _result->length)
 		{
@@ -110,12 +113,12 @@ RegexMatch
 Regex
 ***********************************************************************/
 
-		void Regex::Process(const WString& text, bool keepEmpty, bool keepSuccess, bool keepFail, RegexMatch::List& matches)const
+		void Regex::Process(const U32String& text, bool keepEmpty, bool keepSuccess, bool keepFail, RegexMatch::List& matches)const
 		{
 			if (rich)
 			{
-				const wchar_t* start = text.Buffer();
-				const wchar_t* input = start;
+				const char32_t* start = text.Buffer();
+				const char32_t* input = start;
 				RichResult result;
 				while (rich->Match(input, start, result))
 				{
@@ -145,8 +148,8 @@ Regex
 			}
 			else
 			{
-				const wchar_t* start = text.Buffer();
-				const wchar_t* input = start;
+				const char32_t* start = text.Buffer();
+				const char32_t* input = start;
 				PureResult result;
 				while (pure->Match(input, start, result))
 				{
@@ -254,7 +257,7 @@ Regex
 			return pure ? true : false;
 		}
 
-		RegexMatch::Ref Regex::MatchHead(const WString& text)const
+		RegexMatch::Ref Regex::MatchHead(const U32String& text)const
 		{
 			if (rich)
 			{
@@ -282,7 +285,7 @@ Regex
 			}
 		}
 
-		RegexMatch::Ref Regex::Match(const WString& text)const
+		RegexMatch::Ref Regex::Match(const U32String& text)const
 		{
 			if (rich)
 			{
@@ -310,7 +313,7 @@ Regex
 			}
 		}
 
-		bool Regex::TestHead(const WString& text)const
+		bool Regex::TestHead(const U32String& text)const
 		{
 			if (pure)
 			{
@@ -324,7 +327,7 @@ Regex
 			}
 		}
 
-		bool Regex::Test(const WString& text)const
+		bool Regex::Test(const U32String& text)const
 		{
 			if (pure)
 			{
@@ -338,17 +341,17 @@ Regex
 			}
 		}
 
-		void Regex::Search(const WString& text, RegexMatch::List& matches)const
+		void Regex::Search(const U32String& text, RegexMatch::List& matches)const
 		{
 			Process(text, false, true, false, matches);
 		}
 
-		void Regex::Split(const WString& text, bool keepEmptyMatch, RegexMatch::List& matches)const
+		void Regex::Split(const U32String& text, bool keepEmptyMatch, RegexMatch::List& matches)const
 		{
 			Process(text, keepEmptyMatch, false, true, matches);
 		}
 
-		void Regex::Cut(const WString& text, bool keepEmptyMatch, RegexMatch::List& matches)const
+		void Regex::Cut(const U32String& text, bool keepEmptyMatch, RegexMatch::List& matches)const
 		{
 			Process(text, keepEmptyMatch, true, true, matches);
 		}
@@ -361,11 +364,6 @@ RegexTokens
 		{
 			return length == _token.length && token == _token.token && reading == _token.reading;
 		}
-		
-		bool RegexToken::operator==(const wchar_t* _token)const
-		{
-			return wcslen(_token) == length && wcsncmp(reading, _token, length) == 0;
-		}
 
 		class RegexTokenEnumerator : public Object, public IEnumerator<RegexToken>
 		{
@@ -375,11 +373,11 @@ RegexTokens
 
 			PureInterpretor*		pure;
 			const Array<vint>&		stateTokens;
-			const wchar_t*			start;
+			const char32_t*			start;
 			vint					codeIndex;
 			RegexProc				proc;
 
-			const wchar_t*			reading;
+			const char32_t*			reading;
 			vint					rowStart = 0;
 			vint					columnStart = 0;
 			bool					cacheAvailable = false;
@@ -402,7 +400,7 @@ RegexTokens
 			{
 			}
 
-			RegexTokenEnumerator(PureInterpretor* _pure, const Array<vint>& _stateTokens, const wchar_t* _start, vint _codeIndex, RegexProc _proc)
+			RegexTokenEnumerator(PureInterpretor* _pure, const Array<vint>& _stateTokens, const char32_t* _start, vint _codeIndex, RegexProc _proc)
 				:index(-1)
 				, pure(_pure)
 				, stateTokens(_stateTokens)
@@ -562,7 +560,7 @@ RegexTokens
 			}
 		};
 
-		RegexTokens::RegexTokens(PureInterpretor* _pure, const Array<vint>& _stateTokens, const WString& _code, vint _codeIndex, RegexProc _proc)
+		RegexTokens::RegexTokens(PureInterpretor* _pure, const Array<vint>& _stateTokens, const U32String& _code, vint _codeIndex, RegexProc _proc)
 			:pure(_pure)
 			, stateTokens(_stateTokens)
 			, code(_code)
@@ -634,7 +632,7 @@ RegexLexerWalker
 			return finalState == -1 ? -1 : stateTokens.Get(finalState);
 		}
 
-		void RegexLexerWalker::Walk(wchar_t input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const
+		void RegexLexerWalker::Walk(char32_t input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const
 		{
 			vint previousState = state;
 			token = -1;
@@ -673,7 +671,7 @@ RegexLexerWalker
 			}
 		}
 
-		vint RegexLexerWalker::Walk(wchar_t input, vint state)const
+		vint RegexLexerWalker::Walk(char32_t input, vint state)const
 		{
 			vint token = -1;
 			bool finalState = false;
@@ -682,7 +680,7 @@ RegexLexerWalker
 			return state;
 		}
 
-		bool RegexLexerWalker::IsClosedToken(const wchar_t* input, vint length)const
+		bool RegexLexerWalker::IsClosedToken(const char32_t* input, vint length)const
 		{
 			vint state = pure->GetStartState();
 			for (vint i = 0; i < length; i++)
@@ -694,7 +692,7 @@ RegexLexerWalker
 			return false;
 		}
 
-		bool RegexLexerWalker::IsClosedToken(const WString& input)const
+		bool RegexLexerWalker::IsClosedToken(const U32String& input)const
 		{
 			return IsClosedToken(input.Buffer(), input.Length());
 		}
@@ -730,7 +728,7 @@ RegexLexerColorizer
 			internalState = state;
 		}
 
-		void RegexLexerColorizer::Pass(wchar_t input)
+		void RegexLexerColorizer::Pass(char32_t input)
 		{
 			WalkOneToken(&input, 1, 0, false);
 		}
@@ -740,7 +738,7 @@ RegexLexerColorizer
 			return walker.GetStartState();
 		}
 
-		void RegexLexerColorizer::CallExtendProcAndColorizeProc(const wchar_t* input, vint length, RegexProcessingToken& token, bool colorize)
+		void RegexLexerColorizer::CallExtendProcAndColorizeProc(const char32_t* input, vint length, RegexProcessingToken& token, bool colorize)
 		{
 			vint oldTokenLength = token.length;
 			proc.extendProc(proc.argument, input + token.start, length - token.start, false, token);
@@ -749,19 +747,19 @@ RegexLexerColorizer
 				bool pausedAtTheEnd = token.start + token.length == length && !token.completeToken;
 				CHECK_ERROR(
 					token.completeToken || pausedAtTheEnd,
-					L"RegexLexerColorizer::WalkOneToken(const wchar_t*, vint, vint, bool)#The extendProc is not allowed pause before the end of the input."
+					L"RegexLexerColorizer::WalkOneToken(const char32_t*, vint, vint, bool)#The extendProc is not allowed pause before the end of the input."
 				);
 				CHECK_ERROR(
 					token.completeToken || token.token != -1,
-					L"RegexLexerColorizer::WalkOneToken(const wchar_t*, vint, vint, bool)#The extendProc is not allowed to pause without a valid token id."
+					L"RegexLexerColorizer::WalkOneToken(const char32_t*, vint, vint, bool)#The extendProc is not allowed to pause without a valid token id."
 				);
 				CHECK_ERROR(
 					oldTokenLength <= token.length,
-					L"RegexLexerColorizer::WalkOneToken(const wchar_t*, vint, vint, bool)#The extendProc is not allowed to decrease the token length."
+					L"RegexLexerColorizer::WalkOneToken(const char32_t*, vint, vint, bool)#The extendProc is not allowed to decrease the token length."
 				);
 				CHECK_ERROR(
 					(token.interTokenState == nullptr) == !pausedAtTheEnd,
-					L"RegexLexerColorizer::Colorize(const wchar_t*, vint, void*)#The extendProc should return an inter token state object if and only if a valid token does not end at the end of the input."
+					L"RegexLexerColorizer::Colorize(const char32_t*, vint, void*)#The extendProc should return an inter token state object if and only if a valid token does not end at the end of the input."
 				);
 			}
 #endif
@@ -775,7 +773,7 @@ RegexLexerColorizer
 			}
 		}
 
-		vint RegexLexerColorizer::WalkOneToken(const wchar_t* input, vint length, vint start, bool colorize)
+		vint RegexLexerColorizer::WalkOneToken(const char32_t* input, vint length, vint start, bool colorize)
 		{
 			if (internalState.interTokenState)
 			{
@@ -786,15 +784,15 @@ RegexLexerColorizer
 					bool pausedAtTheEnd = token.length == length && !token.completeToken;
 					CHECK_ERROR(
 						token.completeToken || pausedAtTheEnd,
-						L"RegexLexerColorizer::WalkOneToken(const wchar_t*, vint, vint, bool)#The extendProc is not allowed to pause before the end of the input."
+						L"RegexLexerColorizer::WalkOneToken(const char32_t*, vint, vint, bool)#The extendProc is not allowed to pause before the end of the input."
 					);
 					CHECK_ERROR(
 						token.completeToken || token.token == internalState.interTokenId,
-						L"RegexLexerColorizer::WalkOneToken(const wchar_t*, vint, vint, bool)#The extendProc is not allowed to continue pausing with a different token id."
+						L"RegexLexerColorizer::WalkOneToken(const char32_t*, vint, vint, bool)#The extendProc is not allowed to continue pausing with a different token id."
 					);
 					CHECK_ERROR(
 						(token.interTokenState == nullptr) == !pausedAtTheEnd,
-						L"RegexLexerColorizer::Colorize(const wchar_t*, vint, void*)#The extendProc should return an inter token state object if and only if a valid token does not end at the end of the input."
+						L"RegexLexerColorizer::Colorize(const char32_t*, vint, void*)#The extendProc should return an inter token state object if and only if a valid token does not end at the end of the input."
 					);
 				}
 #endif
@@ -883,7 +881,7 @@ RegexLexerColorizer
 			return length;
 		}
 
-		void* RegexLexerColorizer::Colorize(const wchar_t* input, vint length)
+		void* RegexLexerColorizer::Colorize(const char32_t* input, vint length)
 		{
 			vint index = 0;
 			while (index != length)
@@ -992,7 +990,7 @@ RegexLexer
 			if (pure) delete pure;
 		}
 
-		RegexTokens RegexLexer::Parse(const WString& code, vint codeIndex)const
+		RegexTokens RegexLexer::Parse(const U32String& code, vint codeIndex)const
 		{
 			pure->PrepareForRelatedFinalStateTable();
 			return RegexTokens(pure, stateTokens, code, codeIndex, proc);
