@@ -20,6 +20,7 @@ namespace vl
 
 	namespace regex
 	{
+		class RegexBase_;
 
 /***********************************************************************
 Data Structure
@@ -70,15 +71,15 @@ Data Structure
 		template<typename T>
 		class RegexMatch_ : public Object
 		{
-			friend class Regex;
+			friend class RegexBase_;
 		public:
 			typedef Ptr<RegexMatch_<T>>										Ref;
 			typedef collections::List<Ref>									List;
 			typedef collections::List<RegexString_<T>>						CaptureList;
-			typedef collections::Group<ObjectString<T>, RegexString_<T>>	CaptureGroup;
+			typedef collections::Group<vint, RegexString_<T>>				CaptureGroup;
 		protected:
-			collections::List<RegexString_<T>>								captures;
-			collections::Group<vint, RegexString_<T>>						groups;
+			CaptureList														captures;
+			CaptureGroup													groups;
 			bool															success;
 			RegexString_<T>													result;
 
@@ -165,6 +166,8 @@ Regex
 			/// ]]></example>
 			template<typename T>
 			typename RegexMatch_<T>::Ref				MatchHead(const ObjectString<T>& text)const;
+			template<typename T>
+			typename RegexMatch_<T>::Ref				MatchHead(const T* text) const { return MatchHead<T>(ObjectString<T>(text)); }
 
 			/// <summary>Match a sub string of the text.</summary>
 			/// <typeparam name="T>The character type of the text to match.</typeparam>
@@ -180,6 +183,8 @@ Regex
 			/// ]]></example>
 			template<typename T>
 			typename RegexMatch_<T>::Ref				Match(const ObjectString<T>& text)const;
+			template<typename T>
+			typename RegexMatch_<T>::Ref				Match(const T* text) const { return Match<T>(ObjectString<T>(text)); }
 
 			/// <summary>Match a prefix of the text, ignoring all capturing.</summary>
 			/// <typeparam name="T>The character type of the text to match.</typeparam>
@@ -187,6 +192,8 @@ Regex
 			/// <param name="text">The text to match.</param>
 			template<typename T>
 			bool										TestHead(const ObjectString<T>& text)const;
+			template<typename T>
+			bool										TestHead(const T* text) const { return TestHead<T>(ObjectString<T>(text)); }
 
 			/// <summary>Match a sub string of the text, ignoring all capturing.</summary>
 			/// <typeparam name="T>The character type of the text to match.</typeparam>
@@ -194,6 +201,8 @@ Regex
 			/// <param name="text">The text to match.</param>
 			template<typename T>
 			bool										Test(const ObjectString<T>& text)const;
+			template<typename T>
+			bool										Test(const T* text) const { return Test<T>(ObjectString<T>(text)); }
 
 			/// <summary>Find all matched fragments in the given text, returning all matched sub strings.</summary>
 			/// <typeparam name="T>The character type of the text to match.</typeparam>
@@ -213,6 +222,8 @@ Regex
 			/// ]]></example>
 			template<typename T>
 			void										Search(const ObjectString<T>& text, typename RegexMatch_<T>::List& matches)const;
+			template<typename T>
+			void										Search(const T* text, typename RegexMatch_<T>::List& matches) const { return Search<T>(ObjectString<T>(text), matches); }
 
 			/// <summary>Split the text by matched sub strings, returning all unmatched sub strings.</summary>
 			/// <typeparam name="T>The character type of the text to match.</typeparam>
@@ -233,6 +244,8 @@ Regex
 			/// ]]></example>
 			template<typename T>
 			void										Split(const ObjectString<T>& text, bool keepEmptyMatch, typename RegexMatch_<T>::List& matches)const;
+			template<typename T>
+			void										Split(const T* text, bool keepEmptyMatch, typename RegexMatch_<T>::List& matches) const { return Split<T>(ObjectString<T>(text), keepEmptyMatch, matches); }
 
 			/// <summary>Cut the text by matched sub strings, returning all matched and unmatched sub strings.</summary>
 			/// <typeparam name="T>The character type of the text to match.</typeparam>
@@ -253,6 +266,8 @@ Regex
 			/// ]]></example>
 			template<typename T>
 			void										Cut(const ObjectString<T>& text, bool keepEmptyMatch, typename RegexMatch_<T>::List& matches)const;
+			template<typename T>
+			void										Cut(const T* text, bool keepEmptyMatch, typename RegexMatch_<T>::List& matches) const { return Cut<T>(ObjectString<T>(text), keepEmptyMatch, matches); }
 		};
 
 		/// <summary>
@@ -357,7 +372,8 @@ Regex
 		protected:
 			collections::List<ObjectString<T>>			captureNames;
 
-			void										FillCaptureNames();
+			static U32String							ToU32(const ObjectString<T>& text);
+			static ObjectString<T>						FromU32(const U32String& text);
 		public:
 			NOT_COPYABLE(Regex_<T>);
 

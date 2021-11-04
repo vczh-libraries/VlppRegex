@@ -233,6 +233,8 @@ TEST_FILE
 			Regex regex(L"^(<a>/w+?)(<b>/w+?)((<$a>)(<$b>))+(<$a>)/w{6}$", true);
 			TEST_ASSERT(regex.IsPureMatch() == false);
 			TEST_ASSERT(regex.IsPureTest() == false);
+			vint _a = regex.CaptureNames().IndexOf(L"a");
+			vint _b = regex.CaptureNames().IndexOf(L"b");
 
 			RegexMatch::Ref match = regex.Match(L"vczhgeniusvczhgeniusvczhgeniusvczhgenius");
 			TEST_ASSERT(match);
@@ -241,16 +243,16 @@ TEST_FILE
 			TEST_ASSERT(match->Result().Length() == 40);
 			TEST_ASSERT(match->Result().Value() == L"vczhgeniusvczhgeniusvczhgeniusvczhgenius");
 			TEST_ASSERT(match->Groups().Keys().Count() == 2);
-			TEST_ASSERT(match->Groups().Keys()[0] == L"a");
-			TEST_ASSERT(match->Groups().Keys()[1] == L"b");
-			TEST_ASSERT(match->Groups()[L"a"].Count() == 1);
-			TEST_ASSERT(match->Groups()[L"a"].Get(0).Start() == 0);
-			TEST_ASSERT(match->Groups()[L"a"].Get(0).Length() == 4);
-			TEST_ASSERT(match->Groups()[L"a"].Get(0).Value() == L"vczh");
-			TEST_ASSERT(match->Groups()[L"b"].Count() == 1);
-			TEST_ASSERT(match->Groups()[L"b"].Get(0).Start() == 4);
-			TEST_ASSERT(match->Groups()[L"b"].Get(0).Length() == 6);
-			TEST_ASSERT(match->Groups()[L"b"].Get(0).Value() == L"genius");
+			TEST_ASSERT(match->Groups().Keys()[0] == _a);
+			TEST_ASSERT(match->Groups().Keys()[1] == _b);
+			TEST_ASSERT(match->Groups()[_a].Count() == 1);
+			TEST_ASSERT(match->Groups()[_a].Get(0).Start() == 0);
+			TEST_ASSERT(match->Groups()[_a].Get(0).Length() == 4);
+			TEST_ASSERT(match->Groups()[_a].Get(0).Value() == L"vczh");
+			TEST_ASSERT(match->Groups()[_b].Count() == 1);
+			TEST_ASSERT(match->Groups()[_b].Get(0).Start() == 4);
+			TEST_ASSERT(match->Groups()[_b].Get(0).Length() == 6);
+			TEST_ASSERT(match->Groups()[_b].Get(0).Value() == L"genius");
 		}
 		{
 			Regex regex(L"^(?/d+).(?/d+).(?/d+).(<$0>).(<$1>).(<$2>)$");

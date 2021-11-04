@@ -36,11 +36,11 @@ RegexMatch_<T>
 				CaptureRecord& capture = _result->captures[i];
 				if (capture.capture == -1)
 				{
-					captures.Add(RegexString(_string, capture.start, capture.length));
+					captures.Add(RegexString_<T>(_string, capture.start, capture.length));
 				}
 				else
 				{
-					groups.Add(capture.capture, RegexString(_string, capture.start, capture.length));
+					groups.Add(capture.capture, RegexString_<T>(_string, capture.start, capture.length));
 				}
 			}
 		}
@@ -74,7 +74,7 @@ RegexMatch_<T>
 		const typename RegexMatch_<T>::CaptureGroup& RegexMatch_<T>::Groups()const
 		{
 			return groups;
-		
+		}
 
 /***********************************************************************
 RegexBase_
@@ -95,12 +95,12 @@ RegexBase_
 					{
 						if (result.start > offset || keepEmpty)
 						{
-							matches.Add(new RegexMatch(RegexString(text, offset, result.start - offset)));
+							matches.Add(new RegexMatch_<T>(RegexString_<T>(text, offset, result.start - offset)));
 						}
 					}
 					if (keepSuccess)
 					{
-						matches.Add(new RegexMatch(text, &result, rich));
+						matches.Add(new RegexMatch_<T>(text, &result));
 					}
 					input = start + result.start + result.length;
 				}
@@ -110,7 +110,7 @@ RegexBase_
 					vint length = text.Length() - remain;
 					if (length || keepEmpty)
 					{
-						matches.Add(new RegexMatch(RegexString(text, remain, length)));
+						matches.Add(new RegexMatch_<T>(RegexString_<T>(text, remain, length)));
 					}
 				}
 			}
@@ -126,12 +126,12 @@ RegexBase_
 					{
 						if (result.start > offset || keepEmpty)
 						{
-							matches.Add(new RegexMatch(RegexString(text, offset, result.start - offset)));
+							matches.Add(new RegexMatch_<T>(RegexString_<T>(text, offset, result.start - offset)));
 						}
 					}
 					if (keepSuccess)
 					{
-						matches.Add(new RegexMatch(text, &result));
+						matches.Add(new RegexMatch_<T>(text, &result));
 					}
 					input = start + result.start + result.length;
 				}
@@ -141,7 +141,7 @@ RegexBase_
 					vint length = text.Length() - remain;
 					if (length || keepEmpty)
 					{
-						matches.Add(new RegexMatch(RegexString(text, remain, length)));
+						matches.Add(new RegexMatch_<T>(RegexString_<T>(text, remain, length)));
 					}
 				}
 			}
@@ -161,7 +161,7 @@ RegexBase_
 				RichResult result;
 				if (rich->MatchHead(text.Buffer(), text.Buffer(), result))
 				{
-					return new RegexMatch(text, &result, rich);
+					return new RegexMatch_<T>(text, &result);
 				}
 				else
 				{
@@ -173,7 +173,7 @@ RegexBase_
 				PureResult result;
 				if (pure->MatchHead(text.Buffer(), text.Buffer(), result))
 				{
-					return new RegexMatch(text, &result);
+					return new RegexMatch_<T>(text, &result);
 				}
 				else
 				{
@@ -190,7 +190,7 @@ RegexBase_
 				RichResult result;
 				if (rich->Match(text.Buffer(), text.Buffer(), result))
 				{
-					return new RegexMatch(text, &result, rich);
+					return new RegexMatch_<T>(text, &result);
 				}
 				else
 				{
@@ -202,7 +202,7 @@ RegexBase_
 				PureResult result;
 				if (pure->Match(text.Buffer(), text.Buffer(), result))
 				{
-					return new RegexMatch(text, &result);
+					return new RegexMatch_<T>(text, &result);
 				}
 				else
 				{
@@ -264,58 +264,58 @@ Regex_<T>
 ***********************************************************************/
 
 		template<>
-		void Regex_<wchar_t>::FillCaptureNames()
+		U32String Regex_<wchar_t>::ToU32(const ObjectString<wchar_t>& text)
 		{
-			if (rich)
-			{
-				for (auto&& name : rich->CaptureNames())
-				{
-					captureNames.Add(u32tow(name));
-				}
-			}
+			return wtou32(text);
 		}
 
 		template<>
-		void Regex_<char8_t>::FillCaptureNames()
+		ObjectString<wchar_t> Regex_<wchar_t>::FromU32(const U32String& text)
 		{
-			if (rich)
-			{
-				for (auto&& name : rich->CaptureNames())
-				{
-					captureNames.Add(u32tou8(name));
-				}
-			}
+			return u32tow(text);
 		}
 
 		template<>
-		void Regex_<char16_t>::FillCaptureNames()
+		U32String Regex_<char8_t>::ToU32(const ObjectString<char8_t>& text)
 		{
-			if (rich)
-			{
-				for (auto&& name : rich->CaptureNames())
-				{
-					captureNames.Add(u32tou16(name));
-				}
-			}
+			return u8tou32(text);
 		}
 
 		template<>
-		void Regex_<char32_t>::FillCaptureNames()
+		ObjectString<char8_t> Regex_<char8_t>::FromU32(const U32String& text)
 		{
-			if (rich)
-			{
-				for (auto&& name : rich->CaptureNames())
-				{
-					captureNames.Add(name);
-				}
-			}
+			return u32tou8(text);
+		}
+
+		template<>
+		U32String Regex_<char16_t>::ToU32(const ObjectString<char16_t>& text)
+		{
+			return u16tou32(text);
+		}
+
+		template<>
+		ObjectString<char16_t> Regex_<char16_t>::FromU32(const U32String& text)
+		{
+			return u32tou16(text);
+		}
+
+		template<>
+		U32String Regex_<char32_t>::ToU32(const ObjectString<char32_t>& text)
+		{
+			return text;
+		}
+
+		template<>
+		ObjectString<char32_t> Regex_<char32_t>::FromU32(const U32String& text)
+		{
+			return text;
 		}
 		
 		template<typename T>
-		Regex_::Regex_(const ObjectString<T>& code, bool preferPure)
+		Regex_<T>::Regex_(const ObjectString<T>& code, bool preferPure)
 		{
 			CharRange::List subsets;
-			RegexExpression::Ref regex = ParseRegexExpression(code);
+			RegexExpression::Ref regex = ParseRegexExpression(ToU32(code));
 			Expression::Ref expression = regex->Merge();
 			expression->NormalizeCharSet(subsets);
 
@@ -364,7 +364,11 @@ Regex_<T>
 					Automaton::Ref nfa = EpsilonNfaToNfa(eNfa, RichEpsilonChecker, nfaStateMap);
 					Automaton::Ref dfa = NfaToDfa(nfa, dfaStateMap);
 					rich = new RichInterpretor(dfa);
-					FillCaptureNames();
+
+					for (auto&& name : rich->CaptureNames())
+					{
+						captureNames.Add(FromU32(name));
+					}
 				}
 			}
 			catch (...)
