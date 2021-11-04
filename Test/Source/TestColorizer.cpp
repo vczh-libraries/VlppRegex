@@ -1,4 +1,4 @@
-#include "ColorizerCommon.h"
+﻿#include "ColorizerCommon.h"
 
 TEST_FILE
 {

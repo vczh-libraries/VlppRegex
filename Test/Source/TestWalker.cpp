@@ -1,4 +1,4 @@
-#include "../../Source/Regex/Regex.h"
+﻿#include "../../Source/Regex/Regex.h"
 
 using namespace vl;
 using namespace vl::collections;
