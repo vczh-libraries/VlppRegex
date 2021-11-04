@@ -5,7 +5,7 @@ using namespace vl;
 using namespace vl::regex;
 using namespace vl::regex_internal;
 
-void NormalizedRegexAssert(const wchar_t* input, RegexNode node)
+void NormalizedRegexAssert(const char32_t* input, RegexNode node)
 {
 	CharRange::List subsets;
 	Expression::Ref exp = ParseExpression(input);
@@ -18,7 +18,7 @@ void NormalizedRegexAssert(const wchar_t* input, RegexNode node)
 	TEST_ASSERT(exp->IsEqual(node.expression.Obj()));
 }
 
-void MergedRegexAssert(const wchar_t* input, RegexNode node)
+void MergedRegexAssert(const char32_t* input, RegexNode node)
 {
 	RegexExpression::Ref regex = ParseRegexExpression(input);
 	Expression::Ref exp = regex->Merge();
@@ -29,19 +29,19 @@ TEST_FILE
 {
 	TEST_CASE(L"Test charset normalization")
 	{
-		NormalizedRegexAssert(L"[a-g][h-n]", rC(L'a', L'g') + rC(L'h', L'n'));
-		NormalizedRegexAssert(L"[a-g][g-n]", (rC(L'a', L'f') % rC(L'g')) + (rC(L'g') % rC(L'h', L'n')));
-		NormalizedRegexAssert(L"/w+vczh", (
-			rC(L'0', L'9') % rC(L'A', L'Z') % rC(L'_') % rC(L'a', L'b') % rC(L'c') % rC(L'd', L'g') % rC(L'h') % rC(L'i', L'u') % rC(L'v') % rC(L'w', L'y') % rC(L'z')
-			).Some() + rC(L'v') + rC(L'c') + rC(L'z') + rC(L'h'));
-		NormalizedRegexAssert(L"[0-2][1-3][2-4]", (rC(L'0') % rC(L'1') % rC(L'2')) + (rC(L'1') % rC(L'2') % rC(L'3')) + (rC(L'2') % rC(L'3') % rC(L'4')));
-		NormalizedRegexAssert(L"[^C-X][A-Z]", (rC(1, L'A' - 1) % rC(L'A', L'B') % rC(L'Y', L'Z') % rC(L'Z' + 1, 65535)) + (rC(L'A', L'B') % rC(L'C', L'X') % rC(L'Y', L'Z')));
+		NormalizedRegexAssert(U"[a-g][h-n]", rC(U'a', U'g') + rC(U'h', U'n'));
+		NormalizedRegexAssert(U"[a-g][g-n]", (rC(U'a', U'f') % rC(U'g')) + (rC(U'g') % rC(U'h', U'n')));
+		NormalizedRegexAssert(U"/w+vczh", (
+			rC(U'0', U'9') % rC(U'A', U'Z') % rC(U'_') % rC(U'a', U'b') % rC(U'c') % rC(U'd', U'g') % rC(U'h') % rC(U'i', U'u') % rC(U'v') % rC(U'w', U'y') % rC(U'z')
+			).Some() + rC(U'v') + rC(U'c') + rC(U'z') + rC(U'h'));
+		NormalizedRegexAssert(U"[0-2][1-3][2-4]", (rC(U'0') % rC(U'1') % rC(U'2')) + (rC(U'1') % rC(U'2') % rC(U'3')) + (rC(U'2') % rC(U'3') % rC(U'4')));
+		NormalizedRegexAssert(U"[^C-X][A-Z]", (rC(1, U'A' - 1) % rC(U'A', U'B') % rC(U'Y', U'Z') % rC(U'Z' + 1, 65535)) + (rC(U'A', U'B') % rC(U'C', U'X') % rC(U'Y', U'Z')));
 	});
 
 	TEST_CASE(L"Test expression merging")
 	{
-		const wchar_t* code = L"(<#part>/d+)(<#capture>(<section>(<&part>)))((<&capture>).){3}(<&capture>)";
-		RegexNode node = (rCapture(L"section", r_d().Some()) + rC(L'.')).Loop(3, 3) + rCapture(L"section", r_d().Some());
+		const char32_t* code = U"(<#part>/d+)(<#capture>(<section>(<&part>)))((<&capture>).){3}(<&capture>)";
+		RegexNode node = (rCapture(U"section", r_d().Some()) + rC(L'.')).Loop(3, 3) + rCapture(U"section", r_d().Some());
 		MergedRegexAssert(code, node);
 	});
 
