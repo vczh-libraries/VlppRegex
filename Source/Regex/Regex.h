@@ -389,60 +389,6 @@ Regex
 		};
 
 /***********************************************************************
-Template Instantiation
-***********************************************************************/
-
-		extern template class RegexString_<wchar_t>;
-		extern template class RegexString_<char8_t>;
-		extern template class RegexString_<char16_t>;
-		extern template class RegexString_<char32_t>;
-		using RegexString = RegexString_<wchar_t>;
-
-		extern template class RegexMatch_<wchar_t>;
-		extern template class RegexMatch_<char8_t>;
-		extern template class RegexMatch_<char16_t>;
-		extern template class RegexMatch_<char32_t>;
-		using RegexMatch = RegexMatch_<wchar_t>;
-
-		extern template RegexMatch_<wchar_t>::Ref	RegexBase_::MatchHead<wchar_t>	(const ObjectString<wchar_t>& text)const;
-		extern template RegexMatch_<wchar_t>::Ref	RegexBase_::Match<wchar_t>		(const ObjectString<wchar_t>& text)const;
-		extern template bool						RegexBase_::TestHead<wchar_t>	(const ObjectString<wchar_t>& text)const;
-		extern template bool						RegexBase_::Test<wchar_t>		(const ObjectString<wchar_t>& text)const;
-		extern template void						RegexBase_::Search<wchar_t>		(const ObjectString<wchar_t>& text, RegexMatch_<wchar_t>::List& matches)const;
-		extern template void						RegexBase_::Split<wchar_t>		(const ObjectString<wchar_t>& text, bool keepEmptyMatch, RegexMatch_<wchar_t>::List& matches)const;
-		extern template void						RegexBase_::Cut<wchar_t>		(const ObjectString<wchar_t>& text, bool keepEmptyMatch, RegexMatch_<wchar_t>::List& matches)const;
-
-		extern template RegexMatch_<char8_t>::Ref	RegexBase_::MatchHead<char8_t>	(const ObjectString<char8_t>& text)const;
-		extern template RegexMatch_<char8_t>::Ref	RegexBase_::Match<char8_t>		(const ObjectString<char8_t>& text)const;
-		extern template bool						RegexBase_::TestHead<char8_t>	(const ObjectString<char8_t>& text)const;
-		extern template bool						RegexBase_::Test<char8_t>		(const ObjectString<char8_t>& text)const;
-		extern template void						RegexBase_::Search<char8_t>		(const ObjectString<char8_t>& text, RegexMatch_<char8_t>::List& matches)const;
-		extern template void						RegexBase_::Split<char8_t>		(const ObjectString<char8_t>& text, bool keepEmptyMatch, RegexMatch_<char8_t>::List& matches)const;
-		extern template void						RegexBase_::Cut<char8_t>		(const ObjectString<char8_t>& text, bool keepEmptyMatch, RegexMatch_<char8_t>::List& matches)const;
-
-		extern template RegexMatch_<char16_t>::Ref	RegexBase_::MatchHead<char16_t>	(const ObjectString<char16_t>& text)const;
-		extern template RegexMatch_<char16_t>::Ref	RegexBase_::Match<char16_t>		(const ObjectString<char16_t>& text)const;
-		extern template bool						RegexBase_::TestHead<char16_t>	(const ObjectString<char16_t>& text)const;
-		extern template bool						RegexBase_::Test<char16_t>		(const ObjectString<char16_t>& text)const;
-		extern template void						RegexBase_::Search<char16_t>	(const ObjectString<char16_t>& text, RegexMatch_<char16_t>::List& matches)const;
-		extern template void						RegexBase_::Split<char16_t>		(const ObjectString<char16_t>& text, bool keepEmptyMatch, RegexMatch_<char16_t>::List& matches)const;
-		extern template void						RegexBase_::Cut<char16_t>		(const ObjectString<char16_t>& text, bool keepEmptyMatch, RegexMatch_<char16_t>::List& matches)const;
-
-		extern template RegexMatch_<char32_t>::Ref	RegexBase_::MatchHead<char32_t>	(const ObjectString<char32_t>& text)const;
-		extern template RegexMatch_<char32_t>::Ref	RegexBase_::Match<char32_t>		(const ObjectString<char32_t>& text)const;
-		extern template bool						RegexBase_::TestHead<char32_t>	(const ObjectString<char32_t>& text)const;
-		extern template bool						RegexBase_::Test<char32_t>		(const ObjectString<char32_t>& text)const;
-		extern template void						RegexBase_::Search<char32_t>	(const ObjectString<char32_t>& text, RegexMatch_<char32_t>::List& matches)const;
-		extern template void						RegexBase_::Split<char32_t>		(const ObjectString<char32_t>& text, bool keepEmptyMatch, RegexMatch_<char32_t>::List& matches)const;
-		extern template void						RegexBase_::Cut<char32_t>		(const ObjectString<char32_t>& text, bool keepEmptyMatch, RegexMatch_<char32_t>::List& matches)const;
-
-		extern template class Regex_<wchar_t>;
-		extern template class Regex_<char8_t>;
-		extern template class Regex_<char16_t>;
-		extern template class Regex_<char32_t>;
-		using Regex = Regex_<wchar_t>;
-
-/***********************************************************************
 Tokenizer
 ***********************************************************************/
 
@@ -1158,6 +1104,60 @@ Tokenizer
 			/// <returns>The colorizer.</returns>
 			RegexLexerColorizer							Colorize()const;
 		};
+
+/***********************************************************************
+Template Instantiation
+***********************************************************************/
+
+		extern template class RegexString_<wchar_t>;
+		extern template class RegexString_<char8_t>;
+		extern template class RegexString_<char16_t>;
+		extern template class RegexString_<char32_t>;
+		using RegexString = RegexString_<wchar_t>;
+
+		extern template class RegexMatch_<wchar_t>;
+		extern template class RegexMatch_<char8_t>;
+		extern template class RegexMatch_<char16_t>;
+		extern template class RegexMatch_<char32_t>;
+		using RegexMatch = RegexMatch_<wchar_t>;
+
+		extern template RegexMatch_<wchar_t>::Ref	RegexBase_::MatchHead<wchar_t>	(const ObjectString<wchar_t>& text)const;
+		extern template RegexMatch_<wchar_t>::Ref	RegexBase_::Match<wchar_t>		(const ObjectString<wchar_t>& text)const;
+		extern template bool						RegexBase_::TestHead<wchar_t>	(const ObjectString<wchar_t>& text)const;
+		extern template bool						RegexBase_::Test<wchar_t>		(const ObjectString<wchar_t>& text)const;
+		extern template void						RegexBase_::Search<wchar_t>		(const ObjectString<wchar_t>& text, RegexMatch_<wchar_t>::List& matches)const;
+		extern template void						RegexBase_::Split<wchar_t>		(const ObjectString<wchar_t>& text, bool keepEmptyMatch, RegexMatch_<wchar_t>::List& matches)const;
+		extern template void						RegexBase_::Cut<wchar_t>		(const ObjectString<wchar_t>& text, bool keepEmptyMatch, RegexMatch_<wchar_t>::List& matches)const;
+
+		extern template RegexMatch_<char8_t>::Ref	RegexBase_::MatchHead<char8_t>	(const ObjectString<char8_t>& text)const;
+		extern template RegexMatch_<char8_t>::Ref	RegexBase_::Match<char8_t>		(const ObjectString<char8_t>& text)const;
+		extern template bool						RegexBase_::TestHead<char8_t>	(const ObjectString<char8_t>& text)const;
+		extern template bool						RegexBase_::Test<char8_t>		(const ObjectString<char8_t>& text)const;
+		extern template void						RegexBase_::Search<char8_t>		(const ObjectString<char8_t>& text, RegexMatch_<char8_t>::List& matches)const;
+		extern template void						RegexBase_::Split<char8_t>		(const ObjectString<char8_t>& text, bool keepEmptyMatch, RegexMatch_<char8_t>::List& matches)const;
+		extern template void						RegexBase_::Cut<char8_t>		(const ObjectString<char8_t>& text, bool keepEmptyMatch, RegexMatch_<char8_t>::List& matches)const;
+
+		extern template RegexMatch_<char16_t>::Ref	RegexBase_::MatchHead<char16_t>	(const ObjectString<char16_t>& text)const;
+		extern template RegexMatch_<char16_t>::Ref	RegexBase_::Match<char16_t>		(const ObjectString<char16_t>& text)const;
+		extern template bool						RegexBase_::TestHead<char16_t>	(const ObjectString<char16_t>& text)const;
+		extern template bool						RegexBase_::Test<char16_t>		(const ObjectString<char16_t>& text)const;
+		extern template void						RegexBase_::Search<char16_t>	(const ObjectString<char16_t>& text, RegexMatch_<char16_t>::List& matches)const;
+		extern template void						RegexBase_::Split<char16_t>		(const ObjectString<char16_t>& text, bool keepEmptyMatch, RegexMatch_<char16_t>::List& matches)const;
+		extern template void						RegexBase_::Cut<char16_t>		(const ObjectString<char16_t>& text, bool keepEmptyMatch, RegexMatch_<char16_t>::List& matches)const;
+
+		extern template RegexMatch_<char32_t>::Ref	RegexBase_::MatchHead<char32_t>	(const ObjectString<char32_t>& text)const;
+		extern template RegexMatch_<char32_t>::Ref	RegexBase_::Match<char32_t>		(const ObjectString<char32_t>& text)const;
+		extern template bool						RegexBase_::TestHead<char32_t>	(const ObjectString<char32_t>& text)const;
+		extern template bool						RegexBase_::Test<char32_t>		(const ObjectString<char32_t>& text)const;
+		extern template void						RegexBase_::Search<char32_t>	(const ObjectString<char32_t>& text, RegexMatch_<char32_t>::List& matches)const;
+		extern template void						RegexBase_::Split<char32_t>		(const ObjectString<char32_t>& text, bool keepEmptyMatch, RegexMatch_<char32_t>::List& matches)const;
+		extern template void						RegexBase_::Cut<char32_t>		(const ObjectString<char32_t>& text, bool keepEmptyMatch, RegexMatch_<char32_t>::List& matches)const;
+
+		extern template class Regex_<wchar_t>;
+		extern template class Regex_<char8_t>;
+		extern template class Regex_<char16_t>;
+		extern template class Regex_<char32_t>;
+		using Regex = Regex_<wchar_t>;
 	}
 }
 
