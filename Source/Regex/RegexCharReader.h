@@ -26,7 +26,6 @@ namespace vl
 			{
 			}
 
-			const T* Input() { return input; }
 			const T* Reading() { return input + reader.SourceCluster().index; }
 			vint Index() { return reader.SourceCluster().index; }
 
@@ -64,7 +63,6 @@ namespace vl
 				}
 			}
 
-			const char32_t* Input() { return input; }
 			const char32_t* Reading() { return input + Index(); }
 			vint Index() { return finished ? index : index - 1; }
 		};
