@@ -2,7 +2,7 @@
 
 ## 2.0
 
-- Token will have char component position and `char32_t` component position at the same time.
+- Ensure positions in results are in input character format.
   - Test `PureInterpretor`
   - Test `RichInterpretor`
   - Test `Regex`
