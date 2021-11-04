@@ -16,7 +16,7 @@ namespace vl
 		using namespace regex_internal;
 
 /***********************************************************************
-RegexMatch
+RegexMatch_<T>
 ***********************************************************************/
 		
 		template<typename T>
@@ -59,33 +59,34 @@ RegexMatch
 		}
 
 		template<typename T>
-		const RegexString_<T>& RegexMatch_<T>::Result()const
+		const typename RegexString_<T>& RegexMatch_<T>::Result()const
 		{
 			return result;
 		}
 
 		template<typename T>
-		const RegexMatch_<T>::CaptureList& RegexMatch_<T>::Captures()const
+		const typename RegexMatch_<T>::CaptureList& RegexMatch_<T>::Captures()const
 		{
 			return captures;
 		}
 
 		template<typename T>
-		const RegexMatch_<T>::CaptureGroup& RegexMatch_<T>::Groups()const
+		const typename RegexMatch_<T>::CaptureGroup& RegexMatch_<T>::Groups()const
 		{
 			return groups;
-		}
+		
 
 /***********************************************************************
-Regex
+RegexBase_
 ***********************************************************************/
 
-		void Regex::Process(const U32String& text, bool keepEmpty, bool keepSuccess, bool keepFail, RegexMatch::List& matches)const
+		template<typename T>
+		void RegexBase_::Process(const ObjectString<T>& text, bool keepEmpty, bool keepSuccess, bool keepFail, typename RegexMatch_<T>::List& matches)const
 		{
 			if (rich)
 			{
-				const char32_t* start = text.Buffer();
-				const char32_t* input = start;
+				const T* start = text.Buffer();
+				const T* input = start;
 				RichResult result;
 				while (rich->Match(input, start, result))
 				{
@@ -115,8 +116,8 @@ Regex
 			}
 			else
 			{
-				const char32_t* start = text.Buffer();
-				const char32_t* input = start;
+				const T* start = text.Buffer();
+				const T* input = start;
 				PureResult result;
 				while (pure->Match(input, start, result))
 				{
@@ -145,8 +146,173 @@ Regex
 				}
 			}
 		}
+
+		RegexBase_::~RegexBase_()
+		{
+			if (pure) delete pure;
+			if (rich) delete rich;
+		}
+
+		template<typename T>
+		typename RegexMatch_<T>::Ref RegexBase_::MatchHead(const ObjectString<T>& text)const
+		{
+			if (rich)
+			{
+				RichResult result;
+				if (rich->MatchHead(text.Buffer(), text.Buffer(), result))
+				{
+					return new RegexMatch(text, &result, rich);
+				}
+				else
+				{
+					return 0;
+				}
+			}
+			else
+			{
+				PureResult result;
+				if (pure->MatchHead(text.Buffer(), text.Buffer(), result))
+				{
+					return new RegexMatch(text, &result);
+				}
+				else
+				{
+					return 0;
+				}
+			}
+		}
+
+		template<typename T>
+		typename RegexMatch_<T>::Ref RegexBase_::Match(const ObjectString<T>& text)const
+		{
+			if (rich)
+			{
+				RichResult result;
+				if (rich->Match(text.Buffer(), text.Buffer(), result))
+				{
+					return new RegexMatch(text, &result, rich);
+				}
+				else
+				{
+					return 0;
+				}
+			}
+			else
+			{
+				PureResult result;
+				if (pure->Match(text.Buffer(), text.Buffer(), result))
+				{
+					return new RegexMatch(text, &result);
+				}
+				else
+				{
+					return 0;
+				}
+			}
+		}
+
+		template<typename T>
+		bool RegexBase_::TestHead(const ObjectString<T>& text)const
+		{
+			if (pure)
+			{
+				PureResult result;
+				return pure->MatchHead(text.Buffer(), text.Buffer(), result);
+			}
+			else
+			{
+				RichResult result;
+				return rich->MatchHead(text.Buffer(), text.Buffer(), result);
+			}
+		}
+
+		template<typename T>
+		bool RegexBase_::Test(const ObjectString<T>& text)const
+		{
+			if (pure)
+			{
+				PureResult result;
+				return pure->Match(text.Buffer(), text.Buffer(), result);
+			}
+			else
+			{
+				RichResult result;
+				return rich->Match(text.Buffer(), text.Buffer(), result);
+			}
+		}
+
+		template<typename T>
+		void RegexBase_::Search(const ObjectString<T>& text, typename RegexMatch_<T>::List& matches)const
+		{
+			Process(text, false, true, false, matches);
+		}
+
+		template<typename T>
+		void RegexBase_::Split(const ObjectString<T>& text, bool keepEmptyMatch, typename RegexMatch_<T>::List& matches)const
+		{
+			Process(text, keepEmptyMatch, false, true, matches);
+		}
+
+		template<typename T>
+		void RegexBase_::Cut(const ObjectString<T>& text, bool keepEmptyMatch, typename RegexMatch_<T>::List& matches)const
+		{
+			Process(text, keepEmptyMatch, true, true, matches);
+		}
+
+/***********************************************************************
+Regex_<T>
+***********************************************************************/
+
+		template<>
+		void Regex_<wchar_t>::FillCaptureNames()
+		{
+			if (rich)
+			{
+				for (auto&& name : rich->CaptureNames())
+				{
+					captureNames.Add(u32tow(name));
+				}
+			}
+		}
+
+		template<>
+		void Regex_<char8_t>::FillCaptureNames()
+		{
+			if (rich)
+			{
+				for (auto&& name : rich->CaptureNames())
+				{
+					captureNames.Add(u32tou8(name));
+				}
+			}
+		}
+
+		template<>
+		void Regex_<char16_t>::FillCaptureNames()
+		{
+			if (rich)
+			{
+				for (auto&& name : rich->CaptureNames())
+				{
+					captureNames.Add(u32tou16(name));
+				}
+			}
+		}
+
+		template<>
+		void Regex_<char32_t>::FillCaptureNames()
+		{
+			if (rich)
+			{
+				for (auto&& name : rich->CaptureNames())
+				{
+					captureNames.Add(name);
+				}
+			}
+		}
 		
-		Regex::Regex(const U32String& code, bool preferPure)
+		template<typename T>
+		Regex_::Regex_(const ObjectString<T>& code, bool preferPure)
 		{
 			CharRange::List subsets;
 			RegexExpression::Ref regex = ParseRegexExpression(code);
@@ -198,6 +364,7 @@ Regex
 					Automaton::Ref nfa = EpsilonNfaToNfa(eNfa, RichEpsilonChecker, nfaStateMap);
 					Automaton::Ref dfa = NfaToDfa(nfa, dfaStateMap);
 					rich = new RichInterpretor(dfa);
+					FillCaptureNames();
 				}
 			}
 			catch (...)
@@ -206,121 +373,6 @@ Regex
 				if (rich)delete rich;
 				throw;
 			}
-		}
-
-		Regex::~Regex()
-		{
-			if (pure) delete pure;
-			if (rich) delete rich;
-		}
-
-		bool Regex::IsPureMatch()const
-		{
-			return rich ? false : true;
-		}
-
-		bool Regex::IsPureTest()const
-		{
-			return pure ? true : false;
-		}
-
-		RegexMatch::Ref Regex::MatchHead(const U32String& text)const
-		{
-			if (rich)
-			{
-				RichResult result;
-				if (rich->MatchHead(text.Buffer(), text.Buffer(), result))
-				{
-					return new RegexMatch(text, &result, rich);
-				}
-				else
-				{
-					return 0;
-				}
-			}
-			else
-			{
-				PureResult result;
-				if (pure->MatchHead(text.Buffer(), text.Buffer(), result))
-				{
-					return new RegexMatch(text, &result);
-				}
-				else
-				{
-					return 0;
-				}
-			}
-		}
-
-		RegexMatch::Ref Regex::Match(const U32String& text)const
-		{
-			if (rich)
-			{
-				RichResult result;
-				if (rich->Match(text.Buffer(), text.Buffer(), result))
-				{
-					return new RegexMatch(text, &result, rich);
-				}
-				else
-				{
-					return 0;
-				}
-			}
-			else
-			{
-				PureResult result;
-				if (pure->Match(text.Buffer(), text.Buffer(), result))
-				{
-					return new RegexMatch(text, &result);
-				}
-				else
-				{
-					return 0;
-				}
-			}
-		}
-
-		bool Regex::TestHead(const U32String& text)const
-		{
-			if (pure)
-			{
-				PureResult result;
-				return pure->MatchHead(text.Buffer(), text.Buffer(), result);
-			}
-			else
-			{
-				RichResult result;
-				return rich->MatchHead(text.Buffer(), text.Buffer(), result);
-			}
-		}
-
-		bool Regex::Test(const U32String& text)const
-		{
-			if (pure)
-			{
-				PureResult result;
-				return pure->Match(text.Buffer(), text.Buffer(), result);
-			}
-			else
-			{
-				RichResult result;
-				return rich->Match(text.Buffer(), text.Buffer(), result);
-			}
-		}
-
-		void Regex::Search(const U32String& text, RegexMatch::List& matches)const
-		{
-			Process(text, false, true, false, matches);
-		}
-
-		void Regex::Split(const U32String& text, bool keepEmptyMatch, RegexMatch::List& matches)const
-		{
-			Process(text, keepEmptyMatch, false, true, matches);
-		}
-
-		void Regex::Cut(const U32String& text, bool keepEmptyMatch, RegexMatch::List& matches)const
-		{
-			Process(text, keepEmptyMatch, true, true, matches);
 		}
 
 /***********************************************************************
@@ -987,5 +1039,42 @@ Template Instantiation
 		template class RegexMatch_<char8_t>;
 		template class RegexMatch_<char16_t>;
 		template class RegexMatch_<char32_t>;
+		
+		template RegexMatch_<wchar_t>::Ref		RegexBase_::MatchHead<wchar_t>	(const ObjectString<wchar_t>& text)const;
+		template RegexMatch_<wchar_t>::Ref		RegexBase_::Match<wchar_t>		(const ObjectString<wchar_t>& text)const;
+		template bool							RegexBase_::TestHead<wchar_t>	(const ObjectString<wchar_t>& text)const;
+		template bool							RegexBase_::Test<wchar_t>		(const ObjectString<wchar_t>& text)const;
+		template void							RegexBase_::Search<wchar_t>		(const ObjectString<wchar_t>& text, RegexMatch_<wchar_t>::List& matches)const;
+		template void							RegexBase_::Split<wchar_t>		(const ObjectString<wchar_t>& text, bool keepEmptyMatch, RegexMatch_<wchar_t>::List& matches)const;
+		template void							RegexBase_::Cut<wchar_t>		(const ObjectString<wchar_t>& text, bool keepEmptyMatch, RegexMatch_<wchar_t>::List& matches)const;
+
+		template RegexMatch_<char8_t>::Ref		RegexBase_::MatchHead<char8_t>	(const ObjectString<char8_t>& text)const;
+		template RegexMatch_<char8_t>::Ref		RegexBase_::Match<char8_t>		(const ObjectString<char8_t>& text)const;
+		template bool							RegexBase_::TestHead<char8_t>	(const ObjectString<char8_t>& text)const;
+		template bool							RegexBase_::Test<char8_t>		(const ObjectString<char8_t>& text)const;
+		template void							RegexBase_::Search<char8_t>		(const ObjectString<char8_t>& text, RegexMatch_<char8_t>::List& matches)const;
+		template void							RegexBase_::Split<char8_t>		(const ObjectString<char8_t>& text, bool keepEmptyMatch, RegexMatch_<char8_t>::List& matches)const;
+		template void							RegexBase_::Cut<char8_t>		(const ObjectString<char8_t>& text, bool keepEmptyMatch, RegexMatch_<char8_t>::List& matches)const;
+
+		template RegexMatch_<char16_t>::Ref		RegexBase_::MatchHead<char16_t>	(const ObjectString<char16_t>& text)const;
+		template RegexMatch_<char16_t>::Ref		RegexBase_::Match<char16_t>		(const ObjectString<char16_t>& text)const;
+		template bool							RegexBase_::TestHead<char16_t>	(const ObjectString<char16_t>& text)const;
+		template bool							RegexBase_::Test<char16_t>		(const ObjectString<char16_t>& text)const;
+		template void							RegexBase_::Search<char16_t>	(const ObjectString<char16_t>& text, RegexMatch_<char16_t>::List& matches)const;
+		template void							RegexBase_::Split<char16_t>		(const ObjectString<char16_t>& text, bool keepEmptyMatch, RegexMatch_<char16_t>::List& matches)const;
+		template void							RegexBase_::Cut<char16_t>		(const ObjectString<char16_t>& text, bool keepEmptyMatch, RegexMatch_<char16_t>::List& matches)const;
+
+		template RegexMatch_<char32_t>::Ref		RegexBase_::MatchHead<char32_t>	(const ObjectString<char32_t>& text)const;
+		template RegexMatch_<char32_t>::Ref		RegexBase_::Match<char32_t>		(const ObjectString<char32_t>& text)const;
+		template bool							RegexBase_::TestHead<char32_t>	(const ObjectString<char32_t>& text)const;
+		template bool							RegexBase_::Test<char32_t>		(const ObjectString<char32_t>& text)const;
+		template void							RegexBase_::Search<char32_t>	(const ObjectString<char32_t>& text, RegexMatch_<char32_t>::List& matches)const;
+		template void							RegexBase_::Split<char32_t>		(const ObjectString<char32_t>& text, bool keepEmptyMatch, RegexMatch_<char32_t>::List& matches)const;
+		template void							RegexBase_::Cut<char32_t>		(const ObjectString<char32_t>& text, bool keepEmptyMatch, RegexMatch_<char32_t>::List& matches)const;
+
+		template class Regex_<wchar_t>;
+		template class Regex_<char8_t>;
+		template class Regex_<char16_t>;
+		template class Regex_<char32_t>;
 	}
 }

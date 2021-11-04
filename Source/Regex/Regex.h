@@ -26,7 +26,7 @@ Data Structure
 ***********************************************************************/
 
 		/// <summary>A sub string of the string that a <see cref="Regex"/> is matched against.</summary>
-		/// <typeparam name="T>The character type</typeparam>
+		/// <typeparam name="T>The character type.</typeparam>
 		template<typename T>
 		class RegexString_ : public Object
 		{
@@ -66,7 +66,7 @@ Data Structure
 		};
 
 		/// <summary>A match produces by a <see cref="Regex"/>.</summary>
-		/// <typeparam name="T>The character type</typeparam>
+		/// <typeparam name="T>The character type.</typeparam>
 		template<typename T>
 		class RegexMatch_ : public Object
 		{
@@ -131,6 +131,129 @@ Data Structure
 /***********************************************************************
 Regex
 ***********************************************************************/
+
+		class RegexBase_ : public Object
+		{
+		protected:
+			regex_internal::PureInterpretor*			pure = nullptr;
+			regex_internal::RichInterpretor*			rich = nullptr;
+
+			template<typename T>
+			void										Process(const ObjectString<T>& text, bool keepEmpty, bool keepSuccess, bool keepFail, typename RegexMatch_<T>::List& matches)const;
+		public:
+			RegexBase_() = default;
+			~RegexBase_();
+
+			/// <summary>Test is a DFA used to match a string.</summary>
+			/// <returns>Returns true if a DFA is used.</returns>
+			bool										IsPureMatch() const { return rich ? false : true; }
+			/// <summary>Test is a DFA used to test a string. It ignores all capturing.</summary>
+			/// <returns>Returns true if a DFA is used.</returns>
+			bool										IsPureTest() const { return pure ? true : false; }
+
+			/// <summary>Match a prefix of the text.</summary>
+			/// <typeparam name="T>The character type of the text to match.</typeparam>
+			/// <returns>Returns the match. Returns null if failed.</returns>
+			/// <param name="text">The text to match.</param>
+			/// <example><![CDATA[
+			/// int main()
+			/// {
+			///     Regex regex(L"C/S+");
+			///     auto match = regex.MatchHead(L"C++ and C# are my favorite programing languages");
+			///     Console::WriteLine(match->Result().Value());
+			/// }
+			/// ]]></example>
+			template<typename T>
+			typename RegexMatch_<T>::Ref				MatchHead(const ObjectString<T>& text)const;
+
+			/// <summary>Match a sub string of the text.</summary>
+			/// <typeparam name="T>The character type of the text to match.</typeparam>
+			/// <returns>Returns the first match. Returns null if failed.</returns>
+			/// <param name="text">The text to match.</param>
+			/// <example><![CDATA[
+			/// int main()
+			/// {
+			///     Regex regex(L"C/S+");
+			///     auto match = regex.Match(L"C++ and C# are my favorite programing languages");
+			///     Console::WriteLine(match->Result().Value());
+			/// }
+			/// ]]></example>
+			template<typename T>
+			typename RegexMatch_<T>::Ref				Match(const ObjectString<T>& text)const;
+
+			/// <summary>Match a prefix of the text, ignoring all capturing.</summary>
+			/// <typeparam name="T>The character type of the text to match.</typeparam>
+			/// <returns>Returns true if it succeeded.</returns>
+			/// <param name="text">The text to match.</param>
+			template<typename T>
+			bool										TestHead(const ObjectString<T>& text)const;
+
+			/// <summary>Match a sub string of the text, ignoring all capturing.</summary>
+			/// <typeparam name="T>The character type of the text to match.</typeparam>
+			/// <returns>Returns true if succeeded.</returns>
+			/// <param name="text">The text to match.</param>
+			template<typename T>
+			bool										Test(const ObjectString<T>& text)const;
+
+			/// <summary>Find all matched fragments in the given text, returning all matched sub strings.</summary>
+			/// <typeparam name="T>The character type of the text to match.</typeparam>
+			/// <param name="text">The text to match.</param>
+			/// <param name="matches">Returns all succeeded matches.</param>
+			/// <example><![CDATA[
+			/// int main()
+			/// {
+			///     Regex regex(L"C/S+");
+			///     RegexMatch::List matches;
+			///     regex.Search(L"C++ and C# are my favorite programing languages", matches);
+			///     for (auto match : matches)
+			///     {
+			///         Console::WriteLine(match->Result().Value());
+			///     }
+			/// }
+			/// ]]></example>
+			template<typename T>
+			void										Search(const ObjectString<T>& text, typename RegexMatch_<T>::List& matches)const;
+
+			/// <summary>Split the text by matched sub strings, returning all unmatched sub strings.</summary>
+			/// <typeparam name="T>The character type of the text to match.</typeparam>
+			/// <param name="text">The text to match.</param>
+			/// <param name="keepEmptyMatch">Set to true to keep all empty unmatched sub strings. This could happen when there is nothing between two matched sub strings.</param>
+			/// <param name="matches">Returns all failed matches.</param>
+			/// <example><![CDATA[
+			/// int main()
+			/// {
+			///     Regex regex(L"C/S+");
+			///     RegexMatch::List matches;
+			///     regex.Split(L"C++ and C# are my favorite programing languages", false, matches);
+			///     for (auto match : matches)
+			///     {
+			///         Console::WriteLine(match->Result().Value());
+			///     }
+			/// }
+			/// ]]></example>
+			template<typename T>
+			void										Split(const ObjectString<T>& text, bool keepEmptyMatch, typename RegexMatch_<T>::List& matches)const;
+
+			/// <summary>Cut the text by matched sub strings, returning all matched and unmatched sub strings.</summary>
+			/// <typeparam name="T>The character type of the text to match.</typeparam>
+			/// <param name="text">The text to match.</param>
+			/// <param name="keepEmptyMatch">Set to true to keep all empty matches. This could happen when there is nothing between two matched sub strings.</param>
+			/// <param name="matches">Returns all succeeded and failed matches.</param>
+			/// <example><![CDATA[
+			/// int main()
+			/// {
+			///     Regex regex(L"C/S+");
+			///     RegexMatch::List matches;
+			///     regex.Cut(L"C++ and C# are my favorite programing languages", false, matches);
+			///     for (auto match : matches)
+			///     {
+			///         Console::WriteLine(match->Result().Value());
+			///     }
+			/// }
+			/// ]]></example>
+			template<typename T>
+			void										Cut(const ObjectString<T>& text, bool keepEmptyMatch, typename RegexMatch_<T>::List& matches)const;
+		};
 
 		/// <summary>
 		/// <p>
@@ -227,115 +350,81 @@ Regex
 		///     Testing only returns a bool very indicating success or failure.
 		/// </p>
 		/// </summary>
-		class Regex : public Object
+		/// <typeparam name="T>The character type of the regular expression itself.</typeparam>
+		template<typename T>
+		class Regex_ : public RegexBase_
 		{
 		protected:
-			regex_internal::PureInterpretor*			pure = nullptr;
-			regex_internal::RichInterpretor*			rich = nullptr;
+			collections::List<ObjectString<T>>			captureNames;
 
-			void										Process(const U32String& text, bool keepEmpty, bool keepSuccess, bool keepFail, RegexMatch::List& matches)const;
+			void										FillCaptureNames();
 		public:
-			NOT_COPYABLE(Regex);
+			NOT_COPYABLE(Regex_<T>);
+
 			/// <summary>Create a regular expression. It will crash if the regular expression produces syntax error.</summary>
 			/// <param name="code">The regular expression in a string.</param>
 			/// <param name="preferPure">Set to true to use DFA if possible.</param>
-			Regex(const U32String& code, bool preferPure = true);
-			~Regex();
+			Regex_(const ObjectString<T>& code, bool preferPure = true);
+			~Regex_() = default;
 
 			/// <summary>Get all names of named captures</summary>
 			/// <returns>All names of named captures.</summary>
-			const List<U32String>&						CaptureNames()const;
-
-			/// <summary>Test is a DFA used to match a string.</summary>
-			/// <returns>Returns true if a DFA is used.</returns>
-			bool										IsPureMatch()const;
-			/// <summary>Test is a DFA used to test a string. It ignores all capturing.</summary>
-			/// <returns>Returns true if a DFA is used.</returns>
-			bool										IsPureTest()const;
-
-			/// <summary>Match a prefix of the text.</summary>
-			/// <returns>Returns the match. Returns null if failed.</returns>
-			/// <param name="text">The text to match.</param>
-			/// <example><![CDATA[
-			/// int main()
-			/// {
-			///     Regex regex(L"C/S+");
-			///     auto match = regex.MatchHead(L"C++ and C# are my favorite programing languages");
-			///     Console::WriteLine(match->Result().Value());
-			/// }
-			/// ]]></example>
-			RegexMatch::Ref								MatchHead(const U32String& text)const;
-			/// <summary>Match a sub string of the text.</summary>
-			/// <returns>Returns the first match. Returns null if failed.</returns>
-			/// <param name="text">The text to match.</param>
-			/// <example><![CDATA[
-			/// int main()
-			/// {
-			///     Regex regex(L"C/S+");
-			///     auto match = regex.Match(L"C++ and C# are my favorite programing languages");
-			///     Console::WriteLine(match->Result().Value());
-			/// }
-			/// ]]></example>
-			RegexMatch::Ref								Match(const U32String& text)const;
-			/// <summary>Match a prefix of the text, ignoring all capturing.</summary>
-			/// <returns>Returns true if it succeeded.</returns>
-			/// <param name="text">The text to match.</param>
-			bool										TestHead(const U32String& text)const;
-			/// <summary>Match a sub string of the text, ignoring all capturing.</summary>
-			/// <returns>Returns true if succeeded.</returns>
-			/// <param name="text">The text to match.</param>
-			bool										Test(const U32String& text)const;
-			/// <summary>Find all matched fragments in the given text, returning all matched sub strings.</summary>
-			/// <param name="text">The text to match.</param>
-			/// <param name="matches">Returns all succeeded matches.</param>
-			/// <example><![CDATA[
-			/// int main()
-			/// {
-			///     Regex regex(L"C/S+");
-			///     RegexMatch::List matches;
-			///     regex.Search(L"C++ and C# are my favorite programing languages", matches);
-			///     for (auto match : matches)
-			///     {
-			///         Console::WriteLine(match->Result().Value());
-			///     }
-			/// }
-			/// ]]></example>
-			void										Search(const U32String& text, RegexMatch::List& matches)const;
-			/// <summary>Split the text by matched sub strings, returning all unmatched sub strings.</summary>
-			/// <param name="text">The text to match.</param>
-			/// <param name="keepEmptyMatch">Set to true to keep all empty unmatched sub strings. This could happen when there is nothing between two matched sub strings.</param>
-			/// <param name="matches">Returns all failed matches.</param>
-			/// <example><![CDATA[
-			/// int main()
-			/// {
-			///     Regex regex(L"C/S+");
-			///     RegexMatch::List matches;
-			///     regex.Split(L"C++ and C# are my favorite programing languages", false, matches);
-			///     for (auto match : matches)
-			///     {
-			///         Console::WriteLine(match->Result().Value());
-			///     }
-			/// }
-			/// ]]></example>
-			void										Split(const U32String& text, bool keepEmptyMatch, RegexMatch::List& matches)const;
-			/// <summary>Cut the text by matched sub strings, returning all matched and unmatched sub strings.</summary>
-			/// <param name="text">The text to match.</param>
-			/// <param name="keepEmptyMatch">Set to true to keep all empty matches. This could happen when there is nothing between two matched sub strings.</param>
-			/// <param name="matches">Returns all succeeded and failed matches.</param>
-			/// <example><![CDATA[
-			/// int main()
-			/// {
-			///     Regex regex(L"C/S+");
-			///     RegexMatch::List matches;
-			///     regex.Cut(L"C++ and C# are my favorite programing languages", false, matches);
-			///     for (auto match : matches)
-			///     {
-			///         Console::WriteLine(match->Result().Value());
-			///     }
-			/// }
-			/// ]]></example>
-			void										Cut(const U32String& text, bool keepEmptyMatch, RegexMatch::List& matches)const;
+			const collections::List<ObjectString<T>>&	CaptureNames()const { return captureNames; }
 		};
+
+/***********************************************************************
+Template Instantiation
+***********************************************************************/
+
+		extern template class RegexString_<wchar_t>;
+		extern template class RegexString_<char8_t>;
+		extern template class RegexString_<char16_t>;
+		extern template class RegexString_<char32_t>;
+		using RegexString = RegexString_<wchar_t>;
+
+		extern template class RegexMatch_<wchar_t>;
+		extern template class RegexMatch_<char8_t>;
+		extern template class RegexMatch_<char16_t>;
+		extern template class RegexMatch_<char32_t>;
+		using RegexMatch = RegexMatch_<wchar_t>;
+
+		extern template RegexMatch_<wchar_t>::Ref	RegexBase_::MatchHead<wchar_t>	(const ObjectString<wchar_t>& text)const;
+		extern template RegexMatch_<wchar_t>::Ref	RegexBase_::Match<wchar_t>		(const ObjectString<wchar_t>& text)const;
+		extern template bool						RegexBase_::TestHead<wchar_t>	(const ObjectString<wchar_t>& text)const;
+		extern template bool						RegexBase_::Test<wchar_t>		(const ObjectString<wchar_t>& text)const;
+		extern template void						RegexBase_::Search<wchar_t>		(const ObjectString<wchar_t>& text, RegexMatch_<wchar_t>::List& matches)const;
+		extern template void						RegexBase_::Split<wchar_t>		(const ObjectString<wchar_t>& text, bool keepEmptyMatch, RegexMatch_<wchar_t>::List& matches)const;
+		extern template void						RegexBase_::Cut<wchar_t>		(const ObjectString<wchar_t>& text, bool keepEmptyMatch, RegexMatch_<wchar_t>::List& matches)const;
+
+		extern template RegexMatch_<char8_t>::Ref	RegexBase_::MatchHead<char8_t>	(const ObjectString<char8_t>& text)const;
+		extern template RegexMatch_<char8_t>::Ref	RegexBase_::Match<char8_t>		(const ObjectString<char8_t>& text)const;
+		extern template bool						RegexBase_::TestHead<char8_t>	(const ObjectString<char8_t>& text)const;
+		extern template bool						RegexBase_::Test<char8_t>		(const ObjectString<char8_t>& text)const;
+		extern template void						RegexBase_::Search<char8_t>		(const ObjectString<char8_t>& text, RegexMatch_<char8_t>::List& matches)const;
+		extern template void						RegexBase_::Split<char8_t>		(const ObjectString<char8_t>& text, bool keepEmptyMatch, RegexMatch_<char8_t>::List& matches)const;
+		extern template void						RegexBase_::Cut<char8_t>		(const ObjectString<char8_t>& text, bool keepEmptyMatch, RegexMatch_<char8_t>::List& matches)const;
+
+		extern template RegexMatch_<char16_t>::Ref	RegexBase_::MatchHead<char16_t>	(const ObjectString<char16_t>& text)const;
+		extern template RegexMatch_<char16_t>::Ref	RegexBase_::Match<char16_t>		(const ObjectString<char16_t>& text)const;
+		extern template bool						RegexBase_::TestHead<char16_t>	(const ObjectString<char16_t>& text)const;
+		extern template bool						RegexBase_::Test<char16_t>		(const ObjectString<char16_t>& text)const;
+		extern template void						RegexBase_::Search<char16_t>	(const ObjectString<char16_t>& text, RegexMatch_<char16_t>::List& matches)const;
+		extern template void						RegexBase_::Split<char16_t>		(const ObjectString<char16_t>& text, bool keepEmptyMatch, RegexMatch_<char16_t>::List& matches)const;
+		extern template void						RegexBase_::Cut<char16_t>		(const ObjectString<char16_t>& text, bool keepEmptyMatch, RegexMatch_<char16_t>::List& matches)const;
+
+		extern template RegexMatch_<char32_t>::Ref	RegexBase_::MatchHead<char32_t>	(const ObjectString<char32_t>& text)const;
+		extern template RegexMatch_<char32_t>::Ref	RegexBase_::Match<char32_t>		(const ObjectString<char32_t>& text)const;
+		extern template bool						RegexBase_::TestHead<char32_t>	(const ObjectString<char32_t>& text)const;
+		extern template bool						RegexBase_::Test<char32_t>		(const ObjectString<char32_t>& text)const;
+		extern template void						RegexBase_::Search<char32_t>	(const ObjectString<char32_t>& text, RegexMatch_<char32_t>::List& matches)const;
+		extern template void						RegexBase_::Split<char32_t>		(const ObjectString<char32_t>& text, bool keepEmptyMatch, RegexMatch_<char32_t>::List& matches)const;
+		extern template void						RegexBase_::Cut<char32_t>		(const ObjectString<char32_t>& text, bool keepEmptyMatch, RegexMatch_<char32_t>::List& matches)const;
+
+		extern template class Regex_<wchar_t>;
+		extern template class Regex_<char8_t>;
+		extern template class Regex_<char16_t>;
+		extern template class Regex_<char32_t>;
+		using Regex = Regex_<wchar_t>;
 
 /***********************************************************************
 Tokenizer
@@ -1053,22 +1142,6 @@ Tokenizer
 			/// <returns>The colorizer.</returns>
 			RegexLexerColorizer							Colorize()const;
 		};
-
-/***********************************************************************
-Template Instantiation
-***********************************************************************/
-
-		extern template class RegexString_<wchar_t>;
-		extern template class RegexString_<char8_t>;
-		extern template class RegexString_<char16_t>;
-		extern template class RegexString_<char32_t>;
-		using RegexString = RegexString_<wchar_t>;
-
-		extern template class RegexMatch_<wchar_t>;
-		extern template class RegexMatch_<char8_t>;
-		extern template class RegexMatch_<char16_t>;
-		extern template class RegexMatch_<char32_t>;
-		using RegexMatch = RegexMatch_<wchar_t>;
 	}
 }
 
