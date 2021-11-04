@@ -2,7 +2,7 @@
 
 struct TestExtendProc_InterTokenState
 {
-	U32String postfix;
+	WString postfix;
 };
 
 void TestExtendProc_Deleter(void* interStateDeleter)
@@ -10,35 +10,24 @@ void TestExtendProc_Deleter(void* interStateDeleter)
 	delete (TestExtendProc_InterTokenState*)interStateDeleter;
 }
 
-void TestExtendProc_ExtendProc(void* argument, const char32_t* reading, vint length, bool completeText, RegexProcessingToken& processingToken)
+void TestExtendProc_ExtendProc(void* argument, const wchar_t* reading, vint length, bool completeText, RegexProcessingToken& processingToken)
 {
-	U32String readingBuffer = length == -1 ? U32String::Unmanaged(reading) : U32String::CopyFrom(reading, length);
+	WString readingBuffer = length == -1 ? WString::Unmanaged(reading) : WString::CopyFrom(reading, length);
 	reading = readingBuffer.Buffer();
 
 	if (processingToken.token == 2 || processingToken.token == 4)
 	{
-		U32String postfix;
+		WString postfix;
 		if (processingToken.interTokenState)
 		{
 			postfix = ((TestExtendProc_InterTokenState*)processingToken.interTokenState)->postfix;
 		}
 		else
 		{
-			postfix = U")" + U32String::CopyFrom(reading + 2, processingToken.length - 3) + U"\"";
+			postfix = L")" + WString::CopyFrom(reading + 2, processingToken.length - 3) + L"\"";
 		}
 
-		const char32_t* find = nullptr;
-		{
-			for (vint i = 0; i <= readingBuffer.Length() - postfix.Length(); i++)
-			{
-				if (memcmp(reading + i, postfix.Buffer(), sizeof(char32_t) * postfix.Length()) == 0)
-				{
-					find = reading + i;
-					break;
-				}
-			}
-		}
-
+		auto find = wcsstr(reading, postfix.Buffer());
 		if (find)
 		{
 			processingToken.length = (vint)(find - reading) + postfix.Length();
@@ -160,18 +149,18 @@ TEST_FILE
 
 	TEST_CASE(L"Test RegexLexer with ExtendProc")
 	{
-		List<U32String> codes;
-		codes.Add(U"/d+");
-		codes.Add(U"\"[^\"]*\"");
-		codes.Add(U"/$\"=*/(");
-		codes.Add(U"/t+");
+		List<WString> codes;
+		codes.Add(L"/d+");
+		codes.Add(L"\"[^\"]*\"");
+		codes.Add(L"/$\"=*/(");
+		codes.Add(L"/t+");
 
 		RegexProc proc;
 		proc.deleter = TestExtendProc_Deleter;
 		proc.extendProc = TestExtendProc_ExtendProc;
 		RegexLexer lexer(codes, proc);
 
-		U32String input = UR"test_input(123 456
+		WString input = LR"test_input(123 456
 "simple text"
 123$"===(+
 abcde
@@ -190,11 +179,11 @@ abcde
 
 	TEST_CASE(L"Test RegexLexerColorizer with ExtendProc")
 	{
-		List<U32String> codes;
-		codes.Add(U"/d+");
-		codes.Add(U"\"[^\"]*\"");
-		codes.Add(U"/$\"=*/(");
-		codes.Add(U"/s+");
+		List<WString> codes;
+		codes.Add(L"/d+");
+		codes.Add(L"\"[^\"]*\"");
+		codes.Add(L"/$\"=*/(");
+		codes.Add(L"/s+");
 
 		vint colors[100];
 		RegexProc proc;
@@ -207,7 +196,7 @@ abcde
 
 		void* lastInterTokenState = nullptr;
 		{
-			const char32_t input[] = U"123$\"==()==)==\"456";
+			const wchar_t input[] = L"123$\"==()==)==\"456";
 			vint expect[] = { 0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0 };
 			auto state = AssertColorizer(colors, expect, colorizer, input, true);
 			TEST_ASSERT(state == nullptr);
@@ -216,7 +205,7 @@ abcde
 		colorizer.Pass(L'\r');
 		colorizer.Pass(L'\n');
 		{
-			const char32_t input[] = U"\"simple text\"";
+			const wchar_t input[] = L"\"simple text\"";
 			vint expect[] = { 1,1,1,1,1,1,1,1,1,1,1,1,1 };
 			auto state = AssertColorizer(colors, expect, colorizer, input, true);
 			TEST_ASSERT(state == nullptr);
@@ -225,7 +214,7 @@ abcde
 		colorizer.Pass(L'\r');
 		colorizer.Pass(L'\n');
 		{
-			const char32_t input[] = U"123$\"===(+";
+			const wchar_t input[] = L"123$\"===(+";
 			vint expect[] = { 0,0,0,4,4,4,4,4,4,4 };
 			auto state = AssertColorizer(colors, expect, colorizer, input, true);
 			TEST_ASSERT(state != nullptr);
@@ -234,7 +223,7 @@ abcde
 		colorizer.Pass(L'\r');
 		colorizer.Pass(L'\n');
 		{
-			const char32_t input[] = U"abcde";
+			const wchar_t input[] = L"abcde";
 			vint expect[] = { 4,4,4,4,4 };
 			auto state = AssertColorizer(colors, expect, colorizer, input, true);
 			TEST_ASSERT(state == lastInterTokenState);
@@ -243,7 +232,7 @@ abcde
 		colorizer.Pass(L'\r');
 		colorizer.Pass(L'\n');
 		{
-			const char32_t input[] = U"-)===\"456$\"===(";
+			const wchar_t input[] = L"-)===\"456$\"===(";
 			vint expect[] = { 4,4,4,4,4,4,0,0,0,4,4,4,4,4,4 };
 			auto state = AssertColorizer(colors, expect, colorizer, input, true);
 			TEST_ASSERT(state != nullptr && state != lastInterTokenState);

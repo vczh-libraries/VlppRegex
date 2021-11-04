@@ -89,20 +89,20 @@ TEST_FILE
 
 	TEST_CASE(L"Test RegexLexer 1")
 	{
-		List<U32String> codes;
-		codes.Add(U"/d+");
-		codes.Add(U"/s+");
-		codes.Add(U"[a-zA-Z_]/w*");
+		List<WString> codes;
+		codes.Add(L"/d+");
+		codes.Add(L"/s+");
+		codes.Add(L"[a-zA-Z_]/w*");
 		RegexLexer lexer(codes, {});
 
 		{
 			List<RegexToken> tokens;
-			CopyFrom(tokens, lexer.Parse(U"vczh is$$a&&genius  1234"));
+			CopyFrom(tokens, lexer.Parse(L"vczh is$$a&&genius  1234"));
 			TestRegexLexer1Validation(tokens);
 		}
 		{
 			List<RegexToken> tokens;
-			lexer.Parse(U"vczh is$$a&&genius  1234").ReadToEnd(tokens);
+			lexer.Parse(L"vczh is$$a&&genius  1234").ReadToEnd(tokens);
 			TestRegexLexer1Validation(tokens);
 		}
 	});
@@ -270,16 +270,16 @@ TEST_FILE
 
 	TEST_CASE(L"Test RegexLexer 2")
 	{
-		List<U32String> codes;
-		codes.Add(U"/d+");
-		codes.Add(U"[a-zA-Z_]/w*");
-		codes.Add(U"\"[^\"]*\"");
+		List<WString> codes;
+		codes.Add(L"/d+");
+		codes.Add(L"[a-zA-Z_]/w*");
+		codes.Add(L"\"[^\"]*\"");
 		RegexLexer lexer(codes, {});
 
-		U32String input =
-			U"12345vczh is a genius!"						U"\r\n"
-			U"67890\"vczh\"\"is\" \"a\"\"genius\"\"!\""		U"\r\n"
-			U"hey!";
+		WString input =
+			L"12345vczh is a genius!"		L"\r\n"
+			L"67890\"vczh\"\"is\" \"a\"\"genius\"\"!\""		L"\r\n"
+			L"hey!";
 		{
 			List<RegexToken> tokens;
 			CopyFrom(tokens, lexer.Parse(input));
@@ -295,12 +295,12 @@ TEST_FILE
 	TEST_CASE(L"Test RegexLexer 3")
 	{
 		{
-			List<U32String> codes;
-			codes.Add(U"unit");
-			codes.Add(U"/w+");
+			List<WString> codes;
+			codes.Add(L"unit");
+			codes.Add(L"/w+");
 			RegexLexer lexer(codes, {});
 			{
-				U32String input = U"unit";
+				WString input = L"unit";
 				List<RegexToken> tokens;
 				CopyFrom(tokens, lexer.Parse(input));
 				TEST_ASSERT(tokens.Count() == 1);
@@ -313,7 +313,7 @@ TEST_FILE
 				TEST_ASSERT(tokens[0].columnEnd == 3);
 			}
 			{
-				U32String input = U"vczh";
+				WString input = L"vczh";
 				List<RegexToken> tokens;
 				CopyFrom(tokens, lexer.Parse(input));
 				TEST_ASSERT(tokens.Count() == 1);
@@ -327,12 +327,12 @@ TEST_FILE
 			}
 		}
 		{
-			List<U32String> codes;
-			codes.Add(U"/w+");
-			codes.Add(U"unit");
+			List<WString> codes;
+			codes.Add(L"/w+");
+			codes.Add(L"unit");
 			RegexLexer lexer(codes, {});
 			{
-				U32String input = U"unit";
+				WString input = L"unit";
 				List<RegexToken> tokens;
 				CopyFrom(tokens, lexer.Parse(input));
 				TEST_ASSERT(tokens.Count() == 1);
@@ -345,7 +345,7 @@ TEST_FILE
 				TEST_ASSERT(tokens[0].columnEnd == 3);
 			}
 			{
-				U32String input = U"vczh";
+				WString input = L"vczh";
 				List<RegexToken> tokens;
 				CopyFrom(tokens, lexer.Parse(input));
 				TEST_ASSERT(tokens.Count() == 1);
@@ -363,12 +363,12 @@ TEST_FILE
 	TEST_CASE(L"Test RegexLexer 4")
 	{
 		{
-			List<U32String> codes;
-			codes.Add(U"=");
-			codes.Add(U"==");
+			List<WString> codes;
+			codes.Add(L"=");
+			codes.Add(L"==");
 			RegexLexer lexer(codes, {});
 			{
-				U32String input = U"=";
+				WString input = L"=";
 				List<RegexToken> tokens;
 				CopyFrom(tokens, lexer.Parse(input));
 				TEST_ASSERT(tokens.Count() == 1);
@@ -381,7 +381,7 @@ TEST_FILE
 				TEST_ASSERT(tokens[0].columnEnd == 0);
 			}
 			{
-				U32String input = U"==";
+				WString input = L"==";
 				List<RegexToken> tokens;
 				CopyFrom(tokens, lexer.Parse(input));
 				TEST_ASSERT(tokens.Count() == 1);
@@ -395,12 +395,12 @@ TEST_FILE
 			}
 		}
 		{
-			List<U32String> codes;
-			codes.Add(U"==");
-			codes.Add(U"=");
+			List<WString> codes;
+			codes.Add(L"==");
+			codes.Add(L"=");
 			RegexLexer lexer(codes, {});
 			{
-				U32String input = U"=";
+				WString input = L"=";
 				List<RegexToken> tokens;
 				CopyFrom(tokens, lexer.Parse(input));
 				TEST_ASSERT(tokens.Count() == 1);
@@ -413,7 +413,7 @@ TEST_FILE
 				TEST_ASSERT(tokens[0].columnEnd == 0);
 			}
 			{
-				U32String input = U"==";
+				WString input = L"==";
 				List<RegexToken> tokens;
 				CopyFrom(tokens, lexer.Parse(input));
 				TEST_ASSERT(tokens.Count() == 1);
@@ -453,12 +453,12 @@ TEST_FILE
 
 	TEST_CASE(L"Test RegexLexer 5")
 	{
-		List<U32String> codes;
-		codes.Add(U"/d+");
-		codes.Add(U"\"[^\"]*\"");
+		List<WString> codes;
+		codes.Add(L"/d+");
+		codes.Add(L"\"[^\"]*\"");
 		RegexLexer lexer(codes, {});
 
-		U32String input = U"123\"456";
+		WString input = L"123\"456";
 		{
 			List<RegexToken> tokens;
 			CopyFrom(tokens, lexer.Parse(input));
