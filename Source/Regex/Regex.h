@@ -26,27 +26,43 @@ Data Structure
 ***********************************************************************/
 
 		/// <summary>A sub string of the string that a <see cref="Regex"/> is matched against.</summary>
-		class RegexString : public Object
+		/// <typeparam name="T>The character type</typeparam>
+		template<typename T>
+		class RegexString_ : public Object
 		{
 		protected:
-			U32String									value;
-			vint										start;
-			vint										length;
+			ObjectString<T>								value;
+			vint										start = 0;
+			vint										length = 0;
 
 		public:
-			RegexString(vint _start=0);
-			RegexString(const U32String& _string, vint _start, vint _length);
+			RegexString() = default;
+			RegexString(vint _start) : start(_start) {}
+
+			RegexString(const ObjectString<T>& _string, vint _start, vint _length)
+				: start(_start)
+				, length(_length > 0 ? _length : 0)
+			{
+				if (_length > 0)
+				{
+					value = _string.Sub(_start, _length);
+				}
+			}
 
 			/// <summary>The position of the input string in characters.</summary>
 			/// <returns>The position.</returns>
-			vint										Start()const;
+			vint Start() const { return start; }
 			/// <summary>The size of the sub string in characters.</summary>
 			/// <returns>The size.</returns>
-			vint										Length()const;
+			vint Length() const { return length; }
 			/// <summary>Get the sub string as a <see cref="U32String"/>.</summary>
 			/// <returns>The sub string.</returns>
-			const U32String&							Value()const;
-			bool										operator==(const RegexString& string)const;
+			const ObjectString<T>& Value() const { return value; }
+
+			bool operator==(const RegexString<T>& string) const
+			{
+				return start == string.start && length == string.length && value == string.value;
+			}
 		};
 
 		/// <summary>A match produces by a <see cref="Regex"/>.</summary>
@@ -1031,6 +1047,16 @@ Tokenizer
 			/// <returns>The colorizer.</returns>
 			RegexLexerColorizer							Colorize()const;
 		};
+
+/***********************************************************************
+Template Instantiation
+***********************************************************************/
+
+		extern template class RegexString_<wchar_t>;
+		extern template class RegexString_<char8_t>;
+		extern template class RegexString_<char16_t>;
+		extern template class RegexString_<char32_t>;
+		using RegexString = RegexString_<wchar_t>;
 	}
 }
 

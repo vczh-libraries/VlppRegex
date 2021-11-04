@@ -16,46 +16,6 @@ namespace vl
 		using namespace regex_internal;
 
 /***********************************************************************
-RegexString
-***********************************************************************/
-
-		RegexString::RegexString(vint _start)
-			:start(_start)
-			, length(0)
-		{
-		}
-
-		RegexString::RegexString(const U32String& _string, vint _start, vint _length)
-			: start(_start)
-			, length(_length > 0 ? _length : 0)
-		{
-			if (_length > 0)
-			{
-				value = _string.Sub(_start, _length);
-			}
-		}
-
-		vint RegexString::Start()const
-		{
-			return start;
-		}
-
-		vint RegexString::Length()const
-		{
-			return length;
-		}
-
-		const U32String& RegexString::Value()const
-		{
-			return value;
-		}
-
-		bool RegexString::operator==(const RegexString& string)const
-		{
-			return start == string.start && length == string.length && value == string.value;
-		}
-
-/***********************************************************************
 RegexMatch
 ***********************************************************************/
 		
@@ -1006,5 +966,14 @@ RegexLexer
 		{
 			return RegexLexerColorizer(Walk(), proc);
 		}
+
+/***********************************************************************
+Template Instantiation
+***********************************************************************/
+
+		template class RegexString_<wchar_t>;
+		template class RegexString_<char8_t>;
+		template class RegexString_<char16_t>;
+		template class RegexString_<char32_t>;
 	}
 }
