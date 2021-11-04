@@ -13,6 +13,7 @@
   - The big char component categorizing array will be split to two parts:
     - `0 < x < 128`: an array
     - otherwise: a map using ranges as keys
+- Update Regex to accept `wchar_t`, `char8_t`, `char16_t`, `char32_t` on both regex and input.
 - Move platform-dependent code to separated files as what `Vlpp` does.
 
 ## Optional
