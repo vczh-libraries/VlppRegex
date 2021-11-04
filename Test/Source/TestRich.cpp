@@ -5,9 +5,9 @@ using namespace vl;
 using namespace vl::collections;
 using namespace vl::regex_internal;
 
-TEST_FILE
+namespace TestRich_TestObjects
 {
-	auto BuildRichInterpretor = [](const char32_t* code)
+	Ptr<RichInterpretor> BuildRichInterpretor(const char32_t* code)
 	{
 		CharRange::List subsets;
 		Dictionary<State*, State*> nfaStateMap;
@@ -21,9 +21,9 @@ TEST_FILE
 		Automaton::Ref dfa = NfaToDfa(nfa, dfaStateMap);
 
 		return new RichInterpretor(dfa);
-	};
+	}
 
-	auto RunRichInterpretor = [&](const char32_t* code, const wchar_t* input, vint start, vint length)
+	void RunRichInterpretor(const char32_t* code, const wchar_t* input, vint start, vint length)
 	{
 		TEST_CASE(u32tow(code) + WString(L" on ") + input)
 		{
@@ -37,7 +37,12 @@ TEST_FILE
 				TEST_ASSERT(length == matchResult.length);
 			}
 		});
-	};
+	}
+}
+using namespace TestRich_TestObjects;
+
+TEST_FILE
+{
 
 	TEST_CATEGORY(L"Rich interpretor: simple")
 	{
@@ -120,7 +125,7 @@ TEST_FILE
 			const char32_t* code = U"(<number>/d+)";
 			const wchar_t* input = L"abcde123456abcde";
 			RichResult result;
-			Ptr<RichInterpretor> regex = BuildRichInterpretor(code);
+			auto regex = BuildRichInterpretor(code);
 			vint index = regex->CaptureNames().IndexOf(U"number");
 			TEST_ASSERT(index == 0);
 
@@ -138,7 +143,7 @@ TEST_FILE
 			const char32_t* code = U"(<#sec>(<sec>/d+))((<&sec>).){3}(<&sec>)";
 			const wchar_t* input = L"196.128.0.1";
 			RichResult result;
-			Ptr<RichInterpretor> regex = BuildRichInterpretor(code);
+			auto regex = BuildRichInterpretor(code);
 			vint index = regex->CaptureNames().IndexOf(U"sec");
 			TEST_ASSERT(index == 0);
 
@@ -165,7 +170,7 @@ TEST_FILE
 			const char32_t* code = U"(<sec>/d+?)(<$sec>)+";
 			const wchar_t* input = L"98765123123123123123123";
 			RichResult result;
-			Ptr<RichInterpretor> regex = BuildRichInterpretor(code);
+			auto regex = BuildRichInterpretor(code);
 			vint index = regex->CaptureNames().IndexOf(U"sec");
 			TEST_ASSERT(index == 0);
 
@@ -183,7 +188,7 @@ TEST_FILE
 			const char32_t* code = U"(<sec>/d+)(<$sec>)+";
 			const wchar_t* input = L"98765123123123123123123";
 			RichResult result;
-			Ptr<RichInterpretor> regex = BuildRichInterpretor(code);
+			auto regex = BuildRichInterpretor(code);
 			vint index = regex->CaptureNames().IndexOf(U"sec");
 			TEST_ASSERT(index == 0);
 
@@ -204,7 +209,7 @@ TEST_FILE
 			const char32_t* code = U"win(=2000)";
 			const wchar_t* input = L"win98win2000winxp";
 			RichResult result;
-			Ptr<RichInterpretor> regex = BuildRichInterpretor(code);
+			auto regex = BuildRichInterpretor(code);
 
 			TEST_ASSERT(regex->Match(input, input, result) == true);
 			TEST_ASSERT(result.start == 5);
@@ -217,7 +222,7 @@ TEST_FILE
 			const char32_t* code = U"win(!98)";
 			const wchar_t* input = L"win98win2000winxp";
 			RichResult result;
-			Ptr<RichInterpretor> regex = BuildRichInterpretor(code);
+			auto regex = BuildRichInterpretor(code);
 
 			TEST_ASSERT(regex->Match(input, input, result) == true);
 			TEST_ASSERT(result.start == 5);
@@ -233,7 +238,7 @@ TEST_FILE
 			const char32_t* code = U"^(<a>/w+?)(<b>/w+?)((<$a>)(<$b>))+(<$a>)/w{6}$";
 			const wchar_t* input = L"vczhgeniusvczhgeniusvczhgeniusvczhgenius";
 			RichResult result;
-			Ptr<RichInterpretor> regex = BuildRichInterpretor(code);
+			auto regex = BuildRichInterpretor(code);
 			TEST_ASSERT(regex->CaptureNames().IndexOf(U"a") == 0);
 			TEST_ASSERT(regex->CaptureNames().IndexOf(U"b") == 1);
 
@@ -254,7 +259,7 @@ TEST_FILE
 			const char32_t* code = U"^/d+./d*?(<sec>/d+?)(<$sec>)+$";
 			const wchar_t* input = L"1428.57142857142857142857";
 			RichResult result;
-			Ptr<RichInterpretor> regex = BuildRichInterpretor(code);
+			auto regex = BuildRichInterpretor(code);
 			TEST_ASSERT(regex->CaptureNames().IndexOf(U"sec") == 0);
 
 			TEST_ASSERT(regex->Match(input, input, result) == true);
@@ -271,7 +276,7 @@ TEST_FILE
 			const char32_t* code = U"^/d+./d*?(?/d+?)(<$0>)+$";
 			const wchar_t* input = L"1428.57142857142857142857";
 			RichResult result;
-			Ptr<RichInterpretor> regex = BuildRichInterpretor(code);
+			auto regex = BuildRichInterpretor(code);
 
 			TEST_ASSERT(regex->Match(input, input, result) == true);
 			TEST_ASSERT(result.start == 0);
@@ -280,6 +285,50 @@ TEST_FILE
 			TEST_ASSERT(result.captures[0].capture == -1);
 			TEST_ASSERT(result.captures[0].start == 7);
 			TEST_ASSERT(result.captures[0].length == 6);
+		});
+	});
+
+	TEST_CATEGORY(L"Unicode")
+	{
+		auto interpretor = BuildRichInterpretor(U"/./.(?[𣂕𣴑𣱳𦁚]+)/./.");
+
+		TEST_CASE(L"char8_t")
+		{
+			auto input = u8"𩰪㦲𦰗𠀼 𣂕𣴑𣱳𦁚 Vczh is genius!@我是天才";
+			RichResult result;
+			interpretor->Match(input, input, result);
+			TEST_ASSERT(result.start == 11);
+			TEST_ASSERT(result.length == 23);
+			TEST_ASSERT(result.captures.Count() == 1);
+			TEST_ASSERT(result.captures[0].capture == -1);
+			TEST_ASSERT(result.captures[0].start == 16);
+			TEST_ASSERT(result.captures[0].length == 16);
+		});
+
+		TEST_CASE(L"char16_t")
+		{
+			auto input = u"𩰪㦲𦰗𠀼 𣂕𣴑𣱳𦁚 Vczh is genius!@我是天才";
+			RichResult result;
+			interpretor->Match(input, input, result);
+			TEST_ASSERT(result.start == 5);
+			TEST_ASSERT(result.length == 13);
+			TEST_ASSERT(result.captures.Count() == 1);
+			TEST_ASSERT(result.captures[0].capture == -1);
+			TEST_ASSERT(result.captures[0].start == 8);
+			TEST_ASSERT(result.captures[0].length == 8);
+		});
+
+		TEST_CASE(L"char32_t")
+		{
+			auto input = U"𩰪㦲𦰗𠀼 𣂕𣴑𣱳𦁚 Vczh is genius!@我是天才";
+			RichResult result;
+			interpretor->Match(input, input, result);
+			TEST_ASSERT(result.start == 3);
+			TEST_ASSERT(result.length == 8);
+			TEST_ASSERT(result.captures.Count() == 1);
+			TEST_ASSERT(result.captures[0].capture == -1);
+			TEST_ASSERT(result.captures[0].start == 5);
+			TEST_ASSERT(result.captures[0].length == 4);
 		});
 	});
 }

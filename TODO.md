@@ -3,8 +3,6 @@
 ## 2.0
 
 - Ensure positions in results are in input character format.
-  - Test `PureInterpretor`
-  - Test `RichInterpretor`
   - Test `Regex`
   - Test `RegexLexerWalker`
   - Test `RegexLexerColorizer`
