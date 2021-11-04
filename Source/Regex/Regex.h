@@ -756,73 +756,11 @@ Tokenizer
 		};
 
 /***********************************************************************
-Template Instantiation
-***********************************************************************/
-
-		extern template class RegexString_<wchar_t>;
-		extern template class RegexString_<char8_t>;
-		extern template class RegexString_<char16_t>;
-		extern template class RegexString_<char32_t>;
-
-		extern template class RegexMatch_<wchar_t>;
-		extern template class RegexMatch_<char8_t>;
-		extern template class RegexMatch_<char16_t>;
-		extern template class RegexMatch_<char32_t>;
-
-		extern template RegexMatch_<wchar_t>::Ref	RegexBase_::MatchHead<wchar_t>	(const ObjectString<wchar_t>& text)const;
-		extern template RegexMatch_<wchar_t>::Ref	RegexBase_::Match<wchar_t>		(const ObjectString<wchar_t>& text)const;
-		extern template bool						RegexBase_::TestHead<wchar_t>	(const ObjectString<wchar_t>& text)const;
-		extern template bool						RegexBase_::Test<wchar_t>		(const ObjectString<wchar_t>& text)const;
-		extern template void						RegexBase_::Search<wchar_t>		(const ObjectString<wchar_t>& text, RegexMatch_<wchar_t>::List& matches)const;
-		extern template void						RegexBase_::Split<wchar_t>		(const ObjectString<wchar_t>& text, bool keepEmptyMatch, RegexMatch_<wchar_t>::List& matches)const;
-		extern template void						RegexBase_::Cut<wchar_t>		(const ObjectString<wchar_t>& text, bool keepEmptyMatch, RegexMatch_<wchar_t>::List& matches)const;
-
-		extern template RegexMatch_<char8_t>::Ref	RegexBase_::MatchHead<char8_t>	(const ObjectString<char8_t>& text)const;
-		extern template RegexMatch_<char8_t>::Ref	RegexBase_::Match<char8_t>		(const ObjectString<char8_t>& text)const;
-		extern template bool						RegexBase_::TestHead<char8_t>	(const ObjectString<char8_t>& text)const;
-		extern template bool						RegexBase_::Test<char8_t>		(const ObjectString<char8_t>& text)const;
-		extern template void						RegexBase_::Search<char8_t>		(const ObjectString<char8_t>& text, RegexMatch_<char8_t>::List& matches)const;
-		extern template void						RegexBase_::Split<char8_t>		(const ObjectString<char8_t>& text, bool keepEmptyMatch, RegexMatch_<char8_t>::List& matches)const;
-		extern template void						RegexBase_::Cut<char8_t>		(const ObjectString<char8_t>& text, bool keepEmptyMatch, RegexMatch_<char8_t>::List& matches)const;
-
-		extern template RegexMatch_<char16_t>::Ref	RegexBase_::MatchHead<char16_t>	(const ObjectString<char16_t>& text)const;
-		extern template RegexMatch_<char16_t>::Ref	RegexBase_::Match<char16_t>		(const ObjectString<char16_t>& text)const;
-		extern template bool						RegexBase_::TestHead<char16_t>	(const ObjectString<char16_t>& text)const;
-		extern template bool						RegexBase_::Test<char16_t>		(const ObjectString<char16_t>& text)const;
-		extern template void						RegexBase_::Search<char16_t>	(const ObjectString<char16_t>& text, RegexMatch_<char16_t>::List& matches)const;
-		extern template void						RegexBase_::Split<char16_t>		(const ObjectString<char16_t>& text, bool keepEmptyMatch, RegexMatch_<char16_t>::List& matches)const;
-		extern template void						RegexBase_::Cut<char16_t>		(const ObjectString<char16_t>& text, bool keepEmptyMatch, RegexMatch_<char16_t>::List& matches)const;
-
-		extern template RegexMatch_<char32_t>::Ref	RegexBase_::MatchHead<char32_t>	(const ObjectString<char32_t>& text)const;
-		extern template RegexMatch_<char32_t>::Ref	RegexBase_::Match<char32_t>		(const ObjectString<char32_t>& text)const;
-		extern template bool						RegexBase_::TestHead<char32_t>	(const ObjectString<char32_t>& text)const;
-		extern template bool						RegexBase_::Test<char32_t>		(const ObjectString<char32_t>& text)const;
-		extern template void						RegexBase_::Search<char32_t>	(const ObjectString<char32_t>& text, RegexMatch_<char32_t>::List& matches)const;
-		extern template void						RegexBase_::Split<char32_t>		(const ObjectString<char32_t>& text, bool keepEmptyMatch, RegexMatch_<char32_t>::List& matches)const;
-		extern template void						RegexBase_::Cut<char32_t>		(const ObjectString<char32_t>& text, bool keepEmptyMatch, RegexMatch_<char32_t>::List& matches)const;
-
-		extern template class Regex_<wchar_t>;
-		extern template class Regex_<char8_t>;
-		extern template class Regex_<char16_t>;
-		extern template class Regex_<char32_t>;
-
-		extern template class RegexTokens_<wchar_t>;
-		extern template class RegexTokens_<char8_t>;
-		extern template class RegexTokens_<char16_t>;
-		extern template class RegexTokens_<char32_t>;
-		
-		using RegexString = RegexString_<wchar_t>;
-		using RegexMatch = RegexMatch_<wchar_t>;
-		using Regex = Regex_<wchar_t>;
-		using RegexToken = RegexToken_<wchar_t>;
-		using RegexProc = RegexProc_<wchar_t>;
-		using RegexTokens = RegexTokens_<wchar_t>;
-
-/***********************************************************************
 RegexLexerWalker
 ***********************************************************************/
 		
 		/// <summary>A type for walking through a text against a <see cref="RegexLexer"/>. Call <see cref="RegexLexer::Walk"/> to create this object.</summary>
+		/// <typeparam name="T>The character type.</typeparam>
 		/// <example><![CDATA[
 		/// int main()
 		/// {
@@ -886,17 +824,18 @@ RegexLexerWalker
 		///     }
 		/// }
 		/// ]]></example>
-		class RegexLexerWalker : public Object
+		template<typename T>
+		class RegexLexerWalker_ : public Object
 		{
 			friend class RegexLexer;
 		protected:
 			regex_internal::PureInterpretor*			pure;
 			const collections::Array<vint>&				stateTokens;
 			
-			RegexLexerWalker(regex_internal::PureInterpretor* _pure, const collections::Array<vint>& _stateTokens);
+			RegexLexerWalker_(regex_internal::PureInterpretor* _pure, const collections::Array<vint>& _stateTokens);
 		public:
-			RegexLexerWalker(const RegexLexerWalker& tokens);
-			~RegexLexerWalker();
+			RegexLexerWalker_(const RegexLexerWalker_<T>& tokens);
+			~RegexLexerWalker_() = default;
 			
 			/// <summary>Get the start DFA state number, which represents the correct state before parsing any input.</summary>
 			/// <returns>The DFA state number.</returns>
@@ -925,12 +864,12 @@ RegexLexerWalker
 			/// See the example for <see cref="RegexLexerWalker"/> about how to use this function.
 			/// </p>
 			/// </remarks>
-			void										Walk(char32_t input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const;
+			void										Walk(T input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const;
 			/// <summary>Step forward by one character.</summary>
 			/// <returns>Returns the new current state. It is used to walk the next character.</returns>
 			/// <param name="input">The input character.</param>
 			/// <param name="state">The current state.</param>
-			vint										Walk(char32_t input, vint state)const;
+			vint										Walk(T input, vint state)const;
 			/// <summary>Test if the input text is a closed token.</summary>
 			/// <returns>Returns true if the input text is a closed token.</returns>
 			/// <param name="input">The input text.</param>
@@ -981,7 +920,7 @@ RegexLexerWalker
 			///     }
 			/// }
 			/// ]]></example>
-			bool										IsClosedToken(const char32_t* input, vint length)const;
+			bool										IsClosedToken(const T* input, vint length)const;
 			/// <summary>Test if the input is a closed token.</summary>
 			/// <returns>Returns true if the input text is a closed token.</returns>
 			/// <param name="input">The input text.</param>
@@ -1031,8 +970,77 @@ RegexLexerWalker
 			///     }
 			/// }
 			/// ]]></example>
-			bool										IsClosedToken(const U32String& input)const;
+			bool										IsClosedToken(const ObjectString<T>& input)const;
 		};
+
+/***********************************************************************
+Template Instantiation
+***********************************************************************/
+
+		extern template class RegexString_<wchar_t>;
+		extern template class RegexString_<char8_t>;
+		extern template class RegexString_<char16_t>;
+		extern template class RegexString_<char32_t>;
+
+		extern template class RegexMatch_<wchar_t>;
+		extern template class RegexMatch_<char8_t>;
+		extern template class RegexMatch_<char16_t>;
+		extern template class RegexMatch_<char32_t>;
+
+		extern template RegexMatch_<wchar_t>::Ref	RegexBase_::MatchHead<wchar_t>	(const ObjectString<wchar_t>& text)const;
+		extern template RegexMatch_<wchar_t>::Ref	RegexBase_::Match<wchar_t>		(const ObjectString<wchar_t>& text)const;
+		extern template bool						RegexBase_::TestHead<wchar_t>	(const ObjectString<wchar_t>& text)const;
+		extern template bool						RegexBase_::Test<wchar_t>		(const ObjectString<wchar_t>& text)const;
+		extern template void						RegexBase_::Search<wchar_t>		(const ObjectString<wchar_t>& text, RegexMatch_<wchar_t>::List& matches)const;
+		extern template void						RegexBase_::Split<wchar_t>		(const ObjectString<wchar_t>& text, bool keepEmptyMatch, RegexMatch_<wchar_t>::List& matches)const;
+		extern template void						RegexBase_::Cut<wchar_t>		(const ObjectString<wchar_t>& text, bool keepEmptyMatch, RegexMatch_<wchar_t>::List& matches)const;
+
+		extern template RegexMatch_<char8_t>::Ref	RegexBase_::MatchHead<char8_t>	(const ObjectString<char8_t>& text)const;
+		extern template RegexMatch_<char8_t>::Ref	RegexBase_::Match<char8_t>		(const ObjectString<char8_t>& text)const;
+		extern template bool						RegexBase_::TestHead<char8_t>	(const ObjectString<char8_t>& text)const;
+		extern template bool						RegexBase_::Test<char8_t>		(const ObjectString<char8_t>& text)const;
+		extern template void						RegexBase_::Search<char8_t>		(const ObjectString<char8_t>& text, RegexMatch_<char8_t>::List& matches)const;
+		extern template void						RegexBase_::Split<char8_t>		(const ObjectString<char8_t>& text, bool keepEmptyMatch, RegexMatch_<char8_t>::List& matches)const;
+		extern template void						RegexBase_::Cut<char8_t>		(const ObjectString<char8_t>& text, bool keepEmptyMatch, RegexMatch_<char8_t>::List& matches)const;
+
+		extern template RegexMatch_<char16_t>::Ref	RegexBase_::MatchHead<char16_t>	(const ObjectString<char16_t>& text)const;
+		extern template RegexMatch_<char16_t>::Ref	RegexBase_::Match<char16_t>		(const ObjectString<char16_t>& text)const;
+		extern template bool						RegexBase_::TestHead<char16_t>	(const ObjectString<char16_t>& text)const;
+		extern template bool						RegexBase_::Test<char16_t>		(const ObjectString<char16_t>& text)const;
+		extern template void						RegexBase_::Search<char16_t>	(const ObjectString<char16_t>& text, RegexMatch_<char16_t>::List& matches)const;
+		extern template void						RegexBase_::Split<char16_t>		(const ObjectString<char16_t>& text, bool keepEmptyMatch, RegexMatch_<char16_t>::List& matches)const;
+		extern template void						RegexBase_::Cut<char16_t>		(const ObjectString<char16_t>& text, bool keepEmptyMatch, RegexMatch_<char16_t>::List& matches)const;
+
+		extern template RegexMatch_<char32_t>::Ref	RegexBase_::MatchHead<char32_t>	(const ObjectString<char32_t>& text)const;
+		extern template RegexMatch_<char32_t>::Ref	RegexBase_::Match<char32_t>		(const ObjectString<char32_t>& text)const;
+		extern template bool						RegexBase_::TestHead<char32_t>	(const ObjectString<char32_t>& text)const;
+		extern template bool						RegexBase_::Test<char32_t>		(const ObjectString<char32_t>& text)const;
+		extern template void						RegexBase_::Search<char32_t>	(const ObjectString<char32_t>& text, RegexMatch_<char32_t>::List& matches)const;
+		extern template void						RegexBase_::Split<char32_t>		(const ObjectString<char32_t>& text, bool keepEmptyMatch, RegexMatch_<char32_t>::List& matches)const;
+		extern template void						RegexBase_::Cut<char32_t>		(const ObjectString<char32_t>& text, bool keepEmptyMatch, RegexMatch_<char32_t>::List& matches)const;
+
+		extern template class Regex_<wchar_t>;
+		extern template class Regex_<char8_t>;
+		extern template class Regex_<char16_t>;
+		extern template class Regex_<char32_t>;
+
+		extern template class RegexTokens_<wchar_t>;
+		extern template class RegexTokens_<char8_t>;
+		extern template class RegexTokens_<char16_t>;
+		extern template class RegexTokens_<char32_t>;
+
+		extern template class RegexLexerWalker_<wchar_t>;
+		extern template class RegexLexerWalker_<char8_t>;
+		extern template class RegexLexerWalker_<char16_t>;
+		extern template class RegexLexerWalker_<char32_t>;
+		
+		using RegexString = RegexString_<wchar_t>;
+		using RegexMatch = RegexMatch_<wchar_t>;
+		using Regex = Regex_<wchar_t>;
+		using RegexToken = RegexToken_<wchar_t>;
+		using RegexProc = RegexProc_<wchar_t>;
+		using RegexTokens = RegexTokens_<wchar_t>;
+		using RegexLexerWalker = RegexLexerWalker_<wchar_t>;
 
 /***********************************************************************
 RegexLexerColorizer

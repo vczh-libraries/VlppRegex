@@ -380,7 +380,7 @@ Regex_<T>
 		}
 
 /***********************************************************************
-RegexTokens
+RegexTokens_<T>
 ***********************************************************************/
 
 		template<typename T>
@@ -621,37 +621,38 @@ RegexTokens
 		}
 
 /***********************************************************************
-RegexLexerWalker
+RegexLexerWalker_<T>
 ***********************************************************************/
 
-		RegexLexerWalker::RegexLexerWalker(PureInterpretor* _pure, const Array<vint>& _stateTokens)
+		template<typename T>
+		RegexLexerWalker_<T>::RegexLexerWalker_(PureInterpretor* _pure, const Array<vint>& _stateTokens)
 			:pure(_pure)
 			, stateTokens(_stateTokens)
 		{
 		}
 
-		RegexLexerWalker::RegexLexerWalker(const RegexLexerWalker& tokens)
+		template<typename T>
+		RegexLexerWalker_<T>::RegexLexerWalker_(const RegexLexerWalker_<T>& tokens)
 			: pure(tokens.pure)
 			, stateTokens(tokens.stateTokens)
 		{
 		}
 
-		RegexLexerWalker::~RegexLexerWalker()
-		{
-		}
-
-		vint RegexLexerWalker::GetStartState()const
+		template<typename T>
+		vint RegexLexerWalker_<T>::GetStartState()const
 		{
 			return pure->GetStartState();
 		}
 
-		vint RegexLexerWalker::GetRelatedToken(vint state)const
+		template<typename T>
+		vint RegexLexerWalker_<T>::GetRelatedToken(vint state)const
 		{
 			vint finalState = state == -1 ? -1 : pure->GetRelatedFinalState(state);
 			return finalState == -1 ? -1 : stateTokens.Get(finalState);
 		}
 
-		void RegexLexerWalker::Walk(char32_t input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const
+		template<typename T>
+		void RegexLexerWalker_<T>::Walk(T input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const
 		{
 			vint previousState = state;
 			token = -1;
@@ -690,7 +691,8 @@ RegexLexerWalker
 			}
 		}
 
-		vint RegexLexerWalker::Walk(char32_t input, vint state)const
+		template<typename T>
+		vint RegexLexerWalker_<T>::Walk(T input, vint state)const
 		{
 			vint token = -1;
 			bool finalState = false;
@@ -699,7 +701,8 @@ RegexLexerWalker
 			return state;
 		}
 
-		bool RegexLexerWalker::IsClosedToken(const char32_t* input, vint length)const
+		template<typename T>
+		bool RegexLexerWalker_<T>::IsClosedToken(const T* input, vint length)const
 		{
 			vint state = pure->GetStartState();
 			for (vint i = 0; i < length; i++)
@@ -711,7 +714,8 @@ RegexLexerWalker
 			return false;
 		}
 
-		bool RegexLexerWalker::IsClosedToken(const U32String& input)const
+		template<typename T>
+		bool RegexLexerWalker_<T>::IsClosedToken(const ObjectString<T>& input)const
 		{
 			return IsClosedToken(input.Buffer(), input.Length());
 		}
@@ -1081,5 +1085,10 @@ Template Instantiation
 		template class RegexTokens_<char8_t>;
 		template class RegexTokens_<char16_t>;
 		template class RegexTokens_<char32_t>;
+
+		template class RegexLexerWalker_<wchar_t>;
+		template class RegexLexerWalker_<char8_t>;
+		template class RegexLexerWalker_<char16_t>;
+		template class RegexLexerWalker_<char32_t>;
 	}
 }
