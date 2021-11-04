@@ -226,7 +226,7 @@ RichInterpretor
 					case Transition::BeginString:
 						{
 							// match the input if this is the first character, and it is not consumed
-							found = currentState.reader.Index() == 0;
+							found = currentState.reader.Index() == 0 && input == start;
 						}
 						break;
 					case Transition::EndString:
@@ -252,7 +252,7 @@ RichInterpretor
 							// Push the capture record, and it will be written if the input matches the regex
 							CaptureRecord capture;
 							capture.capture = transition->capture;
-							capture.start = currentState.reader.Index();
+							capture.start = currentState.reader.Index() + (input - start);
 							capture.length = -1;
 							PushNonSaver(result.captures, currentState.captureCount, capture);
 
@@ -341,7 +341,7 @@ RichInterpretor
 								{
 									// Write the captured text
 									CaptureRecord& capture = result.captures[extensionSaver.captureListIndex];
-									capture.length = currentState.reader.Index();
+									capture.length = currentState.reader.Index() + (input - start) - capture.start;
 									found = true;
 								}
 								break;
