@@ -982,5 +982,10 @@ Template Instantiation
 		template class RegexString_<char8_t>;
 		template class RegexString_<char16_t>;
 		template class RegexString_<char32_t>;
+
+		template class RegexMatch_<wchar_t>;
+		template class RegexMatch_<char8_t>;
+		template class RegexMatch_<char16_t>;
+		template class RegexMatch_<char32_t>;
 	}
 }
