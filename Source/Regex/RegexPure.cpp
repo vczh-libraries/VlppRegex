@@ -4,6 +4,7 @@ Licensed under https://github.com/vczh-libraries/License
 ***********************************************************************/
 
 #include "RegexPure.h"
+#include "RegexCharReader.h"
 
 namespace vl
 {
@@ -89,31 +90,35 @@ PureInterpretor
 			delete[] transition;
 		}
 
-		bool PureInterpretor::MatchHead(const char32_t* input, const char32_t* start, PureResult& result)
+		template<typename TChar>
+		bool PureInterpretor::MatchHead(const TChar* input, const TChar* start, PureResult& result)
 		{
+			CharReader<TChar> reader(input);
+			vint currentState = startState;
+			vint terminateState = -1;
+			vint terminateLength = -1;
+
 			result.start = input - start;
 			result.length = -1;
 			result.finalState = -1;
 			result.terminateState = -1;
 
-			vint currentState = startState;
-			vint terminateState = -1;
-			vint terminateLength = -1;
-			const char32_t* read = input;
 			while (currentState != -1)
 			{
+				auto c = reader.Read();
+
 				terminateState = currentState;
-				terminateLength = read - input;
+				terminateLength = reader.Index();
 				if (finalState[currentState])
 				{
 					result.length = terminateLength;
 					result.finalState = currentState;
 				}
-				if (!*read)break;
-#ifdef VCZH_GCC
-				if (*read >= SupportedCharCount)break;
-#endif
-				vint charIndex = charMap[*read++];
+
+				if (!c) break;
+				if (c >= SupportedCharCount) break;
+
+				vint charIndex = charMap[c];
 				currentState = transition[currentState][charIndex];
 			}
 
@@ -132,16 +137,16 @@ PureInterpretor
 			}
 		}
 
-		bool PureInterpretor::Match(const char32_t* input, const char32_t* start, PureResult& result)
+		template<typename TChar>
+		bool PureInterpretor::Match(const TChar* input, const TChar* start, PureResult& result)
 		{
-			const char32_t* read = input;
-			while (*read)
+			CharReader<TChar> reader(input);
+			while (reader.Read())
 			{
-				if (MatchHead(read, start, result))
+				if (MatchHead(reader.Reading(), start, result))
 				{
 					return true;
 				}
-				read++;
 			}
 			return false;
 		}
@@ -231,5 +236,15 @@ PureInterpretor
 		{
 			return relatedFinalState ? relatedFinalState[state] : -1;
 		}
+
+		template bool			PureInterpretor::MatchHead<wchar_t>(const wchar_t* input, const wchar_t* start, PureResult& result);
+		template bool			PureInterpretor::MatchHead<char8_t>(const char8_t* input, const char8_t* start, PureResult& result);
+		template bool			PureInterpretor::MatchHead<char16_t>(const char16_t* input, const char16_t* start, PureResult& result);
+		template bool			PureInterpretor::MatchHead<char32_t>(const char32_t* input, const char32_t* start, PureResult& result);
+
+		template bool			PureInterpretor::Match<wchar_t>(const wchar_t* input, const wchar_t* start, PureResult& result);
+		template bool			PureInterpretor::Match<char8_t>(const char8_t* input, const char8_t* start, PureResult& result);
+		template bool			PureInterpretor::Match<char16_t>(const char16_t* input, const char16_t* start, PureResult& result);
+		template bool			PureInterpretor::Match<char32_t>(const char32_t* input, const char32_t* start, PureResult& result);
 	}
 }

@@ -196,6 +196,7 @@
     <ClInclude Include="..\..\..\Source\Regex\Automaton\RegexAutomaton.h" />
     <ClInclude Include="..\..\..\Source\Regex\Automaton\RegexData.h" />
     <ClInclude Include="..\..\..\Source\Regex\Regex.h" />
+    <ClInclude Include="..\..\..\Source\Regex\RegexCharReader.h" />
     <ClInclude Include="..\..\..\Source\Regex\RegexPure.h" />
     <ClInclude Include="..\..\..\Source\Regex\RegexRich.h" />
     <ClInclude Include="..\..\Source\ColorizerCommon.h" />
