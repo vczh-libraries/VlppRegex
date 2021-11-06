@@ -18,13 +18,19 @@ clean:
 
 all:pre-build ./Bin/UnitTest
 
-./Bin/UnitTest:./Obj/Vlpp.o ./Obj/VlppOS.o ./Obj/RegexExpression.o ./Obj/RegexExpression_CanTreatAsPure.o ./Obj/RegexExpression_CharSet.o ./Obj/RegexExpression_GenerateEpsilonNfa.o ./Obj/RegexExpression_HasNoExtension.o ./Obj/RegexExpression_IsEqual.o ./Obj/RegexParser.o ./Obj/RegexWriter.o ./Obj/RegexAutomaton.o ./Obj/Regex.o ./Obj/RegexPure.o ./Obj/RegexRich.o ./Obj/TestAutomaton.o ./Obj/TestColorizer.o ./Obj/TestExtendProc.o ./Obj/TestLexer.o ./Obj/TestParser.o ./Obj/TestPure.o ./Obj/TestRegex.o ./Obj/TestRich.o ./Obj/TestWalker.o ./Obj/Main.o
+./Bin/UnitTest:./Obj/Vlpp.o ./Obj/Vlpp.Linux.o ./Obj/VlppOS.o ./Obj/VlppOS.Linux.o ./Obj/RegexExpression.o ./Obj/RegexExpression_CanTreatAsPure.o ./Obj/RegexExpression_CharSet.o ./Obj/RegexExpression_GenerateEpsilonNfa.o ./Obj/RegexExpression_HasNoExtension.o ./Obj/RegexExpression_IsEqual.o ./Obj/RegexParser.o ./Obj/RegexWriter.o ./Obj/RegexAutomaton.o ./Obj/Regex.o ./Obj/RegexPure.o ./Obj/RegexRich.o ./Obj/TestAutomaton.o ./Obj/TestColorizer.o ./Obj/TestExtendProc.o ./Obj/TestLexer.o ./Obj/TestParser.o ./Obj/TestPure.o ./Obj/TestRegex.o ./Obj/TestRich.o ./Obj/TestWalker.o ./Obj/Main.o
 	$(CPP_LINK)
 
 ./Obj/Vlpp.o: ../../Import/Vlpp.cpp ../../Import/Vlpp.h
 	$(CPP_COMPILE)
 
+./Obj/Vlpp.Linux.o: ../../Import/Vlpp.Linux.cpp ../../Import/Vlpp.h
+	$(CPP_COMPILE)
+
 ./Obj/VlppOS.o: ../../Import/VlppOS.cpp ../../Import/VlppOS.h ../../Import/Vlpp.h
+	$(CPP_COMPILE)
+
+./Obj/VlppOS.Linux.o: ../../Import/VlppOS.Linux.cpp ../../Import/VlppOS.h ../../Import/Vlpp.h
 	$(CPP_COMPILE)
 
 ./Obj/RegexExpression.o: ../../Source/Regex/AST/RegexExpression.cpp ../../Source/Regex/AST/RegexExpression.h ../../Source/Regex/AST/../Automaton/RegexAutomaton.h ../../Source/Regex/AST/../Automaton/RegexData.h ../../Import/Vlpp.h
