@@ -114,7 +114,7 @@ MergeAlgorithm
 				}
 				else if (target->regex->definitions.Keys().Contains(expression->name))
 				{
-					target->definitions.Add(expression->name, 0);
+					target->definitions.Add(expression->name, nullptr);
 					Expression::Ref result = Invoke(target->regex->definitions[expression->name], target);
 					target->definitions.Set(expression->name, result);
 					return result;

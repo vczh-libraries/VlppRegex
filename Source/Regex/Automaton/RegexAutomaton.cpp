@@ -255,8 +255,6 @@ Helpers
 
 			SortedList<State*> transitionTargets;
 			SortedList<State*> relativeStates;
-			transitionTargets.SetLessMemoryMode(false);
-			relativeStates.SetLessMemoryMode(false);
 
 			for (vint i = 0; i < target->states.Count(); i++)
 			{
