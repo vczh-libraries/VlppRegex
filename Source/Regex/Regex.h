@@ -1106,7 +1106,6 @@ RegexLexer
 		{
 		protected:
 			regex_internal::PureInterpretor*			pure = nullptr;
-			collections::Array<vint>					ids;
 			collections::Array<vint>					stateTokens;
 
 		public:
