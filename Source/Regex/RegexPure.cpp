@@ -11,6 +11,61 @@ namespace vl
 {
 	namespace regex_internal
 	{
+		using namespace collections;
+
+/***********************************************************************
+Read
+***********************************************************************/
+
+		void ReadInt(stream::IStream& inputStream, vint& value)
+		{
+			vint64_t x = value;
+			CHECK_ERROR(
+				inputStream.Read(&x, sizeof(x)) == sizeof(x),
+				L"Failed to deserialize RegexLexer."
+				);
+			value = (vint)x;
+		}
+
+		void ReadInts(stream::IStream& inputStream, vint count, vint* values)
+		{
+			Array<vint64_t> xs(count);
+			CHECK_ERROR(
+				inputStream.Read(&xs[0], sizeof(vint64_t) * count) == sizeof(vint64_t) * count,
+				L"Failed to deserialize RegexLexer."
+				);
+			for (vint i = 0; i < count; i++)
+			{
+				values[i] = (vint)xs[i];
+			}
+		}
+
+/***********************************************************************
+Write
+***********************************************************************/
+
+		void WriteInt(stream::IStream& outputStream, vint value)
+		{
+			vint64_t x = value;
+			CHECK_ERROR(
+				outputStream.Write(&x, sizeof(x)) == sizeof(x),
+				L"Failed to serialize RegexLexer."
+				);
+		}
+
+		void WriteInts(stream::IStream& outputStream, vint count, vint* values)
+		{
+			Array<vint64_t> xs(count);
+			xs[0] = count;
+			for (vint i = 0; i < count; i++)
+			{
+				xs[i] = values[i];
+			}
+			CHECK_ERROR(
+				outputStream.Write(&xs[0], sizeof(vint64_t) * count) == sizeof(vint64_t) * count,
+				L"Failed to serialize RegexLexer."
+				);
+		}
 
 /***********************************************************************
 PureInterpretor (Serialization)
@@ -23,6 +78,9 @@ PureInterpretor (Serialization)
 
 		void PureInterpretor::Serialize(stream::IStream& outputStream)
 		{
+			WriteInt(outputStream, stateCount);
+			WriteInt(outputStream, charSetCount);
+			WriteInt(outputStream, startState);
 			CHECK_FAIL(L"Not implemented!");
 		}
 

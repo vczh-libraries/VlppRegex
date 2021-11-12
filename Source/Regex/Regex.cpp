@@ -11,6 +11,14 @@ Licensed under https://github.com/vczh-libraries/License
 
 namespace vl
 {
+	namespace regex_internal
+	{
+		void ReadInt(stream::IStream& inputStream, vint& value);
+		void ReadInts(stream::IStream& inputStream, vint count, vint* values);
+		void WriteInt(stream::IStream& outputStream, vint value);
+		void WriteInts(stream::IStream& outputStream, vint count, vint* values);
+	}
+
 	namespace regex
 	{
 		using namespace collections;
@@ -943,23 +951,12 @@ RegexLexer_<T> (Serialization)
 		RegexLexer_<T>::RegexLexer_(stream::IStream& inputStream)
 		{
 			pure = new PureInterpretor(inputStream);
-
-			vint64_t count = 0;
-			CHECK_ERROR(
-				inputStream.Read(&count, sizeof(count)) == sizeof(count),
-				L"RegexLexer<T>::RegexLexer_(IStream&)#Unable to deserialize a lexer."
-				);
-
-			Array<vint64_t> xs((vint)count);
-			CHECK_ERROR(
-				inputStream.Read(&xs[0], sizeof(vint64_t) * (vint)count) == sizeof(vint64_t) * (vint)count,
-				L"RegexLexer<T>::RegexLexer_(IStream&)#Unable to deserialize a lexer."
-				);
-
-			stateTokens.Resize((vint)count);
-			for (vint i = 0; i < xs.Count(); i++)
+			vint count = 0;
+			ReadInt(inputStream, count);
+			stateTokens.Resize(count);
+			if (count > 0)
 			{
-				stateTokens[i] = (vint)xs[i];
+				ReadInts(inputStream, count, &stateTokens[0]);
 			}
 		}
 
@@ -967,14 +964,11 @@ RegexLexer_<T> (Serialization)
 		void RegexLexer_<T>::Serialize(stream::IStream& outputStream)
 		{
 			pure->Serialize(outputStream);
-
-			Array<vint64_t> xs(stateTokens.Count() + 1);
-			xs[0] = stateTokens.Count();
-			for (vint i = 0; i < stateTokens.Count(); i++)
+			WriteInt(outputStream, stateTokens.Count());
+			if (stateTokens.Count() > 0)
 			{
-				xs[i + 1] = stateTokens[i];
+				WriteInts(outputStream, stateTokens.Count(), &stateTokens[0]);
 			}
-			outputStream.Write(&xs[0], sizeof(vint64_t) * xs.Count());
 		}
 
 /***********************************************************************
