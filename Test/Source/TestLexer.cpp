@@ -1,7 +1,9 @@
-﻿#include "../../Source/Regex/Regex.h"
+﻿#include <VlppOS.h>
+#include "../../Source/Regex/Regex.h"
 
 using namespace vl;
 using namespace vl::collections;
+using namespace vl::stream;
 using namespace vl::regex;
 
 TEST_FILE
@@ -275,6 +277,36 @@ TEST_FILE
 		codes.Add(L"[a-zA-Z_]/w*");
 		codes.Add(L"\"[^\"]*\"");
 		RegexLexer lexer(codes);
+
+		WString input =
+			L"12345vczh is a genius!"		L"\r\n"
+			L"67890\"vczh\"\"is\" \"a\"\"genius\"\"!\""		L"\r\n"
+			L"hey!";
+		{
+			List<RegexToken> tokens;
+			CopyFrom(tokens, lexer.Parse(input));
+			TestRegexLexer2Validation(tokens);
+		}
+		{
+			List<RegexToken> tokens;
+			lexer.Parse(input).ReadToEnd(tokens);
+			TestRegexLexer2Validation(tokens);
+		}
+	});
+
+	TEST_CASE(L"Test RegexLexer 2 (Serialization)")
+	{
+		MemoryStream lexerStream;
+		{
+			List<WString> codes;
+			codes.Add(L"/d+");
+			codes.Add(L"[a-zA-Z_]/w*");
+			codes.Add(L"\"[^\"]*\"");
+			RegexLexer lexer(codes);
+			lexer.Serialize(lexerStream);
+		}
+		lexerStream.SeekFromBegin(0);
+		RegexLexer lexer(lexerStream);
 
 		WString input =
 			L"12345vczh is a genius!"		L"\r\n"

@@ -3,6 +3,7 @@ Author: Zihan Chen (vczh)
 Licensed under https://github.com/vczh-libraries/License
 ***********************************************************************/
 
+#include <VlppOS.h>
 #include "Regex.h"
 #include "./AST/RegexExpression.h"
 #include "RegexPure.h"
@@ -932,6 +933,22 @@ RegexLexerBase_
 		RegexLexerColorizer_<T> RegexLexerBase_::Colorize(RegexProc_<T> proc)const
 		{
 			return RegexLexerColorizer_<T>(Walk<T>(), proc);
+		}
+
+/***********************************************************************
+RegexLexer_<T> (Serialization)
+***********************************************************************/
+
+		template<typename T>
+		RegexLexer_<T>::RegexLexer_(stream::IStream& inputStream)
+		{
+			CHECK_FAIL(L"Not implemented!");
+		}
+
+		template<typename T>
+		void RegexLexer_<T>::Serialize(stream::IStream& outputStream)
+		{
+			CHECK_FAIL(L"Not implemented!");
 		}
 
 /***********************************************************************

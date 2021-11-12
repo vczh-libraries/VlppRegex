@@ -10,6 +10,11 @@ Licensed under https://github.com/vczh-libraries/License
 
 namespace vl
 {
+	namespace stream
+	{
+		class IStream;
+	}
+
 	namespace regex_internal
 	{
 		class PureResult;
@@ -1147,7 +1152,10 @@ RegexLexer
 			/// <param name="tokens">ALl regular expression, each one represent a kind of tokens.</param>
 			
 			RegexLexer_(const collections::IEnumerable<ObjectString<T>>& tokens);
+			RegexLexer_(stream::IStream& inputStream);
 			~RegexLexer_() = default;
+
+			void				Serialize(stream::IStream & outputStream);
 		};
 
 /***********************************************************************

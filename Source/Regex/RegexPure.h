@@ -10,6 +10,11 @@ Licensed under https://github.com/vczh-libraries/License
 
 namespace vl
 {
+	namespace stream
+	{
+		class IStream;
+	}
+
 	namespace regex_internal
 	{
 		class PureResult
@@ -27,15 +32,18 @@ namespace vl
 			static const vint	SupportedCharCount = MaxChar32 + 1;
 
 			vint				charMap[SupportedCharCount];		// char -> char set index
-			vint**				transition;							// (state * char set index) -> state*
-			bool*				finalState;							// state -> bool
-			vint*				relatedFinalState;					// sate -> (finalState or -1)
+			vint**				transition = nullptr;				// (state * char set index) -> state*
+			bool*				finalState = nullptr;				// state -> bool
+			vint*				relatedFinalState = nullptr;		// sate -> (finalState or -1)
 			vint				stateCount;
 			vint				charSetCount;
 			vint				startState;
 		public:
 			PureInterpretor(Automaton::Ref dfa, CharRange::List& subsets);
+			PureInterpretor(stream::IStream& inputStream);
 			~PureInterpretor();
+
+			void				Serialize(stream::IStream& outputStream);
 
 			template<typename TChar>
 			bool				MatchHead(const TChar* input, const TChar* start, PureResult& result);

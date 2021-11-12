@@ -3,6 +3,7 @@ Author: Zihan Chen (vczh)
 Licensed under https://github.com/vczh-libraries/License
 ***********************************************************************/
 
+#include <VlppOS.h>
 #include "RegexPure.h"
 #include "RegexCharReader.h"
 
@@ -12,13 +13,24 @@ namespace vl
 	{
 
 /***********************************************************************
+PureInterpretor (Serialization)
+***********************************************************************/
+
+		PureInterpretor::PureInterpretor(stream::IStream& inputStream)
+		{
+			CHECK_FAIL(L"Not implemented!");
+		}
+
+		void PureInterpretor::Serialize(stream::IStream& outputStream)
+		{
+			CHECK_FAIL(L"Not implemented!");
+		}
+
+/***********************************************************************
 PureInterpretor
 ***********************************************************************/
 
 		PureInterpretor::PureInterpretor(Automaton::Ref dfa, CharRange::List& subsets)
-			:transition(0)
-			, finalState(0)
-			, relatedFinalState(0)
 		{
 			stateCount = dfa->states.Count();
 			charSetCount = subsets.Count() + 1;
