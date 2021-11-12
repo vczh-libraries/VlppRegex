@@ -942,13 +942,39 @@ RegexLexer_<T> (Serialization)
 		template<typename T>
 		RegexLexer_<T>::RegexLexer_(stream::IStream& inputStream)
 		{
-			CHECK_FAIL(L"Not implemented!");
+			pure = new PureInterpretor(inputStream);
+
+			vint64_t count = 0;
+			CHECK_ERROR(
+				inputStream.Read(&count, sizeof(count)) == sizeof(count),
+				L"RegexLexer<T>::RegexLexer_(IStream&)#Unable to deserialize a lexer."
+				);
+
+			Array<vint64_t> xs((vint)count);
+			CHECK_ERROR(
+				inputStream.Read(&xs[0], sizeof(vint64_t) * (vint)count) == sizeof(vint64_t) * (vint)count,
+				L"RegexLexer<T>::RegexLexer_(IStream&)#Unable to deserialize a lexer."
+				);
+
+			stateTokens.Resize((vint)count);
+			for (vint i = 0; i < xs.Count(); i++)
+			{
+				stateTokens[i] = (vint)xs[i];
+			}
 		}
 
 		template<typename T>
 		void RegexLexer_<T>::Serialize(stream::IStream& outputStream)
 		{
-			CHECK_FAIL(L"Not implemented!");
+			pure->Serialize(outputStream);
+
+			Array<vint64_t> xs(stateTokens.Count() + 1);
+			xs[0] = stateTokens.Count();
+			for (vint i = 0; i < stateTokens.Count(); i++)
+			{
+				xs[i + 1] = stateTokens[i];
+			}
+			outputStream.Write(&xs[0], sizeof(vint64_t) * xs.Count());
 		}
 
 /***********************************************************************
