@@ -19,25 +19,44 @@ Read
 
 		void ReadInt(stream::IStream& inputStream, vint& value)
 		{
-			vint64_t x = value;
+#ifdef VCZH_64
+			vint32_t x = 0;
 			CHECK_ERROR(
-				inputStream.Read(&x, sizeof(x)) == sizeof(x),
+				inputStream.Read(&x, sizeof(vint32_t)) == sizeof(vint32_t),
 				L"Failed to deserialize RegexLexer."
 				);
 			value = (vint)x;
+#else
+			CHECK_ERROR(
+				inputStream.Read(&value, sizeof(vint32_t)) == sizeof(vint32_t),
+				L"Failed to deserialize RegexLexer."
+				);
+#endif
 		}
 
 		void ReadInts(stream::IStream& inputStream, vint count, vint* values)
 		{
-			Array<vint64_t> xs(count);
+#ifdef VCZH_64
+			Array<vint32_t> xs(count);
 			CHECK_ERROR(
-				inputStream.Read(&xs[0], sizeof(vint64_t) * count) == sizeof(vint64_t) * count,
+				inputStream.Read(&xs[0], sizeof(vint32_t) * count) == sizeof(vint32_t) * count,
 				L"Failed to deserialize RegexLexer."
 				);
 			for (vint i = 0; i < count; i++)
 			{
 				values[i] = (vint)xs[i];
 			}
+#else
+			CHECK_ERROR(
+				inputStream.Read(values, sizeof(vint32_t) * count) == sizeof(vint32_t) * count,
+				L"Failed to deserialize RegexLexer."
+				);
+#endif
+		}
+
+		void ReadBools(stream::IStream& inputStream, vint count, bool* values)
+		{
+			CHECK_FAIL(L"Not implemented!");
 		}
 
 /***********************************************************************
@@ -46,25 +65,43 @@ Write
 
 		void WriteInt(stream::IStream& outputStream, vint value)
 		{
-			vint64_t x = value;
+#ifdef VCZH_64
+			vint32_t x = (vint32_t)value;
 			CHECK_ERROR(
-				outputStream.Write(&x, sizeof(x)) == sizeof(x),
+				outputStream.Write(&x, sizeof(vint32_t)) == sizeof(vint32_t),
 				L"Failed to serialize RegexLexer."
 				);
+#else
+			CHECK_ERROR(
+				outputStream.Write(&value, sizeof(vint32_t)) == sizeof(vint32_t),
+				L"Failed to serialize RegexLexer."
+				);
+#endif
 		}
 
 		void WriteInts(stream::IStream& outputStream, vint count, vint* values)
 		{
-			Array<vint64_t> xs(count);
-			xs[0] = count;
+#ifdef VCZH_64
+			Array<vint32_t> xs(count);
 			for (vint i = 0; i < count; i++)
 			{
-				xs[i] = values[i];
+				xs[i] = (vint32_t)values[i];
 			}
 			CHECK_ERROR(
-				outputStream.Write(&xs[0], sizeof(vint64_t) * count) == sizeof(vint64_t) * count,
+				outputStream.Write(&xs[0], sizeof(vint32_t) * count) == sizeof(vint32_t) * count,
 				L"Failed to serialize RegexLexer."
 				);
+#else
+			CHECK_ERROR(
+				outputStream.Write(values, sizeof(vint32_t) * count) == sizeof(vint32_t) * count,
+				L"Failed to serialize RegexLexer."
+				);
+#endif
+		}
+
+		void WriteBools(stream::IStream& outputStream, vint count, bool* values)
+		{
+			CHECK_FAIL(L"Not implemented!");
 		}
 
 /***********************************************************************
@@ -73,7 +110,20 @@ PureInterpretor (Serialization)
 
 		PureInterpretor::PureInterpretor(stream::IStream& inputStream)
 		{
-			CHECK_FAIL(L"Not implemented!");
+			ReadInt(inputStream, stateCount);
+			ReadInt(inputStream, charSetCount);
+			ReadInt(inputStream, startState);
+			ReadInts(inputStream, SupportedCharCount, charMap);
+
+			transition = new vint* [stateCount];
+			for (vint i = 0; i < stateCount; i++)
+			{
+				transition[i] = new vint[charSetCount];
+				ReadInts(inputStream, charSetCount, transition[i]);
+			}
+
+			finalState = new bool[stateCount];
+			ReadBools(inputStream, stateCount, finalState);
 		}
 
 		void PureInterpretor::Serialize(stream::IStream& outputStream)
@@ -81,7 +131,12 @@ PureInterpretor (Serialization)
 			WriteInt(outputStream, stateCount);
 			WriteInt(outputStream, charSetCount);
 			WriteInt(outputStream, startState);
-			CHECK_FAIL(L"Not implemented!");
+			WriteInts(outputStream, SupportedCharCount, charMap);
+			for (vint i = 0; i < stateCount; i++)
+			{
+				WriteInts(outputStream, charSetCount, transition[i]);
+			}
+			WriteBools(outputStream, stateCount, finalState);
 		}
 
 /***********************************************************************
@@ -110,7 +165,7 @@ PureInterpretor
 			}
 
 			// Create transitions from DFA, using input index to represent input char
-			transition = new vint * [stateCount];
+			transition = new vint* [stateCount];
 			for (vint i = 0; i < stateCount; i++)
 			{
 				transition[i] = new vint[charSetCount];
