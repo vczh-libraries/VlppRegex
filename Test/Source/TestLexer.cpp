@@ -302,8 +302,7 @@ TEST_FILE
 			codes.Add(L"/d+");
 			codes.Add(L"[a-zA-Z_]/w*");
 			codes.Add(L"\"[^\"]*\"");
-			RegexLexer lexer(codes);
-			lexer.Serialize(lexerStream);
+			RegexLexer(codes).Serialize(lexerStream);
 		}
 		lexerStream.SeekFromBegin(0);
 		RegexLexer lexer(lexerStream);

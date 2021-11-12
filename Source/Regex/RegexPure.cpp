@@ -56,7 +56,18 @@ Read
 
 		void ReadBools(stream::IStream& inputStream, vint count, bool* values)
 		{
-			CHECK_FAIL(L"Not implemented!");
+			Array<vuint8_t> bits((count + 7) / 8);
+			CHECK_ERROR(
+				inputStream.Read(&bits[0], sizeof(vuint8_t) * bits.Count()) == sizeof(vuint8_t) * bits.Count(),
+				L"Failed to deserialize RegexLexer."
+			);
+
+			for (vint i = 0; i < count; i++)
+			{
+				vint x = i / 8;
+				vint y = i % 8;
+				values[i] = ((bits[x] >> y) & 1) == 1;
+			}
 		}
 
 /***********************************************************************
@@ -101,7 +112,23 @@ Write
 
 		void WriteBools(stream::IStream& outputStream, vint count, bool* values)
 		{
-			CHECK_FAIL(L"Not implemented!");
+			Array<vuint8_t> bits((count + 7) / 8);
+			memset(&bits[0], 0, sizeof(vuint8_t) * bits.Count());
+
+			for (vint i = 0; i < count; i++)
+			{
+				if (values[i])
+				{
+					vint x = i / 8;
+					vint y = i % 8;
+					bits[0] |= (vuint8_t)1 << y;
+				}
+			}
+
+			CHECK_ERROR(
+				outputStream.Write(&bits[0], sizeof(vuint8_t) * bits.Count()) == sizeof(vuint8_t) * bits.Count(),
+				L"Failed to serialize RegexLexer."
+				);
 		}
 
 /***********************************************************************
