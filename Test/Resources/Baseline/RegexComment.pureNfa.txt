@@ -1,0 +1,42 @@
+﻿[START]State<0>
+    To State<1> : <Char : 47[/] - 47[/]>
+State<1>
+    To State<2> : <Char : 42[*] - 42[*]>
+State<2>
+    To State<3> : <Char : 1[] - 41[)]>
+    To State<3> : <Char : 43[+] - 46[.]>
+    To State<3> : <Char : 47[/] - 47[/]>
+    To State<3> : <Char : 48[0] - 1114111[􏿿]>
+    To State<4> : <Char : 42[*] - 42[*]>
+    To State<5> : <Char : 42[*] - 42[*]>
+State<3>
+    To State<3> : <Char : 1[] - 41[)]>
+    To State<3> : <Char : 43[+] - 46[.]>
+    To State<3> : <Char : 47[/] - 47[/]>
+    To State<3> : <Char : 48[0] - 1114111[􏿿]>
+    To State<4> : <Char : 42[*] - 42[*]>
+    To State<5> : <Char : 42[*] - 42[*]>
+State<4>
+    To State<6> : <Char : 42[*] - 42[*]>
+    To State<7> : <Char : 1[] - 41[)]>
+    To State<7> : <Char : 43[+] - 46[.]>
+    To State<7> : <Char : 48[0] - 1114111[􏿿]>
+State<5>
+    To State<8> : <Char : 42[*] - 42[*]>
+    To State<9> : <Char : 47[/] - 47[/]>
+State<6>
+    To State<6> : <Char : 42[*] - 42[*]>
+    To State<7> : <Char : 1[] - 41[)]>
+    To State<7> : <Char : 43[+] - 46[.]>
+    To State<7> : <Char : 48[0] - 1114111[􏿿]>
+State<7>
+    To State<3> : <Char : 1[] - 41[)]>
+    To State<3> : <Char : 43[+] - 46[.]>
+    To State<3> : <Char : 47[/] - 47[/]>
+    To State<3> : <Char : 48[0] - 1114111[􏿿]>
+    To State<4> : <Char : 42[*] - 42[*]>
+    To State<5> : <Char : 42[*] - 42[*]>
+State<8>
+    To State<8> : <Char : 42[*] - 42[*]>
+    To State<9> : <Char : 47[/] - 47[/]>
+[FINISH]State<9>

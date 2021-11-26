@@ -1,0 +1,12 @@
+﻿[START]State<0>
+    To State<1> : <Char : 43[+] - 43[+]>
+    To State<2> : <Char : 45[-] - 45[-]>
+    To State<3> : <Char : 48[0] - 57[9]>
+State<1>
+    To State<3> : <Char : 48[0] - 57[9]>
+State<2>
+    To State<3> : <Char : 48[0] - 57[9]>
+[FINISH]State<3>
+    To State<4> : <Char : 48[0] - 57[9]>
+[FINISH]State<4>
+    To State<4> : <Char : 48[0] - 57[9]>

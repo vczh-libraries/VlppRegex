@@ -116,7 +116,7 @@ void CompareToBaseline(WString fileName)
 	TEST_ASSERT(generatedReader.ReadToEnd() == baselineReader.ReadToEnd());
 }
 
-void PrintRegex(WString name, U32String code, bool compareToBaseline = true)
+void PrintRegex(bool pure, WString name, U32String code)
 {
 	TEST_CASE(name + L": " + u32tow(code))
 	{
@@ -125,21 +125,35 @@ void PrintRegex(WString name, U32String code, bool compareToBaseline = true)
 		CharRange::List subsets;
 		expression->NormalizeCharSet(subsets);
 
-		Dictionary<State*, State*> nfaStateMap;
-		Group<State*, State*> dfaStateMap;
 		Automaton::Ref eNfa = expression->GenerateEpsilonNfa();
-		Automaton::Ref nfa = EpsilonNfaToNfa(eNfa, RichEpsilonChecker, nfaStateMap);
-		Automaton::Ref dfa = NfaToDfa(nfa, dfaStateMap);
-
 		PrintAutomaton(name + L".eNfa.txt", eNfa);
-		PrintAutomaton(name + L".Nfa.txt", nfa);
-		PrintAutomaton(name + L".Dfa.txt", dfa);
+		CompareToBaseline(name + L".eNfa.txt");
 
-		if (compareToBaseline)
+		if (pure)
 		{
-			CompareToBaseline(name + L".eNfa.txt");
-			CompareToBaseline(name + L".Nfa.txt");
-			CompareToBaseline(name + L".Dfa.txt");
+			Dictionary<State*, State*> nfaStateMap;
+			Group<State*, State*> dfaStateMap;
+			Automaton::Ref nfa = EpsilonNfaToNfa(eNfa, PureEpsilonChecker, nfaStateMap);
+			Automaton::Ref dfa = NfaToDfa(nfa, dfaStateMap);
+
+			PrintAutomaton(name + L".pureNfa.txt", nfa);
+			PrintAutomaton(name + L".pureDfa.txt", dfa);
+
+			CompareToBaseline(name + L".pureNfa.txt");
+			CompareToBaseline(name + L".pureDfa.txt");
+		}
+
+		{
+			Dictionary<State*, State*> nfaStateMap;
+			Group<State*, State*> dfaStateMap;
+			Automaton::Ref nfa = EpsilonNfaToNfa(eNfa, RichEpsilonChecker, nfaStateMap);
+			Automaton::Ref dfa = NfaToDfa(nfa, dfaStateMap);
+
+			PrintAutomaton(name + L".richNfa.txt", nfa);
+			PrintAutomaton(name + L".richDfa.txt", dfa);
+
+			CompareToBaseline(name + L".richNfa.txt");
+			CompareToBaseline(name + L".richDfa.txt");
 		}
 	});
 }
@@ -148,13 +162,13 @@ TEST_FILE
 {
 	TEST_CATEGORY(L"Automaton")
 	{
-		PrintRegex(L"RegexInteger",		U"/d");
-		PrintRegex(L"RegexFullint",		U"(/+|-)?/d+");
-		PrintRegex(L"RegexFloat",		U"(/+|-)?/d+(./d+)?");
-		PrintRegex(L"RegexString",		UR"("([^\\"]|\\\.)*")");
-		PrintRegex(L"RegexComment",		U"///*([^*]|/*+[^*//])*/*+//");
-		PrintRegex(L"RegexIP",			U"(<#sec>(<sec>/d+))((<&sec>).){3}(<&sec>)");
-		PrintRegex(L"RegexDuplicate",	U"^(<sec>/.+)(<$sec>)+$");
-		PrintRegex(L"RegexPrescan",		U"/d+(=/w+)(!vczh)");
+		PrintRegex(true,	L"RegexInteger",		U"/d");
+		PrintRegex(true,	L"RegexFullint",		U"(/+|-)?/d+");
+		PrintRegex(true,	L"RegexFloat",			U"(/+|-)?/d+(./d+)?");
+		PrintRegex(true,	L"RegexString",			UR"("([^\\"]|\\\.)*")");
+		PrintRegex(true,	L"RegexComment",		U"///*([^*]|/*+[^*//])*/*+//");
+		PrintRegex(false,	L"RegexIP",				U"(<#sec>(<sec>/d+))((<&sec>).){3}(<&sec>)");
+		PrintRegex(false,	L"RegexDuplicate",		U"^(<sec>/.+)(<$sec>)+$");
+		PrintRegex(false,	L"RegexPrescan",		U"/d+(=/w+)(!vczh)");
 	});
 }

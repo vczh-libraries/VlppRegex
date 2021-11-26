@@ -1,6 +1,5 @@
 ﻿#include <VlppOS.h>
 #include "../../Source/Regex/AST/RegexExpression.h"
-#define protected public
 #include "../../Source/Regex/RegexPure.h"
 
 using namespace vl;
@@ -10,80 +9,6 @@ using namespace vl::regex_internal;
 
 namespace TestPure_TestObjects
 {
-	void EnsureAutomatonIdentical(Automaton::Ref a1, Automaton::Ref a2)
-	{
-		TEST_ASSERT(a1->states.Count() == a2->states.Count());
-		TEST_ASSERT(a1->transitions.Count() == a2->transitions.Count());
-		TEST_ASSERT(CompareEnumerable(a1->captureNames, a2->captureNames) == 0);
-		TEST_ASSERT(a1->states.IndexOf(a1->startState) == a2->states.IndexOf(a2->startState));
-
-		for (vint i = 0; i < a1->states.Count(); i++)
-		{
-			auto s1 = a1->states[i].Obj();
-			auto s2 = a2->states[i].Obj();
-
-			TEST_ASSERT(s1->finalState == s2->finalState);
-			TEST_ASSERT(s1->transitions.Count() == s2->transitions.Count());
-			TEST_ASSERT(s1->inputs.Count() == s2->inputs.Count());
-
-			for (vint j = 0; j < s1->transitions.Count(); j++)
-			{
-				auto t1 = s1->transitions[j];
-				auto t2 = s2->transitions[j];
-				TEST_ASSERT(a1->transitions.IndexOf(t1) == a2->transitions.IndexOf(t2));
-			}
-
-			for (vint j = 0; j < s1->inputs.Count(); j++)
-			{
-				auto t1 = s1->inputs[j];
-				auto t2 = s2->inputs[j];
-				TEST_ASSERT(a1->transitions.IndexOf(t1) == a2->transitions.IndexOf(t2));
-			}
-		}
-
-		for (vint i = 0; i < a1->transitions.Count(); i++)
-		{
-			auto t1 = a1->transitions[i].Obj();
-			auto t2 = a2->transitions[i].Obj();
-
-			TEST_ASSERT(a1->states.IndexOf(t1->source) == a2->states.IndexOf(t2->source));
-			TEST_ASSERT(a1->states.IndexOf(t1->target) == a2->states.IndexOf(t2->target));
-			TEST_ASSERT(t1->range == t2->range);
-			TEST_ASSERT(t1->type == t2->type);
-			TEST_ASSERT(t1->capture == t2->capture);
-			TEST_ASSERT(t1->index == t2->index);
-		}
-	}
-
-	void EnsurePureInterpretorIdentical(PureInterpretor* p1, PureInterpretor* p2)
-	{
-		TEST_ASSERT(p1->stateCount == p2->stateCount);
-		TEST_ASSERT(p1->charSetCount == p2->charSetCount);
-		TEST_ASSERT(p1->startState == p2->startState);
-		TEST_ASSERT(memcmp(p1->charMap, p2->charMap, sizeof(vint) * PureInterpretor::SupportedCharCount) == 0);
-		TEST_ASSERT(memcmp(p1->transitions, p2->transitions, sizeof(vint) * (p1->stateCount * p1->charSetCount)) == 0);
-		TEST_ASSERT(memcmp(p1->finalState, p2->finalState, sizeof(bool) * p1->stateCount) == 0);
-	}
-
-	Ptr<PureInterpretor> BuildPureInterpretor(
-		const char32_t* code,
-		Automaton::Ref& eNfa,
-		Automaton::Ref& nfa,
-		Automaton::Ref& dfa)
-	{
-		CharRange::List subsets;
-		Dictionary<State*, State*> nfaStateMap;
-		Group<State*, State*> dfaStateMap;
-
-		RegexExpression::Ref regex = ParseRegexExpression(code);
-		Expression::Ref expression = regex->Merge();
-		expression->NormalizeCharSet(subsets);
-		eNfa = expression->GenerateEpsilonNfa();
-		nfa = EpsilonNfaToNfa(eNfa, PureEpsilonChecker, nfaStateMap);
-		dfa = NfaToDfa(nfa, dfaStateMap);
-		return new PureInterpretor(dfa, subsets);
-	}
-
 	Ptr<PureInterpretor> BuildPureInterpretor(const char32_t* code)
 	{
 		CharRange::List subsets;
@@ -102,20 +27,9 @@ namespace TestPure_TestObjects
 	void RunPureInterpretor(const char32_t* code, const wchar_t* input, vint start, vint length)
 	{
 		PureResult matchResult;
-		Automaton::Ref eNfa, nfa, dfa;
-		auto interpretor = BuildPureInterpretor(code, eNfa, nfa, dfa);
+		auto interpretor = BuildPureInterpretor(code);
 		TEST_CASE(u32tow(code) + WString(L" on ") + input)
 		{
-			for (vint i = 0; i < 10; i++)
-			{
-				Automaton::Ref eNfa2, nfa2, dfa2;
-				auto second = BuildPureInterpretor(code, eNfa2, nfa2, dfa2);
-				EnsureAutomatonIdentical(eNfa, eNfa2);
-				EnsureAutomatonIdentical(nfa, nfa2);
-				EnsureAutomatonIdentical(dfa, dfa2);
-				EnsurePureInterpretorIdentical(interpretor.Obj(), second.Obj());
-			}
-
 			bool expectedSuccessful = start != -1;
 			TEST_ASSERT(interpretor->Match(input, input, matchResult) == expectedSuccessful);
 			if (expectedSuccessful)

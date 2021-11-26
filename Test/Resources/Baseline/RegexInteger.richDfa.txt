@@ -1,0 +1,3 @@
+﻿[START]State<0>
+    To State<1> : <Char : 48[0] - 57[9]>
+[FINISH]State<1>

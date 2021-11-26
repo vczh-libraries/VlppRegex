@@ -1,0 +1,27 @@
+﻿[START]State<0>
+    To State<1> : <Char : 34["] - 34["]>
+State<1>
+    To State<2> : <Char : 1[] - 33[!]>
+    To State<2> : <Char : 35[#] - 91[[]>
+    To State<2> : <Char : 93[]] - 1114111[􏿿]>
+    To State<3> : <Char : 92[\] - 92[\]>
+    To State<4> : <Char : 34["] - 34["]>
+State<2>
+    To State<2> : <Char : 1[] - 33[!]>
+    To State<2> : <Char : 35[#] - 91[[]>
+    To State<2> : <Char : 93[]] - 1114111[􏿿]>
+    To State<3> : <Char : 92[\] - 92[\]>
+    To State<4> : <Char : 34["] - 34["]>
+State<3>
+    To State<5> : <Char : 1[] - 33[!]>
+    To State<5> : <Char : 34["] - 34["]>
+    To State<5> : <Char : 35[#] - 91[[]>
+    To State<5> : <Char : 92[\] - 92[\]>
+    To State<5> : <Char : 93[]] - 1114111[􏿿]>
+[FINISH]State<4>
+State<5>
+    To State<2> : <Char : 1[] - 33[!]>
+    To State<2> : <Char : 35[#] - 91[[]>
+    To State<2> : <Char : 93[]] - 1114111[􏿿]>
+    To State<3> : <Char : 92[\] - 92[\]>
+    To State<4> : <Char : 34["] - 34["]>
