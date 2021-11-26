@@ -34,7 +34,7 @@ namespace vl
 			vint				charMap[SupportedCharCount];		// char -> char set index
 			vint*				transitions = nullptr;				// (state * charSetCount + charSetIndex) -> state
 			bool*				finalState = nullptr;				// state -> bool
-			vint*				relatedFinalState = nullptr;		// sate -> (finalState or -1)
+			vint*				relatedFinalState = nullptr;		// state -> (finalState or -1)
 			vint				stateCount;
 			vint				charSetCount;
 			vint				startState;

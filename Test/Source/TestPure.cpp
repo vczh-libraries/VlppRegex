@@ -1,5 +1,6 @@
 ﻿#include <VlppOS.h>
 #include "../../Source/Regex/AST/RegexExpression.h"
+#define protected public
 #include "../../Source/Regex/RegexPure.h"
 
 using namespace vl;
@@ -30,28 +31,15 @@ namespace TestPure_TestObjects
 		auto interpretor = BuildPureInterpretor(code);
 		TEST_CASE(u32tow(code) + WString(L" on ") + input)
 		{
+			for (vint i = 0; i < 10; i++)
 			{
-				List<Ptr<MemoryStream>> streams;
-				for (vint i = 0; i < 10; i++)
-				{
-					auto memoryStream = MakePtr<MemoryStream>();
-					streams.Add(memoryStream);
-					BuildPureInterpretor(code)->Serialize(*memoryStream.Obj());
-				}
-				for (vint i = 0; i < streams.Count(); i++)
-				{
-					auto first = streams[0].Obj();
-					auto second = streams[i].Obj();
-					auto b1 = (vint8_t*)first->GetInternalBuffer();
-					auto b2 = (vint8_t*)second->GetInternalBuffer();
-					auto minSize = first->Size() < second->Size() ? first->Size() : second->Size();
-					for (vint j = 0; j < minSize; j++)
-					{
-						TEST_ASSERT(b1[j] == b2[j]);
-					}
-					TEST_ASSERT(first->Size() == second->Size());
-					TEST_ASSERT(memcmp(first->GetInternalBuffer(), second->GetInternalBuffer(), first->Size()) == 0);
-				}
+				auto second = BuildPureInterpretor(code);
+				TEST_ASSERT(interpretor->stateCount == second->stateCount);
+				TEST_ASSERT(interpretor->charSetCount == second->charSetCount);
+				TEST_ASSERT(interpretor->startState == second->startState);
+				TEST_ASSERT(memcmp(interpretor->charMap, second->charMap, sizeof(vint) * PureInterpretor::SupportedCharCount) == 0);
+				TEST_ASSERT(memcmp(interpretor->transitions, second->transitions, sizeof(vint) * (interpretor->stateCount * interpretor->charSetCount)) == 0);
+				TEST_ASSERT(memcmp(interpretor->finalState, second->finalState, sizeof(bool) * interpretor->stateCount) == 0);
 			}
 
 			bool expectedSuccessful = start != -1;
