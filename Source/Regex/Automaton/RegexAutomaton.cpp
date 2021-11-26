@@ -245,9 +245,6 @@ Helpers
 		Automaton::Ref NfaToDfa(Automaton::Ref source, Group<State*, State*>& dfaStateMap)
 		{
 			Automaton::Ref target = new Automaton;
-			Group<Transition*, Transition*> nfaTransitions;
-			List<Transition*> transitionClasses; // Maintain order for nfaTransitions.Keys
-
 			CopyFrom(target->captureNames, source->captureNames);
 			State* startState = target->NewState();
 			target->startState = startState;
@@ -256,57 +253,69 @@ Helpers
 			SortedList<State*> transitionTargets;
 			SortedList<State*> relativeStates;
 
-			for (vint i = 0; i < target->states.Count(); i++)
+			for (auto currentState_ : target->states)
 			{
-				State* currentState = target->states[i].Obj();
-				nfaTransitions.Clear();
-				transitionClasses.Clear();
+				Group<Transition*, Transition*>			nfaClassToTransitions;
+				Dictionary<Transition*, Transition*>	nfaTransitionToClass;
+				List<Transition*>						orderedTransitionClasses;
+
+				State* currentState = currentState_.Obj();
 
 				// Iterate through all NFA states which represent the DFA state
-				const List<State*>& nfaStates = dfaStateMap[currentState];
-				for (vint j = 0; j < nfaStates.Count(); j++)
+				for (auto nfaState : dfaStateMap[currentState])
 				{
-					State* nfaState = nfaStates.Get(j);
 					// Iterate through all transitions from those NFA states
-					for (vint k = 0; k < nfaState->transitions.Count(); k++)
+					for (auto nfaTransition : nfaState->transitions)
 					{
-						Transition* nfaTransition = nfaState->transitions[k];
+						Transition* transitionClass = nullptr;
+
 						// Check if there is any key in nfaTransitions that has the same input as the current transition
-						Transition* transitionClass = 0;
-						for (vint l = 0; l < nfaTransitions.Keys().Count(); l++)
 						{
-							Transition* key = nfaTransitions.Keys()[l];
-							if (AreEqual(key, nfaTransition))
+							vint index = nfaTransitionToClass.Keys().IndexOf(nfaTransition);
+							if (index != -1) transitionClass = nfaTransitionToClass.Values()[index];
+						}
+
+						if (transitionClass == nullptr)
+						{
+							for (vint l = 0; l < orderedTransitionClasses.Count(); l++)
 							{
-								transitionClass = key;
-								break;
+								Transition* key = orderedTransitionClasses[l];
+								if (AreEqual(key, nfaTransition))
+								{
+									transitionClass = key;
+									break;
+								}
 							}
 						}
+
 						// Create a new key if not
-						if (transitionClass == 0)
+						if (transitionClass == nullptr)
 						{
 							transitionClass = nfaTransition;
-							transitionClasses.Add(transitionClass);
+							orderedTransitionClasses.Add(transitionClass);
 						}
 						// Group the transition
-						nfaTransitions.Add(transitionClass, nfaTransition);
+						nfaClassToTransitions.Add(transitionClass, nfaTransition);
+						nfaTransitionToClass.Add(nfaTransition, transitionClass);
 					}
 				}
 
 				// Iterate through all key transition that represent all existing transition inputs from the same state
-				for (vint j = 0; j < transitionClasses.Count(); j++)
+				for (auto transitionClass : orderedTransitionClasses)
 				{
-					const List<Transition*>& transitionSet = nfaTransitions[transitionClasses[j]];
+					auto&& equivalentTransitions = nfaClassToTransitions[transitionClass];
+
 					// Sort all target states and keep unique
 					transitionTargets.Clear();
-					for (vint l = 0; l < transitionSet.Count(); l++)
+					for (auto equivalentTransition : equivalentTransitions)
 					{
-						State* nfaState = transitionSet.Get(l)->target;
+						State* nfaState = equivalentTransition->target;
 						if (!transitionTargets.Contains(nfaState))
 						{
 							transitionTargets.Add(nfaState);
 						}
 					}
+
 					// Check if these NFA states represent a created DFA state
 					State* dfaState = 0;
 					for (vint k = 0; k < dfaStateMap.Count(); k++)
@@ -346,7 +355,6 @@ Helpers
 						}
 					}
 					// Create corresponding DFA transition
-					Transition* transitionClass = transitionClasses[j];
 					Transition* newTransition = target->NewTransition(currentState, dfaState);
 					newTransition->capture = transitionClass->capture;
 					newTransition->index = transitionClass->index;
