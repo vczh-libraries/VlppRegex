@@ -113,12 +113,15 @@ void CompareToBaseline(WString fileName)
 	StreamReader generatedReader(generatedStream);
 	StreamReader baselineReader(baselineStream);
 
-	TEST_ASSERT(generatedReader.ReadToEnd() == baselineReader.ReadToEnd());
+	TEST_CASE(fileName)
+	{
+		TEST_ASSERT(generatedReader.ReadToEnd() == baselineReader.ReadToEnd());
+	});
 }
 
 void PrintRegex(bool pure, WString name, U32String code)
 {
-	TEST_CASE(name + L": " + u32tow(code))
+	TEST_CATEGORY(name + L": " + u32tow(code))
 	{
 		RegexExpression::Ref regex = ParseRegexExpression(code);
 		Expression::Ref expression = regex->Merge();
