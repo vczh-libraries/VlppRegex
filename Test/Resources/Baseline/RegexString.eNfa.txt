@@ -10,7 +10,7 @@ State<3>
 State<4>
     To State<5> : <Char : 1[] - 33[!]>
     To State<5> : <Char : 35[#] - 91[[]>
-    To State<5> : <Char : 93[]] - 65535[￿]>
+    To State<5> : <Char : 93[]] - 1114111[􏿿]>
 State<5>
     To State<3> : <Epsilon>
 State<6>
@@ -22,8 +22,7 @@ State<8>
     To State<9> : <Char : 34["] - 34["]>
     To State<9> : <Char : 35[#] - 91[[]>
     To State<9> : <Char : 92[\] - 92[\]>
-    To State<9> : <Char : 93[]] - 65535[￿]>
-    To State<9> : <Char : 65536[𐀀] - 1114111[􏿿]>
+    To State<9> : <Char : 93[]] - 1114111[􏿿]>
 State<9>
     To State<3> : <Epsilon>
 State<10>

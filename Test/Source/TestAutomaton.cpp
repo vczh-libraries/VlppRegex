@@ -113,7 +113,7 @@ void CompareToBaseline(WString fileName)
 	StreamReader generatedReader(generatedStream);
 	StreamReader baselineReader(baselineStream);
 
-	//TEST_ASSERT(generatedReader.ReadToEnd() == baselineReader.ReadToEnd());
+	TEST_ASSERT(generatedReader.ReadToEnd() == baselineReader.ReadToEnd());
 }
 
 void PrintRegex(WString name, U32String code, bool compareToBaseline = true)

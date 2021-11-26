@@ -3,13 +3,13 @@
 State<1>
     To State<2> : <Char : 1[] - 33[!]>
     To State<2> : <Char : 35[#] - 91[[]>
-    To State<2> : <Char : 93[]] - 65535[￿]>
+    To State<2> : <Char : 93[]] - 1114111[􏿿]>
     To State<3> : <Char : 92[\] - 92[\]>
     To State<4> : <Nop>
 State<2>
     To State<2> : <Char : 1[] - 33[!]>
     To State<2> : <Char : 35[#] - 91[[]>
-    To State<2> : <Char : 93[]] - 65535[￿]>
+    To State<2> : <Char : 93[]] - 1114111[􏿿]>
     To State<3> : <Char : 92[\] - 92[\]>
     To State<4> : <Nop>
 State<3>
@@ -17,14 +17,13 @@ State<3>
     To State<5> : <Char : 34["] - 34["]>
     To State<5> : <Char : 35[#] - 91[[]>
     To State<5> : <Char : 92[\] - 92[\]>
-    To State<5> : <Char : 93[]] - 65535[￿]>
-    To State<5> : <Char : 65536[𐀀] - 1114111[􏿿]>
+    To State<5> : <Char : 93[]] - 1114111[􏿿]>
 State<4>
     To State<6> : <Char : 34["] - 34["]>
 State<5>
     To State<2> : <Char : 1[] - 33[!]>
     To State<2> : <Char : 35[#] - 91[[]>
-    To State<2> : <Char : 93[]] - 65535[￿]>
+    To State<2> : <Char : 93[]] - 1114111[􏿿]>
     To State<3> : <Char : 92[\] - 92[\]>
     To State<4> : <Nop>
 [FINISH]State<6>
