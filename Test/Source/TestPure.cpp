@@ -21,29 +21,39 @@ namespace TestPure_TestObjects
 		Automaton::Ref eNfa = expression->GenerateEpsilonNfa();
 		Automaton::Ref nfa = EpsilonNfaToNfa(eNfa, PureEpsilonChecker, nfaStateMap);
 		Automaton::Ref dfa = NfaToDfa(nfa, dfaStateMap);
-
-		List<Ptr<MemoryStream>> streams;
-		for (vint i = 0; i < 10; i++)
-		{
-			auto memoryStream = MakePtr<MemoryStream>();
-			PureInterpretor(dfa, subsets).Serialize(*memoryStream.Obj());
-		}
-		for (vint i = 1; i < streams.Count(); i++)
-		{
-			auto first = streams[0].Obj();
-			auto second = streams[i].Obj();
-			TEST_ASSERT(first->Size() == second->Size());
-			TEST_ASSERT(memcmp(first->GetInternalBuffer(), second->GetInternalBuffer(), first->Size()));
-		}
 		return new PureInterpretor(dfa, subsets);
 	}
 
 	void RunPureInterpretor(const char32_t* code, const wchar_t* input, vint start, vint length)
 	{
+		PureResult matchResult;
+		auto interpretor = BuildPureInterpretor(code);
 		TEST_CASE(u32tow(code) + WString(L" on ") + input)
 		{
-			PureResult matchResult;
-			auto interpretor = BuildPureInterpretor(code);
+			{
+				List<Ptr<MemoryStream>> streams;
+				for (vint i = 0; i < 10; i++)
+				{
+					auto memoryStream = MakePtr<MemoryStream>();
+					streams.Add(memoryStream);
+					BuildPureInterpretor(code)->Serialize(*memoryStream.Obj());
+				}
+				for (vint i = 0; i < streams.Count(); i++)
+				{
+					auto first = streams[0].Obj();
+					auto second = streams[i].Obj();
+					auto b1 = (vint8_t*)first->GetInternalBuffer();
+					auto b2 = (vint8_t*)second->GetInternalBuffer();
+					auto minSize = first->Size() < second->Size() ? first->Size() : second->Size();
+					for (vint j = 0; j < minSize; j++)
+					{
+						TEST_ASSERT(b1[j] == b2[j]);
+					}
+					TEST_ASSERT(first->Size() == second->Size());
+					TEST_ASSERT(memcmp(first->GetInternalBuffer(), second->GetInternalBuffer(), first->Size()) == 0);
+				}
+			}
+
 			bool expectedSuccessful = start != -1;
 			TEST_ASSERT(interpretor->Match(input, input, matchResult) == expectedSuccessful);
 			if (expectedSuccessful)
