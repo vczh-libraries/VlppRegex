@@ -142,12 +142,8 @@ PureInterpretor (Serialization)
 			ReadInt(inputStream, startState);
 			ReadInts(inputStream, SupportedCharCount, charMap);
 
-			transition = new vint* [stateCount];
-			for (vint i = 0; i < stateCount; i++)
-			{
-				transition[i] = new vint[charSetCount];
-				ReadInts(inputStream, charSetCount, transition[i]);
-			}
+			transitions = new vint[stateCount * charSetCount];
+			ReadInts(inputStream, stateCount * charSetCount, transitions);
 
 			finalState = new bool[stateCount];
 			ReadBools(inputStream, stateCount, finalState);
@@ -159,10 +155,7 @@ PureInterpretor (Serialization)
 			WriteInt(outputStream, charSetCount);
 			WriteInt(outputStream, startState);
 			WriteInts(outputStream, SupportedCharCount, charMap);
-			for (vint i = 0; i < stateCount; i++)
-			{
-				WriteInts(outputStream, charSetCount, transition[i]);
-			}
+			WriteInts(outputStream, stateCount * charSetCount, transitions);
 			WriteBools(outputStream, stateCount, finalState);
 		}
 
@@ -192,13 +185,12 @@ PureInterpretor
 			}
 
 			// Create transitions from DFA, using input index to represent input char
-			transition = new vint* [stateCount];
+			transitions = new vint[stateCount * charSetCount];
 			for (vint i = 0; i < stateCount; i++)
 			{
-				transition[i] = new vint[charSetCount];
 				for (vint j = 0; j < charSetCount; j++)
 				{
-					transition[i][j] = -1;
+					transitions[i * charSetCount + j] = -1;
 				}
 
 				State* state = dfa->states[i].Obj();
@@ -214,7 +206,7 @@ PureInterpretor
 							{
 								CHECK_ERROR(false, L"PureInterpretor::PureInterpretor(Automaton::Ref, CharRange::List&)#Specified chars don't appear in the normalized char ranges.");
 							}
-							transition[i][index] = dfa->states.IndexOf(dfaTransition->target);
+							transitions[i * charSetCount + index] = dfa->states.IndexOf(dfaTransition->target);
 						}
 						break;
 					default:
@@ -235,11 +227,7 @@ PureInterpretor
 		{
 			if (relatedFinalState) delete[] relatedFinalState;
 			delete[] finalState;
-			for (vint i = 0; i < stateCount; i++)
-			{
-				delete[] transition[i];
-			}
-			delete[] transition;
+			delete[] transitions;
 		}
 
 		template<typename TChar>
@@ -271,7 +259,7 @@ PureInterpretor
 				if (c >= SupportedCharCount) break;
 
 				vint charIndex = charMap[c];
-				currentState = transition[currentState][charIndex];
+				currentState = transitions[currentState * charSetCount + charIndex];
 			}
 
 			if (result.finalState == -1)
@@ -313,7 +301,7 @@ PureInterpretor
 			if (0 <= state && state < stateCount && 0 <= input && input <= MaxChar32)
 			{
 				vint charIndex = charMap[input];
-				vint nextState = transition[state][charIndex];
+				vint nextState = transitions[state * charSetCount + charIndex];
 				return nextState;
 			}
 			else
@@ -332,7 +320,7 @@ PureInterpretor
 			if (state == -1) return true;
 			for (vint i = 0; i < charSetCount; i++)
 			{
-				if (transition[state][i] != -1)
+				if (transitions[state * charSetCount + i] != -1)
 				{
 					return false;
 				}
@@ -359,7 +347,7 @@ PureInterpretor
 							vint state = -1;
 							for (vint j = 0; j < charSetCount; j++)
 							{
-								vint nextState = transition[i][j];
+								vint nextState = transitions[i * charSetCount + j];
 								if (nextState != -1)
 								{
 									state = relatedFinalState[nextState];
