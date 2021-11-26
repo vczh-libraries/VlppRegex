@@ -1,8 +1,10 @@
-﻿#include "../../Source/Regex/AST/RegexExpression.h"
+﻿#include <VlppOS.h>
+#include "../../Source/Regex/AST/RegexExpression.h"
 #include "../../Source/Regex/RegexPure.h"
 
 using namespace vl;
 using namespace vl::collections;
+using namespace vl::stream;
 using namespace vl::regex_internal;
 
 namespace TestPure_TestObjects
@@ -20,15 +22,28 @@ namespace TestPure_TestObjects
 		Automaton::Ref nfa = EpsilonNfaToNfa(eNfa, PureEpsilonChecker, nfaStateMap);
 		Automaton::Ref dfa = NfaToDfa(nfa, dfaStateMap);
 
+		List<Ptr<MemoryStream>> streams;
+		for (vint i = 0; i < 10; i++)
+		{
+			auto memoryStream = MakePtr<MemoryStream>();
+			PureInterpretor(dfa, subsets).Serialize(*memoryStream.Obj());
+		}
+		for (vint i = 1; i < streams.Count(); i++)
+		{
+			auto first = streams[0].Obj();
+			auto second = streams[i].Obj();
+			TEST_ASSERT(first->Size() == second->Size());
+			TEST_ASSERT(memcmp(first->GetInternalBuffer(), second->GetInternalBuffer(), first->Size()));
+		}
 		return new PureInterpretor(dfa, subsets);
 	}
 
 	void RunPureInterpretor(const char32_t* code, const wchar_t* input, vint start, vint length)
 	{
-		PureResult matchResult;
-		auto interpretor = BuildPureInterpretor(code);
 		TEST_CASE(u32tow(code) + WString(L" on ") + input)
 		{
+			PureResult matchResult;
+			auto interpretor = BuildPureInterpretor(code);
 			bool expectedSuccessful = start != -1;
 			TEST_ASSERT(interpretor->Match(input, input, matchResult) == expectedSuccessful);
 			if (expectedSuccessful)
