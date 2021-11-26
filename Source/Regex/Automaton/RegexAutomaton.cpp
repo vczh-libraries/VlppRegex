@@ -250,9 +250,6 @@ Helpers
 			target->startState = startState;
 			dfaStateMap.Add(startState, source->startState);
 
-			SortedList<State*> transitionTargets;
-			SortedList<State*> relativeStates;
-
 			for (auto currentState_ : target->states)
 			{
 				Group<Transition*, Transition*>			nfaClassToTransitions;
@@ -306,39 +303,22 @@ Helpers
 					auto&& equivalentTransitions = nfaClassToTransitions[transitionClass];
 
 					// Sort all target states and keep unique
-					transitionTargets.Clear();
-					for (auto equivalentTransition : equivalentTransitions)
-					{
-						State* nfaState = equivalentTransition->target;
-						if (!transitionTargets.Contains(nfaState))
-						{
-							transitionTargets.Add(nfaState);
-						}
-					}
+					List<State*> transitionTargets;
+					CopyFrom(
+						transitionTargets,
+						From(equivalentTransitions)
+							.Select([](auto t) { return t->target; })
+							.Distinct()
+						);
 
 					// Check if these NFA states represent a created DFA state
 					State* dfaState = 0;
 					for (vint k = 0; k < dfaStateMap.Count(); k++)
 					{
-						// Sort NFA states for a certain DFA state
-						CopyFrom(relativeStates, dfaStateMap.GetByIndex(k));
 						// Compare two NFA states set
-						if (relativeStates.Count() == transitionTargets.Count())
+						if (CompareEnumerable(transitionTargets, dfaStateMap.GetByIndex(k)) == 0)
 						{
-							bool equal = true;
-							for (vint l = 0; l < relativeStates.Count(); l++)
-							{
-								if (relativeStates[l] != transitionTargets[l])
-								{
-									equal = false;
-									break;
-								}
-							}
-							if (equal)
-							{
-								dfaState = dfaStateMap.Keys()[k];
-								break;
-							}
+							dfaState = dfaStateMap.Keys()[k];
 						}
 					}
 					// Create a new DFA state if there is not

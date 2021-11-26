@@ -16,20 +16,20 @@ State<3>
     To State<4> : <Char : 42[*] - 42[*]>
 State<4>
     To State<5> : <Char : 42[*] - 42[*]>
-    To State<6> : <Char : 47[/] - 47[/]>
-    To State<7> : <Char : 1[] - 41[)]>
-    To State<7> : <Char : 43[+] - 46[.]>
-    To State<7> : <Char : 48[0] - 1114111[􏿿]>
+    To State<6> : <Char : 1[] - 41[)]>
+    To State<6> : <Char : 43[+] - 46[.]>
+    To State<6> : <Char : 48[0] - 1114111[􏿿]>
+    To State<7> : <Char : 47[/] - 47[/]>
 State<5>
     To State<5> : <Char : 42[*] - 42[*]>
-    To State<7> : <Char : 1[] - 41[)]>
-    To State<7> : <Char : 43[+] - 46[.]>
-    To State<7> : <Char : 48[0] - 1114111[􏿿]>
-    To State<6> : <Char : 47[/] - 47[/]>
-[FINISH]State<6>
-State<7>
+    To State<6> : <Char : 1[] - 41[)]>
+    To State<6> : <Char : 43[+] - 46[.]>
+    To State<6> : <Char : 48[0] - 1114111[􏿿]>
+    To State<7> : <Char : 47[/] - 47[/]>
+State<6>
     To State<3> : <Char : 1[] - 41[)]>
     To State<3> : <Char : 43[+] - 46[.]>
     To State<3> : <Char : 47[/] - 47[/]>
     To State<3> : <Char : 48[0] - 1114111[􏿿]>
     To State<4> : <Char : 42[*] - 42[*]>
+[FINISH]State<7>
