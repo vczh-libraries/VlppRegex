@@ -388,7 +388,8 @@ Helper Functions
 
 		public:
 			RegexException(const WString& _message, const U32String& _code, vint _position)
-				: code(_code)
+				: Exception(_message)
+				, code(_code)
 				, position(_position)
 			{
 			}
