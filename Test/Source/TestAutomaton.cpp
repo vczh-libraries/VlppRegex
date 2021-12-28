@@ -3,6 +3,7 @@
 
 using namespace vl;
 using namespace vl::collections;
+using namespace vl::filesystem;
 using namespace vl::regex_internal;
 using namespace vl::stream;
 
@@ -98,24 +99,22 @@ void PrintAutomaton(WString fileName, Automaton::Ref automaton)
 
 void CompareToBaseline(WString fileName)
 {
-	WString generatedPath = GetTestOutputPath() + fileName;
-	WString baselinePath = GetTestResourcePath() + L"Baseline/" + fileName;
+	File generatedFile = FilePath(GetTestOutputPath()) / fileName;
+	File baselineFile = FilePath(GetTestResourcePath()) / L"Baseline" / fileName;
 
-	FileStream generatedFile(generatedPath, FileStream::ReadOnly);
-	FileStream baselineFile(baselinePath, FileStream::ReadOnly);
+	List<WString> generatedLines;
+	List<WString> baselineLines;
 
-	BomDecoder generatedDecoder;
-	BomDecoder baselineDecoder;
-
-	DecoderStream generatedStream(generatedFile, generatedDecoder);
-	DecoderStream baselineStream(baselineFile, baselineDecoder);
-
-	StreamReader generatedReader(generatedStream);
-	StreamReader baselineReader(baselineStream);
+	generatedFile.ReadAllLinesByBom(generatedLines);
+	baselineFile.ReadAllLinesByBom(baselineLines);
 
 	TEST_CASE(fileName)
 	{
-		TEST_ASSERT(generatedReader.ReadToEnd() == baselineReader.ReadToEnd());
+		TEST_ASSERT(generatedLines.Count() == baselineLines.Count());
+		for (vint i = 0; i < generatedLines.Count(); i++)
+		{
+			TEST_ASSERT(generatedLines[i] == baselineLines[i]);
+		}
 	});
 }
 

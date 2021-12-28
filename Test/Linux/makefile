@@ -60,10 +60,10 @@ all:pre-build ./Bin/UnitTest
 ./Obj/RegexAutomaton.o: ../../Source/Regex/Automaton/RegexAutomaton.cpp ../../Source/Regex/Automaton/RegexAutomaton.h ../../Source/Regex/Automaton/RegexData.h ../../Import/Vlpp.h
 	$(CPP_COMPILE)
 
-./Obj/Regex.o: ../../Source/Regex/Regex.cpp ../../Source/Regex/Regex.h ../../Import/Vlpp.h ../../Source/Regex/./AST/RegexExpression.h ../../Source/Regex/./AST/../Automaton/RegexAutomaton.h ../../Source/Regex/./AST/../Automaton/RegexData.h ../../Source/Regex/RegexPure.h ../../Source/Regex/./Automaton/RegexAutomaton.h ../../Source/Regex/RegexRich.h
+./Obj/Regex.o: ../../Source/Regex/Regex.cpp ../../Import/VlppOS.h ../../Import/Vlpp.h ../../Source/Regex/Regex.h ../../Source/Regex/./AST/RegexExpression.h ../../Source/Regex/./AST/../Automaton/RegexAutomaton.h ../../Source/Regex/./AST/../Automaton/RegexData.h ../../Source/Regex/RegexPure.h ../../Source/Regex/./Automaton/RegexAutomaton.h ../../Source/Regex/RegexRich.h
 	$(CPP_COMPILE)
 
-./Obj/RegexPure.o: ../../Source/Regex/RegexPure.cpp ../../Source/Regex/RegexPure.h ../../Source/Regex/./Automaton/RegexAutomaton.h ../../Source/Regex/./Automaton/RegexData.h ../../Import/Vlpp.h ../../Source/Regex/RegexCharReader.h
+./Obj/RegexPure.o: ../../Source/Regex/RegexPure.cpp ../../Import/VlppOS.h ../../Import/Vlpp.h ../../Source/Regex/RegexPure.h ../../Source/Regex/./Automaton/RegexAutomaton.h ../../Source/Regex/./Automaton/RegexData.h ../../Source/Regex/RegexCharReader.h
 	$(CPP_COMPILE)
 
 ./Obj/RegexRich.o: ../../Source/Regex/RegexRich.cpp ../../Source/Regex/RegexRich.h ../../Source/Regex/./Automaton/RegexAutomaton.h ../../Source/Regex/./Automaton/RegexData.h ../../Import/Vlpp.h ../../Source/Regex/RegexCharReader.h
@@ -78,13 +78,13 @@ all:pre-build ./Bin/UnitTest
 ./Obj/TestExtendProc.o: ../Source/TestExtendProc.cpp ../Source/ColorizerCommon.h ../Source/../../Source/Regex/Regex.h ../../Import/Vlpp.h
 	$(CPP_COMPILE)
 
-./Obj/TestLexer.o: ../Source/TestLexer.cpp ../Source/../../Source/Regex/Regex.h ../../Import/Vlpp.h
+./Obj/TestLexer.o: ../Source/TestLexer.cpp ../../Import/VlppOS.h ../../Import/Vlpp.h ../Source/../../Source/Regex/Regex.h
 	$(CPP_COMPILE)
 
 ./Obj/TestParser.o: ../Source/TestParser.cpp ../Source/../../Source/Regex/AST/RegexWriter.h ../Source/../../Source/Regex/AST/RegexExpression.h ../Source/../../Source/Regex/AST/../Automaton/RegexAutomaton.h ../Source/../../Source/Regex/AST/../Automaton/RegexData.h ../../Import/Vlpp.h
 	$(CPP_COMPILE)
 
-./Obj/TestPure.o: ../Source/TestPure.cpp ../Source/../../Source/Regex/AST/RegexExpression.h ../Source/../../Source/Regex/AST/../Automaton/RegexAutomaton.h ../Source/../../Source/Regex/AST/../Automaton/RegexData.h ../../Import/Vlpp.h ../Source/../../Source/Regex/RegexPure.h ../Source/../../Source/Regex/./Automaton/RegexAutomaton.h
+./Obj/TestPure.o: ../Source/TestPure.cpp ../../Import/VlppOS.h ../../Import/Vlpp.h ../Source/../../Source/Regex/AST/RegexExpression.h ../Source/../../Source/Regex/AST/../Automaton/RegexAutomaton.h ../Source/../../Source/Regex/AST/../Automaton/RegexData.h ../Source/../../Source/Regex/RegexPure.h ../Source/../../Source/Regex/./Automaton/RegexAutomaton.h
 	$(CPP_COMPILE)
 
 ./Obj/TestRegex.o: ../Source/TestRegex.cpp ../Source/../../Source/Regex/AST/RegexWriter.h ../Source/../../Source/Regex/AST/RegexExpression.h ../Source/../../Source/Regex/AST/../Automaton/RegexAutomaton.h ../Source/../../Source/Regex/AST/../Automaton/RegexData.h ../../Import/Vlpp.h ../Source/../../Source/Regex/Regex.h
