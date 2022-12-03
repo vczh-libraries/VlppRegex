@@ -43,8 +43,7 @@ Regex Expression AST
 			NOT_COPYABLE(Expression);
 			Expression() = default;
 
-			typedef Ptr<Expression>											Ref;
-			typedef collections::Dictionary<U32String, Expression::Ref>		Map;
+			typedef collections::Dictionary<U32String, Ptr<Expression>>		Map;
 
 			virtual void				Apply(IRegexExpressionAlgorithm& algorithm)=0;
 			bool						IsEqual(Expression* expression);
@@ -53,7 +52,7 @@ Regex Expression AST
 			void						NormalizeCharSet(CharRange::List& subsets);
 			void						CollectCharSet(CharRange::List& subsets);
 			void						ApplyCharSet(CharRange::List& subsets);
-			Automaton::Ref				GenerateEpsilonNfa();
+			Ptr<Automaton>				GenerateEpsilonNfa();
 		};
 
 		class CharSetExpression : public Expression
@@ -69,7 +68,7 @@ Regex Expression AST
 		class LoopExpression : public Expression
 		{
 		public:
-			Expression::Ref				expression;		// The regex to loop
+			Ptr<Expression>				expression;		// The regex to loop
 			vint						min;			// Minimum count of looping
 			vint						max;			// Maximum count of looping, -1 for infinite
 			bool						preferLong;		// Prefer longer matching
@@ -80,8 +79,8 @@ Regex Expression AST
 		class SequenceExpression : public Expression
 		{
 		public:
-			Expression::Ref				left;			// First regex to match
-			Expression::Ref				right;			// Last regex to match
+			Ptr<Expression>				left;			// First regex to match
+			Ptr<Expression>				right;			// Last regex to match
 
 			void						Apply(IRegexExpressionAlgorithm& algorithm);
 		};
@@ -89,8 +88,8 @@ Regex Expression AST
 		class AlternateExpression : public Expression
 		{
 		public:
-			Expression::Ref				left;			// First regex to match
-			Expression::Ref				right;			// Last regex to match
+			Ptr<Expression>				left;			// First regex to match
+			Ptr<Expression>				right;			// Last regex to match
 
 			void						Apply(IRegexExpressionAlgorithm& algorithm);
 		};
@@ -113,7 +112,7 @@ Regex Expression AST
 		{
 		public:
 			U32String					name;			// Capture name, empty for anonymous capture
-			Expression::Ref				expression;		// Regex to match
+			Ptr<Expression>				expression;		// Regex to match
 
 			void						Apply(IRegexExpressionAlgorithm& algorithm);
 		};
@@ -130,7 +129,7 @@ Regex Expression AST
 		class PositiveExpression : public Expression
 		{
 		public:
-			Expression::Ref				expression;		// Regex to match
+			Ptr<Expression>				expression;		// Regex to match
 
 			void						Apply(IRegexExpressionAlgorithm& algorithm);
 		};
@@ -138,7 +137,7 @@ Regex Expression AST
 		class NegativeExpression : public Expression
 		{
 		public:
-			Expression::Ref				expression;		// Regex to match
+			Ptr<Expression>				expression;		// Regex to match
 
 			void						Apply(IRegexExpressionAlgorithm& algorithm);
 		};
@@ -157,12 +156,12 @@ Regex Expression AST
 			typedef Ptr<RegexExpression>						Ref;
 
 			Expression::Map				definitions;	// Named regex to be referred
-			Expression::Ref				expression;		// Regex to match
+			Ptr<Expression>				expression;		// Regex to match
 
 			NOT_COPYABLE(RegexExpression);
 			RegexExpression() = default;
 
-			Expression::Ref				Merge();
+			Ptr<Expression>				Merge();
 		};
 
 /***********************************************************************
@@ -200,7 +199,7 @@ Visitor
 				return returnValue;
 			}
 
-			ReturnType Invoke(Expression::Ref expression, ParameterType parameter)
+			ReturnType Invoke(Ptr<Expression> expression, ParameterType parameter)
 			{
 				parameterValue=&parameter;
 				expression->Apply(*this);
@@ -288,7 +287,7 @@ Visitor
 				expression->Apply(*this);
 			}
 
-			void Invoke(Expression::Ref expression, ParameterType parameter)
+			void Invoke(Ptr<Expression> expression, ParameterType parameter)
 			{
 				parameterValue=&parameter;
 				expression->Apply(*this);
@@ -373,7 +372,7 @@ Helper Functions
 		extern Ptr<Expression>			ParseJoin(const char32_t*& input);
 		extern Ptr<Expression>			ParseAlt(const char32_t*& input);
 		extern Ptr<Expression>			ParseExpression(const char32_t*& input);
-		extern RegexExpression::Ref		ParseRegexExpression(const U32String& code);
+		extern Ptr<RegexExpression>		ParseRegexExpression(const U32String& code);
 
 		extern U32String				EscapeTextForRegex(const U32String& literalString);
 		extern U32String				UnescapeTextForRegex(const U32String& escapedText);

@@ -17,7 +17,7 @@ IsEqualAlgorithm
 		class IsEqualAlgorithm : public RegexExpressionAlgorithm<bool, Expression*>
 		{
 		public:
-			bool Apply(CharSetExpression* expression, Expression* target)
+			bool Apply(CharSetExpression* expression, Expression* target) override
 			{
 				CharSetExpression* expected = dynamic_cast<CharSetExpression*>(target);
 				if (expected)
@@ -33,7 +33,7 @@ IsEqualAlgorithm
 				return false;
 			}
 
-			bool Apply(LoopExpression* expression, Expression* target)
+			bool Apply(LoopExpression* expression, Expression* target) override
 			{
 				LoopExpression* expected = dynamic_cast<LoopExpression*>(target);
 				if (expected)
@@ -47,7 +47,7 @@ IsEqualAlgorithm
 				return false;
 			}
 
-			bool Apply(SequenceExpression* expression, Expression* target)
+			bool Apply(SequenceExpression* expression, Expression* target) override
 			{
 				SequenceExpression* expected = dynamic_cast<SequenceExpression*>(target);
 				if (expected)
@@ -59,7 +59,7 @@ IsEqualAlgorithm
 				return false;
 			}
 
-			bool Apply(AlternateExpression* expression, Expression* target)
+			bool Apply(AlternateExpression* expression, Expression* target) override
 			{
 				AlternateExpression* expected = dynamic_cast<AlternateExpression*>(target);
 				if (expected)
@@ -71,7 +71,7 @@ IsEqualAlgorithm
 				return false;
 			}
 
-			bool Apply(BeginExpression* expression, Expression* target)
+			bool Apply(BeginExpression* expression, Expression* target) override
 			{
 				BeginExpression* expected = dynamic_cast<BeginExpression*>(target);
 				if (expected)
@@ -81,7 +81,7 @@ IsEqualAlgorithm
 				return false;
 			}
 
-			bool Apply(EndExpression* expression, Expression* target)
+			bool Apply(EndExpression* expression, Expression* target) override
 			{
 				EndExpression* expected = dynamic_cast<EndExpression*>(target);
 				if (expected)
@@ -91,7 +91,7 @@ IsEqualAlgorithm
 				return false;
 			}
 
-			bool Apply(CaptureExpression* expression, Expression* target)
+			bool Apply(CaptureExpression* expression, Expression* target) override
 			{
 				CaptureExpression* expected = dynamic_cast<CaptureExpression*>(target);
 				if (expected)
@@ -103,7 +103,7 @@ IsEqualAlgorithm
 				return false;
 			}
 
-			bool Apply(MatchExpression* expression, Expression* target)
+			bool Apply(MatchExpression* expression, Expression* target) override
 			{
 				MatchExpression* expected = dynamic_cast<MatchExpression*>(target);
 				if (expected)
@@ -115,7 +115,7 @@ IsEqualAlgorithm
 				return false;
 			}
 
-			bool Apply(PositiveExpression* expression, Expression* target)
+			bool Apply(PositiveExpression* expression, Expression* target) override
 			{
 				PositiveExpression* expected = dynamic_cast<PositiveExpression*>(target);
 				if (expected)
@@ -126,7 +126,7 @@ IsEqualAlgorithm
 				return false;
 			}
 
-			bool Apply(NegativeExpression* expression, Expression* target)
+			bool Apply(NegativeExpression* expression, Expression* target) override
 			{
 				NegativeExpression* expected = dynamic_cast<NegativeExpression*>(target);
 				if (expected)
@@ -137,7 +137,7 @@ IsEqualAlgorithm
 				return false;
 			}
 
-			bool Apply(UsingExpression* expression, Expression* target)
+			bool Apply(UsingExpression* expression, Expression* target) override
 			{
 				UsingExpression* expected = dynamic_cast<UsingExpression*>(target);
 				if (expected)

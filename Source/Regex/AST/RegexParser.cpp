@@ -141,7 +141,7 @@ Helper Functions
 			}
 
 			{
-				LoopExpression* expression = new LoopExpression;
+				auto expression = Ptr(new LoopExpression);
 				expression->min = min;
 				expression->max = max;
 				expression->preferLong = !IsChar(input, U'?');
@@ -159,15 +159,15 @@ Helper Functions
 			}
 			else if (IsChar(input, U'^'))
 			{
-				return new BeginExpression;
+				return Ptr(new BeginExpression);
 			}
 			else if (IsChar(input, U'$'))
 			{
-				return new EndExpression;
+				return Ptr(new EndExpression);
 			}
 			else if (IsChar(input, U'\\') || IsChar(input, U'/'))
 			{
-				Ptr<CharSetExpression> expression = new CharSetExpression;
+				auto expression = Ptr(new CharSetExpression);
 				expression->reverse = false;
 				switch (*input)
 				{
@@ -224,7 +224,7 @@ Helper Functions
 			}
 			else if (IsChar(input, U'['))
 			{
-				Ptr<CharSetExpression> expression = new CharSetExpression;
+				auto expression = Ptr(new CharSetExpression);
 				if (IsChar(input, U'^'))
 				{
 					expression->reverse = true;
@@ -321,7 +321,7 @@ Helper Functions
 			}
 			else
 			{
-				CharSetExpression* expression = new CharSetExpression;
+				auto expression = Ptr(new CharSetExpression);
 				expression->reverse = false;
 				expression->ranges.Add(CharRange(*input, *input));
 				input++;
@@ -338,7 +338,7 @@ Helper Functions
 				{
 					goto NEED_RIGHT_BRACKET;
 				}
-				PositiveExpression* expression = new PositiveExpression;
+				auto expression = Ptr(new PositiveExpression);
 				expression->expression = sub;
 				return expression;
 			}
@@ -349,7 +349,7 @@ Helper Functions
 				{
 					goto NEED_RIGHT_BRACKET;
 				}
-				NegativeExpression* expression = new NegativeExpression;
+				auto expression = Ptr(new NegativeExpression);
 				expression->expression = sub;
 				return expression;
 			}
@@ -368,7 +368,7 @@ Helper Functions
 				{
 					goto NEED_RIGHT_BRACKET;
 				}
-				UsingExpression* expression = new UsingExpression;
+				auto expression = Ptr(new UsingExpression);
 				expression->name = name;
 				return expression;
 			}
@@ -398,7 +398,7 @@ Helper Functions
 				{
 					goto NEED_RIGHT_BRACKET;
 				}
-				MatchExpression* expression = new MatchExpression;
+				auto expression = Ptr(new MatchExpression);
 				expression->name = name;
 				expression->index = index;
 				return expression;
@@ -414,30 +414,30 @@ Helper Functions
 				{
 					goto NEED_GREATER;
 				}
-				Ptr<Expression> sub = ParseExpression(input);
+				auto sub = ParseExpression(input);
 				if (!IsChar(input, U')'))
 				{
 					goto NEED_RIGHT_BRACKET;
 				}
-				CaptureExpression* expression = new CaptureExpression;
+				auto expression = Ptr(new CaptureExpression);
 				expression->name = name;
 				expression->expression = sub;
 				return expression;
 			}
 			else if (IsStr(input, U"(?"))
 			{
-				Ptr<Expression> sub = ParseExpression(input);
+				auto sub = ParseExpression(input);
 				if (!IsChar(input, U')'))
 				{
 					goto NEED_RIGHT_BRACKET;
 				}
-				CaptureExpression* expression = new CaptureExpression;
+				auto expression = Ptr(new CaptureExpression);
 				expression->expression = sub;
 				return expression;
 			}
 			else if (IsChar(input, U'('))
 			{
-				Ptr<Expression> sub = ParseExpression(input);
+				auto sub = ParseExpression(input);
 				if (!IsChar(input, U')'))
 				{
 					goto NEED_RIGHT_BRACKET;
@@ -480,13 +480,13 @@ Helper Functions
 
 		Ptr<Expression> ParseJoin(const char32_t*& input)
 		{
-			Ptr<Expression> expression = ParseUnit(input);
+			auto expression = ParseUnit(input);
 			while (true)
 			{
-				Ptr<Expression> right = ParseUnit(input);
+				auto right = ParseUnit(input);
 				if (right)
 				{
-					SequenceExpression* sequence = new SequenceExpression;
+					auto sequence = Ptr(new SequenceExpression);
 					sequence->left = expression;
 					sequence->right = right;
 					expression = sequence;
@@ -501,15 +501,15 @@ Helper Functions
 
 		Ptr<Expression> ParseAlt(const char32_t*& input)
 		{
-			Ptr<Expression> expression = ParseJoin(input);
+			auto expression = ParseJoin(input);
 			while (true)
 			{
 				if (IsChar(input, U'|'))
 				{
-					Ptr<Expression> right = ParseJoin(input);
+					auto right = ParseJoin(input);
 					if (right)
 					{
-						AlternateExpression* alternate = new AlternateExpression;
+						auto alternate = Ptr(new AlternateExpression);
 						alternate->left = expression;
 						alternate->right = right;
 						expression = alternate;
@@ -532,9 +532,9 @@ Helper Functions
 			return ParseAlt(input);
 		}
 
-		RegexExpression::Ref ParseRegexExpression(const U32String& code)
+		Ptr<RegexExpression> ParseRegexExpression(const U32String& code)
 		{
-			RegexExpression::Ref regex = new RegexExpression;
+			auto regex = Ptr(new RegexExpression);
 			const char32_t* start = code.Buffer();
 			const char32_t* input = start;
 			try

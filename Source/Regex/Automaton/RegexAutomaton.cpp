@@ -22,27 +22,27 @@ Automaton
 
 		State* Automaton::NewState()
 		{
-			State* state = new State;
+			auto state = Ptr(new State);
 			state->finalState = false;
 			state->userData = 0;
 			states.Add(state);
-			return state;
+			return state.Obj();
 		}
 
 		Transition* Automaton::NewTransition(State* start, State* end)
 		{
-			Transition* transition = new Transition;
+			auto transition = Ptr(new Transition);
 			transition->source = start;
 			transition->target = end;
-			start->transitions.Add(transition);
-			end->inputs.Add(transition);
+			start->transitions.Add(transition.Obj());
+			end->inputs.Add(transition.Obj());
 			transitions.Add(transition);
-			return transition;
+			return transition.Obj();
 		}
 
 		Transition* Automaton::NewChars(State* start, State* end, CharRange range)
 		{
-			Transition* transition = NewTransition(start, end);
+			auto transition = NewTransition(start, end);
 			transition->type = Transition::Chars;
 			transition->range = range;
 			return transition;
@@ -50,35 +50,35 @@ Automaton
 
 		Transition* Automaton::NewEpsilon(State* start, State* end)
 		{
-			Transition* transition = NewTransition(start, end);
+			auto transition = NewTransition(start, end);
 			transition->type = Transition::Epsilon;
 			return transition;
 		}
 
 		Transition* Automaton::NewBeginString(State* start, State* end)
 		{
-			Transition* transition = NewTransition(start, end);
+			auto transition = NewTransition(start, end);
 			transition->type = Transition::BeginString;
 			return transition;
 		}
 
 		Transition* Automaton::NewEndString(State* start, State* end)
 		{
-			Transition* transition = NewTransition(start, end);
+			auto transition = NewTransition(start, end);
 			transition->type = Transition::EndString;
 			return transition;
 		}
 
 		Transition* Automaton::NewNop(State* start, State* end)
 		{
-			Transition* transition = NewTransition(start, end);
+			auto transition = NewTransition(start, end);
 			transition->type = Transition::Nop;
 			return transition;
 		}
 
 		Transition* Automaton::NewCapture(State* start, State* end, vint capture)
 		{
-			Transition* transition = NewTransition(start, end);
+			auto transition = NewTransition(start, end);
 			transition->type = Transition::Capture;
 			transition->capture = capture;
 			return transition;
@@ -86,7 +86,7 @@ Automaton
 
 		Transition* Automaton::NewMatch(State* start, State* end, vint capture, vint index)
 		{
-			Transition* transition = NewTransition(start, end);
+			auto transition = NewTransition(start, end);
 			transition->type = Transition::Match;
 			transition->capture = capture;
 			transition->index = index;
@@ -95,28 +95,28 @@ Automaton
 
 		Transition* Automaton::NewPositive(State* start, State* end)
 		{
-			Transition* transition = NewTransition(start, end);
+			auto transition = NewTransition(start, end);
 			transition->type = Transition::Positive;
 			return transition;
 		}
 
 		Transition* Automaton::NewNegative(State* start, State* end)
 		{
-			Transition* transition = NewTransition(start, end);
+			auto transition = NewTransition(start, end);
 			transition->type = Transition::Negative;
 			return transition;
 		}
 
 		Transition* Automaton::NewNegativeFail(State* start, State* end)
 		{
-			Transition* transition = NewTransition(start, end);
+			auto transition = NewTransition(start, end);
 			transition->type = Transition::NegativeFail;
 			return transition;
 		}
 
 		Transition* Automaton::NewEnd(State* start, State* end)
 		{
-			Transition* transition = NewTransition(start, end);
+			auto transition = NewTransition(start, end);
 			transition->type = Transition::End;
 			return transition;
 		}
@@ -194,9 +194,9 @@ Helpers
 			}
 		}
 
-		Automaton::Ref EpsilonNfaToNfa(Automaton::Ref source, bool(*epsilonChecker)(Transition*), Dictionary<State*, State*>& nfaStateMap)
+		Ptr<Automaton> EpsilonNfaToNfa(Ptr<Automaton> source, bool(*epsilonChecker)(Transition*), Dictionary<State*, State*>& nfaStateMap)
 		{
-			Automaton::Ref target = new Automaton;
+			auto target = Ptr(new Automaton);
 			Dictionary<State*, State*> stateMap;	// source->target
 			List<State*> epsilonStates;				// current epsilon closure
 			List<Transition*> transitions;			// current non-epsilon transitions
@@ -242,9 +242,9 @@ Helpers
 			return target;
 		}
 
-		Automaton::Ref NfaToDfa(Automaton::Ref source, Group<State*, State*>& dfaStateMap)
+		Ptr<Automaton> NfaToDfa(Ptr<Automaton> source, Group<State*, State*>& dfaStateMap)
 		{
-			Automaton::Ref target = new Automaton;
+			auto target = Ptr(new Automaton);
 			CopyFrom(target->captureNames, source->captureNames);
 			State* startState = target->NewState();
 			target->startState = startState;

@@ -11,7 +11,7 @@ TEST_FILE
 	{
 		TEST_CASE(u32tow(input))
 		{
-			Expression::Ref exp = ParseExpression(input);
+			Ptr<Expression> exp = ParseExpression(input);
 			TEST_ASSERT(exp->IsEqual(node.expression.Obj()));
 			TEST_ASSERT(exp->CanTreatAsPure() == pure);
 		});
@@ -100,11 +100,11 @@ TEST_FILE
 	TEST_CASE(L"Parser: integration 1")
 	{
 		U32String code = U"(<#part>/d+)(<#capture>(<section>(<&part>)))((<&capture>).){3}(<&capture>)";
-		RegexExpression::Ref regex = ParseRegexExpression(code);
+		auto regex = ParseRegexExpression(code);
 
-		Expression::Ref part = r_d().Some().expression;
-		Expression::Ref capture = rCapture(U"section", rUsing(U"part")).expression;
-		Expression::Ref main = ((rUsing(U"capture") + rC(U'.')).Loop(3, 3) + rUsing(U"capture")).expression;
+		auto part = r_d().Some().expression;
+		auto capture = rCapture(U"section", rUsing(U"part")).expression;
+		auto main = ((rUsing(U"capture") + rC(U'.')).Loop(3, 3) + rUsing(U"capture")).expression;
 
 		TEST_ASSERT(regex->definitions.Count() == 2);
 		TEST_ASSERT(regex->definitions.Keys()[0] == U"capture");
@@ -118,9 +118,9 @@ TEST_FILE
 	TEST_CASE(L"Parser: integration 2")
 	{
 		U32String code = U"((<part>\\d+).){3}(<part>\\d+)";
-		RegexExpression::Ref regex = ParseRegexExpression(code);
+		auto regex = ParseRegexExpression(code);
 
-		Expression::Ref main = ((rCapture(U"part", r_d().Some()) + rC(U'.')).Loop(3, 3) + rCapture(U"part", r_d().Some())).expression;
+		auto main = ((rCapture(U"part", r_d().Some()) + rC(U'.')).Loop(3, 3) + rCapture(U"part", r_d().Some())).expression;
 
 		TEST_ASSERT(regex->definitions.Count() == 0);
 		TEST_ASSERT(regex->expression->IsEqual(main.Obj()));

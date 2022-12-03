@@ -55,8 +55,6 @@ namespace vl
 		class Automaton
 		{
 		public:
-			typedef Ptr<Automaton>		Ref;
-
 			collections::List<Ptr<State>>		states;
 			collections::List<Ptr<Transition>>	transitions;
 			collections::List<U32String>		captureNames;
@@ -82,8 +80,8 @@ namespace vl
 		extern bool								PureEpsilonChecker(Transition* transition);
 		extern bool								RichEpsilonChecker(Transition* transition);
 		extern bool								AreEqual(Transition* transA, Transition* transB);
-		extern Automaton::Ref					EpsilonNfaToNfa(Automaton::Ref source, bool(*epsilonChecker)(Transition*), collections::Dictionary<State*, State*>& nfaStateMap);
-		extern Automaton::Ref					NfaToDfa(Automaton::Ref source, collections::Group<State*, State*>& dfaStateMap);
+		extern Ptr<Automaton>					EpsilonNfaToNfa(Ptr<Automaton> source, bool(*epsilonChecker)(Transition*), collections::Dictionary<State*, State*>& nfaStateMap);
+		extern Ptr<Automaton>					NfaToDfa(Ptr<Automaton> source, collections::Group<State*, State*>& dfaStateMap);
 	}
 }
 

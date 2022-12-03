@@ -15,9 +15,9 @@ namespace vl
 		class RegexNode : public Object
 		{
 		public:
-			vl::regex_internal::Expression::Ref		expression;
+			Ptr<vl::regex_internal::Expression>		expression;
 
-			RegexNode(vl::regex_internal::Expression::Ref _expression);
+			RegexNode(Ptr<vl::regex_internal::Expression> _expression);
 
 			RegexNode					Some()const;
 			RegexNode					Any()const;

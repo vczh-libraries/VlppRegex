@@ -119,8 +119,8 @@ Data Structures for Backtracking
 			return current;
 		}
 
-		template<typename T, typename K>
-		void PushNonSaver(List<T, K>& elements, vint& count, const T& element)
+		template<typename T>
+		void PushNonSaver(List<T>& elements, vint& count, const T& element)
 		{
 			if (elements.Count() == count)
 			{
@@ -133,8 +133,8 @@ Data Structures for Backtracking
 			count++;
 		}
 
-		template<typename T, typename K>
-		T PopNonSaver(List<T, K>& elements, vint& count)
+		template<typename T>
+		T PopNonSaver(List<T>& elements, vint& count)
 		{
 			return elements[--count];
 		}
@@ -155,7 +155,7 @@ CaptureRecord
 RichInterpretor
 ***********************************************************************/
 
-		RichInterpretor::RichInterpretor(Automaton::Ref _dfa)
+		RichInterpretor::RichInterpretor(Ptr<Automaton> _dfa)
 			:dfa(_dfa)
 		{
 			datas = new UserData[dfa->states.Count()];

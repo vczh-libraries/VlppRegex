@@ -43,7 +43,7 @@ namespace vl
 
 			void				ExpandCharRanges();
 		public:
-			PureInterpretor(Automaton::Ref dfa, CharRange::List& subsets);
+			PureInterpretor(Ptr<Automaton> dfa, CharRange::List& subsets);
 			PureInterpretor(stream::IStream& inputStream);
 			~PureInterpretor();
 

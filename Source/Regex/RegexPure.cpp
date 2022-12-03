@@ -197,7 +197,7 @@ PureInterpretor
 			}
 		}
 
-		PureInterpretor::PureInterpretor(Automaton::Ref dfa, CharRange::List& subsets)
+		PureInterpretor::PureInterpretor(Ptr<Automaton> dfa, CharRange::List& subsets)
 		{
 			stateCount = dfa->states.Count();
 			charSetCount = subsets.Count() + 1;
@@ -227,13 +227,13 @@ PureInterpretor
 							vint index = subsets.IndexOf(dfaTransition->range);
 							if (index == -1)
 							{
-								CHECK_ERROR(false, L"PureInterpretor::PureInterpretor(Automaton::Ref, CharRange::List&)#Specified chars don't appear in the normalized char ranges.");
+								CHECK_ERROR(false, L"PureInterpretor::PureInterpretor(Ptr<Automaton>, CharRange::List&)#Specified chars don't appear in the normalized char ranges.");
 							}
 							transitions[i * charSetCount + index] = dfa->states.IndexOf(dfaTransition->target);
 						}
 						break;
 					default:
-						CHECK_ERROR(false, L"PureInterpretor::PureInterpretor(Automaton::Ref, CharRange::List&)#PureInterpretor only accepts Transition::Chars transitions.");
+						CHECK_ERROR(false, L"PureInterpretor::PureInterpretor(Ptr<Automaton>, CharRange::List&)#PureInterpretor only accepts Transition::Chars transitions.");
 					}
 				}
 			}

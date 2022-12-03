@@ -17,7 +17,7 @@ EpsilonNfaAlgorithm
 		class EpsilonNfaInfo
 		{
 		public:
-			Automaton::Ref		automaton;
+			Ptr<Automaton>		automaton;
 		};
 
 		class EpsilonNfa
@@ -50,7 +50,7 @@ EpsilonNfaAlgorithm
 				}
 			}
 
-			EpsilonNfa Apply(CharSetExpression* expression, Automaton* target)
+			EpsilonNfa Apply(CharSetExpression* expression, Automaton* target) override
 			{
 				EpsilonNfa nfa;
 				nfa.start = target->NewState();
@@ -62,7 +62,7 @@ EpsilonNfaAlgorithm
 				return nfa;
 			}
 
-			EpsilonNfa Apply(LoopExpression* expression, Automaton* target)
+			EpsilonNfa Apply(LoopExpression* expression, Automaton* target) override
 			{
 				EpsilonNfa head;
 				for (vint i = 0; i < expression->min; i++)
@@ -120,14 +120,14 @@ EpsilonNfaAlgorithm
 				return head;
 			}
 
-			EpsilonNfa Apply(SequenceExpression* expression, Automaton* target)
+			EpsilonNfa Apply(SequenceExpression* expression, Automaton* target) override
 			{
 				EpsilonNfa a = Invoke(expression->left, target);
 				EpsilonNfa b = Invoke(expression->right, target);
 				return Connect(a, b, target);
 			}
 
-			EpsilonNfa Apply(AlternateExpression* expression, Automaton* target)
+			EpsilonNfa Apply(AlternateExpression* expression, Automaton* target) override
 			{
 				EpsilonNfa result;
 				result.start = target->NewState();
@@ -141,7 +141,7 @@ EpsilonNfaAlgorithm
 				return result;
 			}
 
-			EpsilonNfa Apply(BeginExpression* expression, Automaton* target)
+			EpsilonNfa Apply(BeginExpression* expression, Automaton* target) override
 			{
 				EpsilonNfa result;
 				result.start = target->NewState();
@@ -150,7 +150,7 @@ EpsilonNfaAlgorithm
 				return result;
 			}
 
-			EpsilonNfa Apply(EndExpression* expression, Automaton* target)
+			EpsilonNfa Apply(EndExpression* expression, Automaton* target) override
 			{
 				EpsilonNfa result;
 				result.start = target->NewState();
@@ -159,7 +159,7 @@ EpsilonNfaAlgorithm
 				return result;
 			}
 
-			EpsilonNfa Apply(CaptureExpression* expression, Automaton* target)
+			EpsilonNfa Apply(CaptureExpression* expression, Automaton* target) override
 			{
 				EpsilonNfa result;
 				result.start = target->NewState();
@@ -182,7 +182,7 @@ EpsilonNfaAlgorithm
 				return result;
 			}
 
-			EpsilonNfa Apply(MatchExpression* expression, Automaton* target)
+			EpsilonNfa Apply(MatchExpression* expression, Automaton* target) override
 			{
 				vint capture = -1;
 				if (expression->name != U32String::Empty)
@@ -201,7 +201,7 @@ EpsilonNfaAlgorithm
 				return result;
 			}
 
-			EpsilonNfa Apply(PositiveExpression* expression, Automaton* target)
+			EpsilonNfa Apply(PositiveExpression* expression, Automaton* target) override
 			{
 				EpsilonNfa result;
 				result.start = target->NewState();
@@ -212,7 +212,7 @@ EpsilonNfaAlgorithm
 				return result;
 			}
 
-			EpsilonNfa Apply(NegativeExpression* expression, Automaton* target)
+			EpsilonNfa Apply(NegativeExpression* expression, Automaton* target) override
 			{
 				EpsilonNfa result;
 				result.start = target->NewState();
@@ -224,7 +224,7 @@ EpsilonNfaAlgorithm
 				return result;
 			}
 
-			EpsilonNfa Apply(UsingExpression* expression, Automaton* target)
+			EpsilonNfa Apply(UsingExpression* expression, Automaton* target) override
 			{
 				CHECK_FAIL(L"RegexExpression::GenerateEpsilonNfa()#UsingExpression cannot create state machine.");
 			}
@@ -234,9 +234,9 @@ EpsilonNfaAlgorithm
 Expression
 ***********************************************************************/
 
-		Automaton::Ref Expression::GenerateEpsilonNfa()
+		Ptr<Automaton> Expression::GenerateEpsilonNfa()
 		{
-			Automaton::Ref automaton = new Automaton;
+			auto automaton = Ptr(new Automaton);
 			EpsilonNfa result = EpsilonNfaAlgorithm().Invoke(this, automaton.Obj());
 			automaton->startState = result.start;
 			result.end->finalState = true;

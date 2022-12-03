@@ -18,23 +18,23 @@ MergeAlgorithm
 		{
 		public:
 			Expression::Map			definitions;
-			RegexExpression* regex;
+			RegexExpression*		regex = nullptr;
 		};
 
-		class MergeAlgorithm : public RegexExpressionAlgorithm<Expression::Ref, MergeParameter*>
+		class MergeAlgorithm : public RegexExpressionAlgorithm<Ptr<Expression>, MergeParameter*>
 		{
 		public:
-			Expression::Ref Apply(CharSetExpression* expression, MergeParameter* target)
+			Ptr<Expression> Apply(CharSetExpression* expression, MergeParameter* target) override
 			{
-				Ptr<CharSetExpression> result = new CharSetExpression;
+				auto result = Ptr(new CharSetExpression);
 				CopyFrom(result->ranges, expression->ranges);
 				result->reverse = expression->reverse;
 				return result;
 			}
 
-			Expression::Ref Apply(LoopExpression* expression, MergeParameter* target)
+			Ptr<Expression> Apply(LoopExpression* expression, MergeParameter* target) override
 			{
-				Ptr<LoopExpression> result = new LoopExpression;
+				auto result = Ptr(new LoopExpression);
 				result->max = expression->max;
 				result->min = expression->min;
 				result->preferLong = expression->preferLong;
@@ -42,67 +42,67 @@ MergeAlgorithm
 				return result;
 			}
 
-			Expression::Ref Apply(SequenceExpression* expression, MergeParameter* target)
+			Ptr<Expression> Apply(SequenceExpression* expression, MergeParameter* target) override
 			{
-				Ptr<SequenceExpression> result = new SequenceExpression;
+				auto result = Ptr(new SequenceExpression);
 				result->left = Invoke(expression->left, target);
 				result->right = Invoke(expression->right, target);
 				return result;
 			}
 
-			Expression::Ref Apply(AlternateExpression* expression, MergeParameter* target)
+			Ptr<Expression> Apply(AlternateExpression* expression, MergeParameter* target) override
 			{
-				Ptr<AlternateExpression> result = new AlternateExpression;
+				auto result = Ptr(new AlternateExpression);
 				result->left = Invoke(expression->left, target);
 				result->right = Invoke(expression->right, target);
 				return result;
 			}
 
-			Expression::Ref Apply(BeginExpression* expression, MergeParameter* target)
+			Ptr<Expression> Apply(BeginExpression* expression, MergeParameter* target) override
 			{
-				return new BeginExpression;
+				return Ptr(new BeginExpression);
 			}
 
-			Expression::Ref Apply(EndExpression* expression, MergeParameter* target)
+			Ptr<Expression> Apply(EndExpression* expression, MergeParameter* target) override
 			{
-				return new EndExpression;
+				return Ptr(new EndExpression);
 			}
 
-			Expression::Ref Apply(CaptureExpression* expression, MergeParameter* target)
+			Ptr<Expression> Apply(CaptureExpression* expression, MergeParameter* target) override
 			{
-				Ptr<CaptureExpression> result = new CaptureExpression;
+				auto result = Ptr(new CaptureExpression);
 				result->expression = Invoke(expression->expression, target);
 				result->name = expression->name;
 				return result;
 			}
 
-			Expression::Ref Apply(MatchExpression* expression, MergeParameter* target)
+			Ptr<Expression> Apply(MatchExpression* expression, MergeParameter* target) override
 			{
-				Ptr<MatchExpression> result = new MatchExpression;
+				auto result = Ptr(new MatchExpression);
 				result->name = expression->name;
 				result->index = expression->index;
 				return result;
 			}
 
-			Expression::Ref Apply(PositiveExpression* expression, MergeParameter* target)
+			Ptr<Expression> Apply(PositiveExpression* expression, MergeParameter* target) override
 			{
-				Ptr<PositiveExpression> result = new PositiveExpression;
+				auto result = Ptr(new PositiveExpression);
 				result->expression = Invoke(expression->expression, target);
 				return result;
 			}
 
-			Expression::Ref Apply(NegativeExpression* expression, MergeParameter* target)
+			Ptr<Expression> Apply(NegativeExpression* expression, MergeParameter* target) override
 			{
-				Ptr<NegativeExpression> result = new NegativeExpression;
+				auto result = Ptr(new NegativeExpression);
 				result->expression = Invoke(expression->expression, target);
 				return result;
 			}
 
-			Expression::Ref Apply(UsingExpression* expression, MergeParameter* target)
+			Ptr<Expression> Apply(UsingExpression* expression, MergeParameter* target) override
 			{
 				if (target->definitions.Keys().Contains(expression->name))
 				{
-					Expression::Ref reference = target->definitions[expression->name];
+					Ptr<Expression> reference = target->definitions[expression->name];
 					if (reference)
 					{
 						return reference;
@@ -115,7 +115,7 @@ MergeAlgorithm
 				else if (target->regex->definitions.Keys().Contains(expression->name))
 				{
 					target->definitions.Add(expression->name, nullptr);
-					Expression::Ref result = Invoke(target->regex->definitions[expression->name], target);
+					Ptr<Expression> result = Invoke(target->regex->definitions[expression->name], target);
 					target->definitions.Set(expression->name, result);
 					return result;
 				}
@@ -153,7 +153,7 @@ CharSetExpression
 RegexExpression
 ***********************************************************************/
 
-		Expression::Ref RegexExpression::Merge()
+		Ptr<Expression> RegexExpression::Merge()
 		{
 			MergeParameter merge;
 			merge.regex = this;

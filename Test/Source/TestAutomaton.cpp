@@ -10,7 +10,7 @@ using namespace vl::stream;
 extern WString GetTestResourcePath();
 extern WString GetTestOutputPath();
 
-void PrintAutomaton(WString fileName, Automaton::Ref automaton)
+void PrintAutomaton(WString fileName, Ptr<Automaton> automaton)
 {
 	FileStream file(GetTestOutputPath() + fileName, FileStream::WriteOnly);
 	BomEncoder encoder(BomEncoder::Utf8);
@@ -122,12 +122,12 @@ void PrintRegex(bool pure, WString name, U32String code)
 {
 	TEST_CATEGORY(name + L": " + u32tow(code))
 	{
-		RegexExpression::Ref regex = ParseRegexExpression(code);
-		Expression::Ref expression = regex->Merge();
+		auto regex = ParseRegexExpression(code);
+		auto expression = regex->Merge();
 		CharRange::List subsets;
 		expression->NormalizeCharSet(subsets);
 
-		Automaton::Ref eNfa = expression->GenerateEpsilonNfa();
+		auto eNfa = expression->GenerateEpsilonNfa();
 		PrintAutomaton(name + L".eNfa.txt", eNfa);
 		CompareToBaseline(name + L".eNfa.txt");
 
@@ -135,8 +135,8 @@ void PrintRegex(bool pure, WString name, U32String code)
 		{
 			Dictionary<State*, State*> nfaStateMap;
 			Group<State*, State*> dfaStateMap;
-			Automaton::Ref nfa = EpsilonNfaToNfa(eNfa, PureEpsilonChecker, nfaStateMap);
-			Automaton::Ref dfa = NfaToDfa(nfa, dfaStateMap);
+			auto nfa = EpsilonNfaToNfa(eNfa, PureEpsilonChecker, nfaStateMap);
+			auto dfa = NfaToDfa(nfa, dfaStateMap);
 
 			PrintAutomaton(name + L".pureNfa.txt", nfa);
 			PrintAutomaton(name + L".pureDfa.txt", dfa);
@@ -148,8 +148,8 @@ void PrintRegex(bool pure, WString name, U32String code)
 		{
 			Dictionary<State*, State*> nfaStateMap;
 			Group<State*, State*> dfaStateMap;
-			Automaton::Ref nfa = EpsilonNfaToNfa(eNfa, RichEpsilonChecker, nfaStateMap);
-			Automaton::Ref dfa = NfaToDfa(nfa, dfaStateMap);
+			auto nfa = EpsilonNfaToNfa(eNfa, RichEpsilonChecker, nfaStateMap);
+			auto dfa = NfaToDfa(nfa, dfaStateMap);
 
 			PrintAutomaton(name + L".richNfa.txt", nfa);
 			PrintAutomaton(name + L".richDfa.txt", dfa);

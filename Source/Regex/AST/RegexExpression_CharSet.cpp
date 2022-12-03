@@ -52,51 +52,51 @@ CharSetAlgorithm
 				}
 			}
 
-			void Apply(LoopExpression* expression, NormalizedCharSet* target)
+			void Apply(LoopExpression* expression, NormalizedCharSet* target) override
 			{
 				Invoke(expression->expression, target);
 			}
 
-			void Apply(SequenceExpression* expression, NormalizedCharSet* target)
+			void Apply(SequenceExpression* expression, NormalizedCharSet* target) override
 			{
 				Invoke(expression->left, target);
 				Invoke(expression->right, target);
 			}
 
-			void Apply(AlternateExpression* expression, NormalizedCharSet* target)
+			void Apply(AlternateExpression* expression, NormalizedCharSet* target) override
 			{
 				Invoke(expression->left, target);
 				Invoke(expression->right, target);
 			}
 
-			void Apply(BeginExpression* expression, NormalizedCharSet* target)
+			void Apply(BeginExpression* expression, NormalizedCharSet* target) override
 			{
 			}
 
-			void Apply(EndExpression* expression, NormalizedCharSet* target)
+			void Apply(EndExpression* expression, NormalizedCharSet* target) override
 			{
 			}
 
-			void Apply(CaptureExpression* expression, NormalizedCharSet* target)
-			{
-				Invoke(expression->expression, target);
-			}
-
-			void Apply(MatchExpression* expression, NormalizedCharSet* target)
-			{
-			}
-
-			void Apply(PositiveExpression* expression, NormalizedCharSet* target)
+			void Apply(CaptureExpression* expression, NormalizedCharSet* target) override
 			{
 				Invoke(expression->expression, target);
 			}
 
-			void Apply(NegativeExpression* expression, NormalizedCharSet* target)
+			void Apply(MatchExpression* expression, NormalizedCharSet* target) override
+			{
+			}
+
+			void Apply(PositiveExpression* expression, NormalizedCharSet* target) override
 			{
 				Invoke(expression->expression, target);
 			}
 
-			void Apply(UsingExpression* expression, NormalizedCharSet* target)
+			void Apply(NegativeExpression* expression, NormalizedCharSet* target) override
+			{
+				Invoke(expression->expression, target);
+			}
+
+			void Apply(UsingExpression* expression, NormalizedCharSet* target) override
 			{
 			}
 		};

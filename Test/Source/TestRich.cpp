@@ -13,14 +13,14 @@ namespace TestRich_TestObjects
 		Dictionary<State*, State*> nfaStateMap;
 		Group<State*, State*> dfaStateMap;
 
-		RegexExpression::Ref regex = ParseRegexExpression(code);
-		Expression::Ref expression = regex->Merge();
+		auto regex = ParseRegexExpression(code);
+		auto expression = regex->Merge();
 		expression->NormalizeCharSet(subsets);
-		Automaton::Ref eNfa = expression->GenerateEpsilonNfa();
-		Automaton::Ref nfa = EpsilonNfaToNfa(eNfa, RichEpsilonChecker, nfaStateMap);
-		Automaton::Ref dfa = NfaToDfa(nfa, dfaStateMap);
+		auto eNfa = expression->GenerateEpsilonNfa();
+		auto nfa = EpsilonNfaToNfa(eNfa, RichEpsilonChecker, nfaStateMap);
+		auto dfa = NfaToDfa(nfa, dfaStateMap);
 
-		return new RichInterpretor(dfa);
+		return Ptr(new RichInterpretor(dfa));
 	}
 
 	void RunRichInterpretor(const char32_t* code, const wchar_t* input, vint start, vint length)

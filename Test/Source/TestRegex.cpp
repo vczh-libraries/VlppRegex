@@ -8,7 +8,7 @@ using namespace vl::regex_internal;
 void NormalizedRegexAssert(const char32_t* input, RegexNode node)
 {
 	CharRange::List subsets;
-	Expression::Ref exp = ParseExpression(input);
+	Ptr<Expression> exp = ParseExpression(input);
 	exp->NormalizeCharSet(subsets);
 	TEST_ASSERT(exp->IsEqual(node.expression.Obj()));
 
@@ -20,8 +20,8 @@ void NormalizedRegexAssert(const char32_t* input, RegexNode node)
 
 void MergedRegexAssert(const char32_t* input, RegexNode node)
 {
-	RegexExpression::Ref regex = ParseRegexExpression(input);
-	Expression::Ref exp = regex->Merge();
+	auto regex = ParseRegexExpression(input);
+	auto exp = regex->Merge();
 	TEST_ASSERT(exp->IsEqual(node.expression.Obj()));
 }
 

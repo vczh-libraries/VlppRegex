@@ -43,10 +43,10 @@ namespace vl
 				bool								NeedKeepState;
 			};
 
-			Automaton::Ref							dfa;
+			Ptr<Automaton>							dfa;
 			UserData*								datas;
 		public:
-			RichInterpretor(Automaton::Ref _dfa);
+			RichInterpretor(Ptr<Automaton> _dfa);
 			~RichInterpretor();
 
 			template<typename TChar>

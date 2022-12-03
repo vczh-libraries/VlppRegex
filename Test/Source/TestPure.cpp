@@ -15,13 +15,13 @@ namespace TestPure_TestObjects
 		Dictionary<State*, State*> nfaStateMap;
 		Group<State*, State*> dfaStateMap;
 
-		RegexExpression::Ref regex = ParseRegexExpression(code);
-		Expression::Ref expression = regex->Merge();
+		auto regex = ParseRegexExpression(code);
+		auto expression = regex->Merge();
 		expression->NormalizeCharSet(subsets);
-		Automaton::Ref eNfa = expression->GenerateEpsilonNfa();
-		Automaton::Ref nfa = EpsilonNfaToNfa(eNfa, PureEpsilonChecker, nfaStateMap);
-		Automaton::Ref dfa = NfaToDfa(nfa, dfaStateMap);
-		return new PureInterpretor(dfa, subsets);
+		auto eNfa = expression->GenerateEpsilonNfa();
+		auto nfa = EpsilonNfaToNfa(eNfa, PureEpsilonChecker, nfaStateMap);
+		auto dfa = NfaToDfa(nfa, dfaStateMap);
+		return Ptr(new PureInterpretor(dfa, subsets));
 	}
 
 	void RunPureInterpretor(const char32_t* code, const wchar_t* input, vint start, vint length)

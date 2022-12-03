@@ -139,12 +139,12 @@ RegexBase_
 					{
 						if (result.start > offset || keepEmpty)
 						{
-							matches.Add(new RegexMatch_<T>(RegexString_<T>(text, offset, result.start - offset)));
+							matches.Add(Ptr(new RegexMatch_<T>(RegexString_<T>(text, offset, result.start - offset))));
 						}
 					}
 					if (keepSuccess)
 					{
-						matches.Add(new RegexMatch_<T>(text, &result));
+						matches.Add(Ptr(new RegexMatch_<T>(text, &result)));
 					}
 					input = start + result.start + result.length;
 				}
@@ -154,7 +154,7 @@ RegexBase_
 					vint length = text.Length() - remain;
 					if (length || keepEmpty)
 					{
-						matches.Add(new RegexMatch_<T>(RegexString_<T>(text, remain, length)));
+						matches.Add(Ptr(new RegexMatch_<T>(RegexString_<T>(text, remain, length))));
 					}
 				}
 			}
@@ -170,12 +170,12 @@ RegexBase_
 					{
 						if (result.start > offset || keepEmpty)
 						{
-							matches.Add(new RegexMatch_<T>(RegexString_<T>(text, offset, result.start - offset)));
+							matches.Add(Ptr(new RegexMatch_<T>(RegexString_<T>(text, offset, result.start - offset))));
 						}
 					}
 					if (keepSuccess)
 					{
-						matches.Add(new RegexMatch_<T>(text, &result));
+						matches.Add(Ptr(new RegexMatch_<T>(text, &result)));
 					}
 					input = start + result.start + result.length;
 				}
@@ -185,7 +185,7 @@ RegexBase_
 					vint length = text.Length() - remain;
 					if (length || keepEmpty)
 					{
-						matches.Add(new RegexMatch_<T>(RegexString_<T>(text, remain, length)));
+						matches.Add(Ptr(new RegexMatch_<T>(RegexString_<T>(text, remain, length))));
 					}
 				}
 			}
@@ -205,11 +205,11 @@ RegexBase_
 				RichResult result;
 				if (rich->MatchHead(text.Buffer(), text.Buffer(), result))
 				{
-					return new RegexMatch_<T>(text, &result);
+					return Ptr(new RegexMatch_<T>(text, &result));
 				}
 				else
 				{
-					return 0;
+					return nullptr;
 				}
 			}
 			else
@@ -217,11 +217,11 @@ RegexBase_
 				PureResult result;
 				if (pure->MatchHead(text.Buffer(), text.Buffer(), result))
 				{
-					return new RegexMatch_<T>(text, &result);
+					return Ptr(new RegexMatch_<T>(text, &result));
 				}
 				else
 				{
-					return 0;
+					return nullptr;
 				}
 			}
 		}
@@ -234,11 +234,11 @@ RegexBase_
 				RichResult result;
 				if (rich->Match(text.Buffer(), text.Buffer(), result))
 				{
-					return new RegexMatch_<T>(text, &result);
+					return Ptr(new RegexMatch_<T>(text, &result));
 				}
 				else
 				{
-					return 0;
+					return nullptr;
 				}
 			}
 			else
@@ -246,11 +246,11 @@ RegexBase_
 				PureResult result;
 				if (pure->Match(text.Buffer(), text.Buffer(), result))
 				{
-					return new RegexMatch_<T>(text, &result);
+					return Ptr(new RegexMatch_<T>(text, &result));
 				}
 				else
 				{
-					return 0;
+					return nullptr;
 				}
 			}
 		}
@@ -311,8 +311,8 @@ Regex_<T>
 		Regex_<T>::Regex_(const ObjectString<T>& code, bool preferPure)
 		{
 			CharRange::List subsets;
-			RegexExpression::Ref regex = ParseRegexExpression(U32<T>::ToU32(code));
-			Expression::Ref expression = regex->Merge();
+			auto regex = ParseRegexExpression(U32<T>::ToU32(code));
+			auto expression = regex->Merge();
 			expression->NormalizeCharSet(subsets);
 
 			bool pureRequired = false;
@@ -347,18 +347,18 @@ Regex_<T>
 				{
 					Dictionary<State*, State*> nfaStateMap;
 					Group<State*, State*> dfaStateMap;
-					Automaton::Ref eNfa = expression->GenerateEpsilonNfa();
-					Automaton::Ref nfa = EpsilonNfaToNfa(eNfa, PureEpsilonChecker, nfaStateMap);
-					Automaton::Ref dfa = NfaToDfa(nfa, dfaStateMap);
+					Ptr<Automaton> eNfa = expression->GenerateEpsilonNfa();
+					Ptr<Automaton> nfa = EpsilonNfaToNfa(eNfa, PureEpsilonChecker, nfaStateMap);
+					Ptr<Automaton> dfa = NfaToDfa(nfa, dfaStateMap);
 					pure = new PureInterpretor(dfa, subsets);
 				}
 				if (richRequired)
 				{
 					Dictionary<State*, State*> nfaStateMap;
 					Group<State*, State*> dfaStateMap;
-					Automaton::Ref eNfa = expression->GenerateEpsilonNfa();
-					Automaton::Ref nfa = EpsilonNfaToNfa(eNfa, RichEpsilonChecker, nfaStateMap);
-					Automaton::Ref dfa = NfaToDfa(nfa, dfaStateMap);
+					Ptr<Automaton> eNfa = expression->GenerateEpsilonNfa();
+					Ptr<Automaton> nfa = EpsilonNfaToNfa(eNfa, RichEpsilonChecker, nfaStateMap);
+					Ptr<Automaton> dfa = NfaToDfa(nfa, dfaStateMap);
 					rich = new RichInterpretor(dfa);
 
 					for (auto&& name : rich->CaptureNames())
@@ -980,13 +980,13 @@ RegexLexer_<T>
 		RegexLexer_<T>::RegexLexer_(const collections::IEnumerable<ObjectString<T>>& tokens)
 		{
 			// Build DFA for all tokens
-			List<Expression::Ref> expressions;
-			List<Automaton::Ref> dfas;
+			List<Ptr<Expression>> expressions;
+			List<Ptr<Automaton>> dfas;
 			CharRange::List subsets;
 			for (auto&& code : tokens)
 			{
-				RegexExpression::Ref regex = ParseRegexExpression(U32<T>::ToU32(code));
-				Expression::Ref expression = regex->Merge();
+				auto regex = ParseRegexExpression(U32<T>::ToU32(code));
+				auto expression = regex->Merge();
 				expression->CollectCharSet(subsets);
 				expressions.Add(expression);
 			}
@@ -994,18 +994,17 @@ RegexLexer_<T>
 			{
 				Dictionary<State*, State*> nfaStateMap;
 				Group<State*, State*> dfaStateMap;
-				Expression::Ref expression = expressions[i];
-				expression->ApplyCharSet(subsets);
-				Automaton::Ref eNfa = expression->GenerateEpsilonNfa();
-				Automaton::Ref nfa = EpsilonNfaToNfa(eNfa, PureEpsilonChecker, nfaStateMap);
-				Automaton::Ref dfa = NfaToDfa(nfa, dfaStateMap);
+				expressions[i]->ApplyCharSet(subsets);
+				auto eNfa = expressions[i]->GenerateEpsilonNfa();
+				auto nfa = EpsilonNfaToNfa(eNfa, PureEpsilonChecker, nfaStateMap);
+				auto dfa = NfaToDfa(nfa, dfaStateMap);
 				dfas.Add(dfa);
 			}
 
 			// Mark all states in DFAs
 			for (vint i = 0; i < dfas.Count(); i++)
 			{
-				Automaton::Ref dfa = dfas[i];
+				Ptr<Automaton> dfa = dfas[i];
 				for (vint j = 0; j < dfa->states.Count(); j++)
 				{
 					if (dfa->states[j]->finalState)
@@ -1020,7 +1019,7 @@ RegexLexer_<T>
 			}
 
 			// Connect all DFAs to an e-NFA
-			Automaton::Ref bigEnfa = new Automaton;
+			auto bigEnfa = Ptr(new Automaton);
 			for (vint i = 0; i < dfas.Count(); i++)
 			{
 				CopyFrom(bigEnfa->states, dfas[i]->states, true);
@@ -1035,13 +1034,13 @@ RegexLexer_<T>
 			// Build a single DFA out of the e-NFA
 			Dictionary<State*, State*> nfaStateMap;
 			Group<State*, State*> dfaStateMap;
-			Automaton::Ref bigNfa = EpsilonNfaToNfa(bigEnfa, PureEpsilonChecker, nfaStateMap);
+			auto bigNfa = EpsilonNfaToNfa(bigEnfa, PureEpsilonChecker, nfaStateMap);
 			for (vint i = 0; i < nfaStateMap.Keys().Count(); i++)
 			{
 				void* userData = nfaStateMap.Values().Get(i)->userData;
 				nfaStateMap.Keys()[i]->userData = userData;
 			}
-			Automaton::Ref bigDfa = NfaToDfa(bigNfa, dfaStateMap);
+			auto bigDfa = NfaToDfa(bigNfa, dfaStateMap);
 			for (vint i = 0; i < dfaStateMap.Keys().Count(); i++)
 			{
 				void* userData = dfaStateMap.GetByIndex(i).Get(0)->userData;
