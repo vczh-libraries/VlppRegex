@@ -27,6 +27,24 @@ void MergedRegexAssert(const char32_t* input, RegexNode node)
 
 TEST_FILE
 {
+	TEST_CASE(L"Test CharRange comparison")
+	{
+		{
+			CharRange cr{U'b', L'd'};
+			TEST_ASSERT((CharRange{'a', 'a'} < cr));
+			TEST_ASSERT((CharRange{'b', 'd'} == cr));
+			TEST_ASSERT((CharRange{'e', 'e'} > cr));
+		}
+		{
+			CharRange cr{U'b', L'd'};
+			TEST_ASSERT('a' < cr);
+			TEST_ASSERT('b' == cr);
+			TEST_ASSERT('c' == cr);
+			TEST_ASSERT('d' == cr);
+			TEST_ASSERT('e' > cr);
+		}
+	});
+
 	TEST_CASE(L"Test charset normalization")
 	{
 		NormalizedRegexAssert(U"[a-g][h-n]", rC(U'a', U'g') + rC(U'h', U'n'));

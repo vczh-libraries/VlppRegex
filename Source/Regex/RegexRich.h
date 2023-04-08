@@ -18,8 +18,6 @@ namespace vl
 			vint									capture;
 			vint									start;
 			vint									length;
-
-			bool									operator==(const CaptureRecord& record)const;
 		};
 	}
 
