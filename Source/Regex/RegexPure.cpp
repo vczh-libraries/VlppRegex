@@ -186,6 +186,7 @@ PureInterpretor
 			{
 				charMap[i] = charSetCount - 1;
 			}
+			// TODO: (enumerable) foreach
 			for (vint i = 0; i < charRanges.Count(); i++)
 			{
 				CharRange range = charRanges[i];
@@ -217,6 +218,7 @@ PureInterpretor
 				}
 
 				State* state = dfa->states[i].Obj();
+				// TODO: (enumerable) foreach
 				for (vint j = 0; j < state->transitions.Count(); j++)
 				{
 					Transition* dfaTransition = state->transitions[j];

@@ -138,6 +138,7 @@ CharSetExpression
 				range.begin = range.end;
 				range.end = t;
 			}
+			// TODO: (enumerable) foreach
 			for (vint i = 0; i < ranges.Count(); i++)
 			{
 				if (!(range<ranges[i] || range>ranges[i]))

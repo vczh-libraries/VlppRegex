@@ -29,6 +29,7 @@ CharSetAlgorithm
 				if (expression->reverse)
 				{
 					char32_t begin = 1;
+					// TODO: (enumerable) foreach
 					for (vint i = 0; i < ranges.Count(); i++)
 					{
 						CharRange range = ranges[i];
@@ -45,6 +46,7 @@ CharSetAlgorithm
 				}
 				else
 				{
+					// TODO: (enumerable) foreach
 					for (vint i = 0; i < ranges.Count(); i++)
 					{
 						Process(expression, target, ranges[i]);
@@ -175,6 +177,7 @@ SetNormalizedCharSetAlgorithm
 		public:
 			void Process(CharSetExpression* expression, NormalizedCharSet* target, CharRange range)
 			{
+				// TODO: (enumerable) foreach
 				for (vint j = 0; j < target->ranges.Count(); j++)
 				{
 					CharRange targetRange = target->ranges[j];

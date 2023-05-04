@@ -98,6 +98,7 @@ RegexNode
 			auto target = Ptr(new CharSetExpression);
 			target->reverse = false;
 			CopyFrom(target->ranges, left->ranges);
+			// TODO: (enumerable) foreach
 			for (vint i = 0; i < right->ranges.Count(); i++)
 			{
 				if (!target->AddRangeWithConflict(right->ranges[i]))

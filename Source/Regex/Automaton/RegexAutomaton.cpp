@@ -172,6 +172,7 @@ Helpers
 			if (!epsilonStates.Contains(sourceState))
 			{
 				epsilonStates.Add(sourceState);
+				// TODO: (enumerable) foreach:alterable
 				for (vint i = 0; i < sourceState->transitions.Count(); i++)
 				{
 					Transition* transition = sourceState->transitions[i];
@@ -206,6 +207,7 @@ Helpers
 			target->startState = target->states[0].Obj();
 			CopyFrom(target->captureNames, source->captureNames);
 
+			// TODO: (enumerable) foreach
 			for (vint i = 0; i < target->states.Count(); i++)
 			{
 				// Clear cache
@@ -222,6 +224,7 @@ Helpers
 				CollectEpsilon(targetState, sourceState, epsilonChecker, epsilonStates, transitions);
 
 				// Iterate through all non-epsilon transitions
+				// TODO: (enumerable) foreach
 				for (vint j = 0; j < transitions.Count(); j++)
 				{
 					Transition* transition = transitions[j];
@@ -274,6 +277,7 @@ Helpers
 
 						if (transitionClass == nullptr)
 						{
+							// TODO: (enumerable) foreach
 							for (vint l = 0; l < orderedTransitionClasses.Count(); l++)
 							{
 								Transition* key = orderedTransitionClasses[l];
@@ -313,6 +317,7 @@ Helpers
 
 					// Check if these NFA states represent a created DFA state
 					State* dfaState = 0;
+					// TODO: (enumerable) foreach on dictionary
 					for (vint k = 0; k < dfaStateMap.Count(); k++)
 					{
 						// Compare two NFA states set
@@ -325,6 +330,7 @@ Helpers
 					if (!dfaState)
 					{
 						dfaState = target->NewState();
+						// TODO: (enumerable) foreach
 						for (vint k = 0; k < transitionTargets.Count(); k++)
 						{
 							dfaStateMap.Add(dfaState, transitionTargets[k]);

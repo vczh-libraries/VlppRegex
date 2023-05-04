@@ -75,6 +75,7 @@ RegexMatch_<T>
 			: success(true)
 			, result(_string, _result->start, _result->length)
 		{
+			// TODO: (enumerable) foreach
 			for (vint i = 0; i < _result->captures.Count(); i++)
 			{
 				CaptureRecord& capture = _result->captures[i];
@@ -990,6 +991,7 @@ RegexLexer_<T>
 				expression->CollectCharSet(subsets);
 				expressions.Add(expression);
 			}
+			// TODO: (enumerable) foreach
 			for (vint i = 0; i < expressions.Count(); i++)
 			{
 				Dictionary<State*, State*> nfaStateMap;
@@ -1002,9 +1004,11 @@ RegexLexer_<T>
 			}
 
 			// Mark all states in DFAs
+			// TODO: (enumerable) foreach
 			for (vint i = 0; i < dfas.Count(); i++)
 			{
 				Ptr<Automaton> dfa = dfas[i];
+				// TODO: (enumerable) foreach
 				for (vint j = 0; j < dfa->states.Count(); j++)
 				{
 					if (dfa->states[j]->finalState)
@@ -1020,12 +1024,14 @@ RegexLexer_<T>
 
 			// Connect all DFAs to an e-NFA
 			auto bigEnfa = Ptr(new Automaton);
+			// TODO: (enumerable) foreach
 			for (vint i = 0; i < dfas.Count(); i++)
 			{
 				CopyFrom(bigEnfa->states, dfas[i]->states, true);
 				CopyFrom(bigEnfa->transitions, dfas[i]->transitions, true);
 			}
 			bigEnfa->startState = bigEnfa->NewState();
+			// TODO: (enumerable) foreach
 			for (vint i = 0; i < dfas.Count(); i++)
 			{
 				bigEnfa->NewEpsilon(bigEnfa->startState, dfas[i]->startState);
@@ -1035,12 +1041,14 @@ RegexLexer_<T>
 			Dictionary<State*, State*> nfaStateMap;
 			Group<State*, State*> dfaStateMap;
 			auto bigNfa = EpsilonNfaToNfa(bigEnfa, PureEpsilonChecker, nfaStateMap);
+			// TODO: (enumerable) foreach on dictionary
 			for (vint i = 0; i < nfaStateMap.Keys().Count(); i++)
 			{
 				void* userData = nfaStateMap.Values().Get(i)->userData;
 				nfaStateMap.Keys()[i]->userData = userData;
 			}
 			auto bigDfa = NfaToDfa(bigNfa, dfaStateMap);
+			// TODO: (enumerable) foreach on group
 			for (vint i = 0; i < dfaStateMap.Keys().Count(); i++)
 			{
 				void* userData = dfaStateMap.GetByIndex(i).Get(0)->userData;

@@ -55,6 +55,7 @@ EpsilonNfaAlgorithm
 				EpsilonNfa nfa;
 				nfa.start = target->NewState();
 				nfa.end = target->NewState();
+				// TODO: (enumerable) foreach
 				for (vint i = 0; i < expression->ranges.Count(); i++)
 				{
 					target->NewChars(nfa.start, nfa.end, expression->ranges[i]);

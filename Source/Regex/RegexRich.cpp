@@ -142,12 +142,14 @@ RichInterpretor
 		{
 			datas = new UserData[dfa->states.Count()];
 
+			// TODO: (enumerable) foreach
 			for (vint i = 0; i < dfa->states.Count(); i++)
 			{
 				State* state = dfa->states[i].Obj();
 				vint charEdges = 0;
 				vint nonCharEdges = 0;
 				bool mustSave = false;
+				// TODO: (enumerable) foreach
 				for (vint j = 0; j < state->transitions.Count(); j++)
 				{
 					if (state->transitions[j]->type == Transition::Chars)
@@ -187,6 +189,7 @@ RichInterpretor
 				bool found = false; // true means at least one transition matches the input
 				StateSaver<TChar> oldState = currentState;
 				// Iterate through all transitions from the current state
+				// TODO: (enumerable) foreach:reversed
 				for (vint i = currentState.minTransition; i < currentState.currentState->transitions.Count(); i++)
 				{
 					Transition* transition = currentState.currentState->transitions[i];
@@ -397,6 +400,7 @@ RichInterpretor
 							// Find the next NegativeFail transition
 							// Because when a negative lookahead regex failed to match, it is actually succeeded
 							// Since a negative lookahead means we don't want to match this regex
+							// TODO: (enumerable) foreach:reversed
 							for (vint i = 0; i < currentState.currentState->transitions.Count(); i++)
 							{
 								Transition* transition = currentState.currentState->transitions[i];

@@ -24,6 +24,7 @@ IsEqualAlgorithm
 				{
 					if (expression->reverse != expected->reverse)return false;
 					if (expression->ranges.Count() != expected->ranges.Count())return false;
+					// TODO: (enumerable) foreach:indexed
 					for (vint i = 0; i < expression->ranges.Count(); i++)
 					{
 						if (expression->ranges[i] != expected->ranges[i])return false;
