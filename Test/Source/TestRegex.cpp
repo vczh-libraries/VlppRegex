@@ -362,7 +362,7 @@ TEST_FILE
 			}
 		}
 		DateTime dt2 = DateTime::LocalTime();
-		vuint64_t ms = dt2.totalMilliseconds - dt1.totalMilliseconds;
+		vuint64_t ms = dt2.osMilliseconds - dt1.osMilliseconds;
 		unittest::UnitTest::PrintMessage(L"Running 10000000 times of Regex::TestHead uses: " + i64tow(ms) + L" milliseconds.", unittest::UnitTest::MessageKind::Info);
 	};
 
