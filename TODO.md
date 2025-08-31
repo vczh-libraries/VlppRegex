@@ -4,6 +4,7 @@
 
 - Ensure there is no way to say a specific character in regex which does not fall in UTF-16 range (0 - 10FFFF).
 - Optimize `PureInterpretor::CharMap`, only 0 - 127 is in an array, others are in a range map.
+- Put `Regex` and `RegexLexer` to different cpp files.
 - A `RegexReplacer`, which could access anonymius or named captures:
   - Use them to build a nee string
   - Join list with delimiter

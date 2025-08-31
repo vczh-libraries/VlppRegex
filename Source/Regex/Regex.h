@@ -644,8 +644,8 @@ Tokenizer
 			///         }
 			///     };
 			/// 
-			///     RegexLexer lexer(tokenDefs, proc);
-			///     RegexLexerColorizer colorizer = lexer.Colorize();
+			///     RegexLexer lexer(tokenDefs);
+			///     RegexLexerColorizer colorizer = lexer.Colorize(proc);
 			/// 
 			///     void* lastInterTokenState = nullptr;
 			///     for (auto [line, index] : indexed(From(lines)))
@@ -703,7 +703,7 @@ Tokenizer
 		///     tokenDefs.Add(L"/w+");
 		///     tokenDefs.Add(L"/s+");
 		/// 
-		///     RegexLexer lexer(tokenDefs, {});
+		///     RegexLexer lexer(tokenDefs);
 		///     WString input = L"I have 2 books.";
 		///     auto tokenResult = lexer.Parse(input);
 		/// 
@@ -744,7 +744,7 @@ Tokenizer
 			///     tokenDefs.Add(L"/w+");
 			///     tokenDefs.Add(L"/s+");
 			/// 
-			///     RegexLexer lexer(tokenDefs, {});
+			///     RegexLexer lexer(tokenDefs);
 			///     WString input = L"I have 2 books.";
 			///     auto tokenResult = lexer.Parse(input);
 			/// 
@@ -777,7 +777,7 @@ RegexLexerWalker
 		///     tokenDefs.Add(L"/w+");
 		///     tokenDefs.Add(L"/s+");
 		/// 
-		///     RegexLexer lexer(tokenDefs, {});
+		///     RegexLexer lexer(tokenDefs);
 		///     RegexLexerWalker walker = lexer.Walk();
 		/// 
 		///     WString input = L"This book costs 2.5. That book costs 2.";
@@ -910,7 +910,7 @@ RegexLexerWalker
 			///     tokenDefs.Add(L"/d+./d+");
 			///     tokenDefs.Add(L"/d+");
 			/// 
-			///     RegexLexer lexer(tokenDefs, {});
+			///     RegexLexer lexer(tokenDefs);
 			///     RegexLexerWalker walker = lexer.Walk();
 			/// 
 			///     WString tests[] = { L".", L"2", L"2.", L"2.5", L"2.5." };
@@ -960,7 +960,7 @@ RegexLexerWalker
 			///     tokenDefs.Add(L"/d+./d+");
 			///     tokenDefs.Add(L"/d+");
 			/// 
-			///     RegexLexer lexer(tokenDefs, {});
+			///     RegexLexer lexer(tokenDefs);
 			///     RegexLexerWalker walker = lexer.Walk();
 			/// 
 			///     WString tests[] = { L".", L"2", L"2.", L"2.5", L"2.5." };
@@ -1025,8 +1025,8 @@ RegexLexerColorizer
 		///         Console::WriteLine(itow(token) + L": <" + WString(text + start, length) + L">");
 		///     };
 		/// 
-		///     RegexLexer lexer(tokenDefs, proc);
-		///     RegexLexerColorizer colorizer = lexer.Colorize();
+		///     RegexLexer lexer(tokenDefs);
+		///     RegexLexerColorizer colorizer = lexer.Colorize(proc);
 		/// 
 		///     for (auto [line, index] : indexed(From(lines)))
 		///     {
