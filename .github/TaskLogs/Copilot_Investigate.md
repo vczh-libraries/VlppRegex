@@ -90,6 +90,10 @@ agreed.
 
 # UPDATES
 
+## UPDATE
+
+I don't like the idea of changing walk from accepting T to char32_t, I think this break the contract of the interface design, and I guess the real implementation should be, if such T does not form a char32_t yet, cache it inside the class. So maybe you should maintain a T[6] buffer inside the class with a vint field for the length. And when a complete unicode scalar is completed, it calls `pure`.
+
 # TEST [CONFIRMED]
 
 Add focused Unicode-scalar regressions to the existing lexer, walker, and colorizer test files while preserving their UTF-8 BOMs.
@@ -97,11 +101,11 @@ Add focused Unicode-scalar regressions to the existing lexer, walker, and colori
 - Use U+2605A (`𦁚`) and the supplementary-plane string already present in `TestRegex.cpp`.
 - Exercise `wchar_t`, `char8_t`, `char16_t`, and `char32_t` inputs from one common token-definition encoding.
 - For lexer parsing, prove that an undefined supplementary scalar is emitted once as a complete encoded source cluster and never restarts matching inside UTF-8 continuation bytes or a UTF-16 surrogate pair.
-- For walker APIs, prove that each `Walk` call consumes one decoded `char32_t` scalar, while both `IsClosedToken` range overloads decode bounded encoded text without reading beyond the supplied length.
+- For walker APIs, pass U+2605A one `T` code unit at a time. Every call before the completing code unit must leave the caller-owned DFA state unchanged and return `token == -1`, `finalState == false` and `previousTokenStop == false`; the completing call must perform exactly one scalar transition. Exercise both overloads, token-boundary restart, an initial state of `-1`, cache reset after completion and copying a partially buffered walker.
 - For colorization, prove that undefined and recognized supplementary scalars each produce one callback covering the complete encoded source cluster, preserve source-code-unit offsets, and keep every code unit in the expected color.
 - Keep `/W+` as recognized control coverage, and use `[𦁚]+` or `[𣂕𣴑𣱳𦁚]+` as the scalar-sensitive recognized regression.
 - Cover exact-length, non-null-terminated buffers for bounded `Colorize` and `IsClosedToken` APIs.
-- Preserve the current `RegexLexerColorizer_<char32_t>::Pass` semantics and add supplementary-scalar coverage for every `T`.
+- Preserve `RegexLexerColorizer_<T>::Pass(T)`: pass each encoded code unit of a supplementary scalar, verify that the DFA advances only when the scalar completes, and verify that `extendProc` receives the complete encoded source cluster.
 
 The problem is confirmed when the new tests compile and fail on the current implementation for encoded inputs that require multiple code units while the `char32_t` controls retain their established behavior. The fix succeeds when all targeted tests and the complete `UnitTest` suite pass, source-unit starts/lengths/rows/columns and callback spans are exact, no decoder reads past a bounded buffer, and all edited Unicode test files retain BOM bytes `EF BB BF`.
 
@@ -111,11 +115,17 @@ The incremental macOS build completed successfully against the unfixed implement
 - `TestWalker.cpp` failed the expected `state == -1` assertion for the `char8_t` `/w+` case because `Walk(T)` truncated U+2605A to `Z` before the DFA transition.
 - `TestColorizer.cpp` failed the expected single-callback assertion because the `char8_t` colorizer emitted separate callbacks for code units instead of one callback for U+2605A.
 
-The existing UTF-32 tests and the `wchar_t`-as-UTF-32 execution on macOS retain the established scalar behavior and serve as controls.
+The existing UTF-32 tests and the `wchar_t`-as-UTF-32 execution on macOS retain the established one-call behavior and serve as controls.
+
+After the walker contract was clarified, the tests were strengthened to pass the actual encoded `T` units instead of passing a `char32_t` to every instantiation. They compiled against the rejected scalar-signature implementation and reproduced both contract violations:
+
+- `TestWalker.cpp` failed `state == previousState` on a UTF-8 prefix because the first code unit reached the DFA instead of being buffered until U+2605A was complete.
+- `TestColorizer.cpp` failed the token assertion after `Pass` because the UTF-8/UTF-16 code units were each treated as independent scalar arguments.
 
 # PROPOSALS
 
-- No.1 DECODE SCALARS AT ENCODED-RANGE BOUNDARIES
+- No.1 DECODE SCALARS AT ENCODED-RANGE BOUNDARIES [DENIED]
+- No.2 BUFFER ENCODED WALKER INPUT UNTIL A SCALAR COMPLETES
 
 ## No.1 DECODE SCALARS AT ENCODED-RANGE BOUNDARIES
 
@@ -129,3 +139,35 @@ Make the DFA boundary explicit: `PureInterpretor::Transit` and scalar stepping A
 - Clarify public documentation so scalar parameters and encoded code-unit ranges are not both described ambiguously as characters.
 
 ### CODE CHANGE
+
+Planned implementation in `Source/Regex/Regex.h` and `Source/Regex/Regex.cpp`:
+
+- Replace raw one-unit fallback advancement with the decoded source-cluster size.
+- Change scalar `Walk` and `Pass` parameters to `char32_t` without changing the `char32_t` instantiation's behavior.
+- Stream-decode bounded `IsClosedToken` and colorizer ranges, retaining `T` offsets for every public result and callback.
+- Re-encode `Pass` scalars to a temporary `T` cluster before invoking colorizer processing and extension callbacks.
+- Update the affected public comments to distinguish Unicode scalars from encoded code units.
+
+### DENIED BY USER
+
+Changing `RegexLexerWalker_<T>::Walk` from `T` to `char32_t` breaks the intended encoded-code-unit interface contract. Although the proposal fixed DFA inputs, it moved decoding responsibility to every caller and changed how many calls consume an encoded input buffer. The walker must instead retain its `Walk(T, ...)` overloads and incrementally decode code units internally. `RegexLexerColorizer_<T>::Pass` must likewise retain its `T` parameter.
+
+## No.2 BUFFER ENCODED WALKER INPUT UNTIL A SCALAR COMPLETES
+
+Keep the public code-unit interface while enforcing the DFA's scalar input boundary.
+
+- Retain both `RegexLexerWalker_<T>::Walk(T, ...)` signatures. Store up to six pending `T` code units and their length in each walker. Decode after every input unit, but call `PureInterpretor::Transit` only after one complete `char32_t` is available.
+- An incomplete call is neutral: it leaves `state` unchanged and returns `token == -1`, `finalState == false` and `previousTokenStop == false`. `char32_t` remains the one-unit direct path, so that instantiation is unchanged semantically.
+- Treat one walker instance as one sequential encoded input stream. Copy its pending units by value so a copied partially filled walker can complete independently. Valid, complete UTF input is a precondition.
+- Factor the existing DFA transition logic into a scalar helper. Bounded colorizer input already has complete source clusters, so it decodes with the range reader, calls the scalar helper and retains the reader's source-unit positions.
+- Retain `RegexLexerColorizer_<T>::Pass(T)`. Accumulate its code units in the colorizer's saved internal state; after a scalar completes, route the full encoded cluster through normal token processing so extension callbacks receive the original `T` units and lengths.
+- Keep bounded decoding in `IsClosedToken`, complete-cluster lexer fallback advancement, and all public source positions and callback spans in original `T` code units.
+
+### CODE CHANGE
+
+Planned implementation in `Source/Regex/Regex.h` and `Source/Regex/Regex.cpp`:
+
+- Add the walker decoder buffer, length, scalar decoder and scalar transition helper; copy pending decoder state and restore both public `Walk(T)` overloads.
+- Add pass-through decoder state to `RegexLexerColorizer_<T>::InternalState`, restore `Pass(T)`, and process the complete buffered cluster when decoding finishes.
+- Make bounded colorization call the scalar transition helper while continuing to map every decision through `SourceCluster`.
+- Retain the independent lexer fallback and bounded `IsClosedToken` fixes, and document code-unit streaming and source-unit measurements.

@@ -212,7 +212,10 @@ void AssertUnicodeColorizerPass(RegexLexer& sequenceLexer, RegexLexer& scalarLex
 
 		TEST_ASSERT(colorizer.Colorize(&boundedPrefix[0], boundedPrefix.Count()) == nullptr);
 		TEST_ASSERT(argument.count == 1);
-		colorizer.Pass(U'𦁚');
+		for (vint i = 0; i < encodedScalar.Length(); i++)
+		{
+			colorizer.Pass(encodedScalar[i]);
+		}
 		TEST_ASSERT(argument.count == 1);
 		TEST_ASSERT(colorizer.Colorize(&boundedSuffix[0], boundedSuffix.Count()) == nullptr);
 		TEST_ASSERT(argument.count == 2);
@@ -231,7 +234,10 @@ void AssertUnicodeColorizerPass(RegexLexer& sequenceLexer, RegexLexer& scalarLex
 		proc.argument = &argument;
 		auto colorizer = scalarLexer.Colorize(proc);
 
-		colorizer.Pass(U'𦁚');
+		for (vint i = 0; i < encodedScalar.Length(); i++)
+		{
+			colorizer.Pass(encodedScalar[i]);
+		}
 		TEST_ASSERT(argument.extendCount == 1);
 		TEST_ASSERT(argument.colorizeCount == 0);
 		TEST_ASSERT(argument.length == encodedScalar.Length());
