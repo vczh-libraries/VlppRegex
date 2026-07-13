@@ -6,6 +6,33 @@ using namespace vl::collections;
 using namespace vl::stream;
 using namespace vl::regex;
 
+struct UnicodeLexerToken
+{
+	vint										start;
+	vint										length;
+	vint										token;
+};
+
+template<typename T, size_t Count>
+void AssertUnicodeLexer(RegexLexer& lexer, const ObjectString<T>& input, const UnicodeLexerToken(&expected)[Count])
+{
+	List<RegexToken_<T>> tokens;
+	CopyFrom(tokens, lexer.Parse(input));
+
+	TEST_ASSERT(tokens.Count() == (vint)Count);
+	for (vint i = 0; i < (vint)Count; i++)
+	{
+		TEST_ASSERT(tokens[i].start == expected[i].start);
+		TEST_ASSERT(tokens[i].length == expected[i].length);
+		TEST_ASSERT(tokens[i].token == expected[i].token);
+		TEST_ASSERT(tokens[i].rowStart == 0);
+		TEST_ASSERT(tokens[i].columnStart == expected[i].start);
+		TEST_ASSERT(tokens[i].rowEnd == 0);
+		TEST_ASSERT(tokens[i].columnEnd == expected[i].start + expected[i].length - 1);
+		TEST_ASSERT(tokens[i].completeToken == true);
+	}
+}
+
 TEST_FILE
 {
 	auto TestRegexLexer1Validation = [](List<RegexToken>& tokens)
@@ -615,6 +642,131 @@ TEST_FILE
 			TEST_ASSERT(tokens[2].rowEnd == 0);
 			TEST_ASSERT(tokens[2].columnEnd == 29);
 			TEST_ASSERT(tokens[2].completeToken == true);
+		});
+	});
+
+	TEST_CATEGORY(L"Unicode scalar boundaries")
+	{
+		List<WString> wordCodes;
+		wordCodes.Add(L"/w+");
+		RegexLexer wordLexer(wordCodes);
+
+		List<WString> scalarCodes;
+		scalarCodes.Add(L"[𦁚]+");
+		RegexLexer scalarLexer(scalarCodes);
+
+		List<WString> inverseWordCodes;
+		inverseWordCodes.Add(L"/W+");
+		RegexLexer inverseWordLexer(inverseWordCodes);
+
+		UnicodeLexerToken word8[] =
+		{
+			{ 0, 33, -1 },
+			{ 33, 4, 0 },
+			{ 37, 1, -1 },
+			{ 38, 2, 0 },
+			{ 40, 1, -1 },
+			{ 41, 6, 0 },
+			{ 47, 14, -1 },
+		};
+		UnicodeLexerToken scalar8[] =
+		{
+			{ 0, 28, -1 },
+			{ 28, 4, 0 },
+			{ 32, 29, -1 },
+		};
+		UnicodeLexerToken inverseWord8[] =
+		{
+			{ 0, 33, 0 },
+			{ 33, 4, -1 },
+			{ 37, 1, 0 },
+			{ 38, 2, -1 },
+			{ 40, 1, 0 },
+			{ 41, 6, -1 },
+			{ 47, 14, 0 },
+		};
+
+		UnicodeLexerToken word16[] =
+		{
+			{ 0, 17, -1 },
+			{ 17, 4, 0 },
+			{ 21, 1, -1 },
+			{ 22, 2, 0 },
+			{ 24, 1, -1 },
+			{ 25, 6, 0 },
+			{ 31, 6, -1 },
+		};
+		UnicodeLexerToken scalar16[] =
+		{
+			{ 0, 14, -1 },
+			{ 14, 2, 0 },
+			{ 16, 21, -1 },
+		};
+		UnicodeLexerToken inverseWord16[] =
+		{
+			{ 0, 17, 0 },
+			{ 17, 4, -1 },
+			{ 21, 1, 0 },
+			{ 22, 2, -1 },
+			{ 24, 1, 0 },
+			{ 25, 6, -1 },
+			{ 31, 6, 0 },
+		};
+
+		UnicodeLexerToken word32[] =
+		{
+			{ 0, 10, -1 },
+			{ 10, 4, 0 },
+			{ 14, 1, -1 },
+			{ 15, 2, 0 },
+			{ 17, 1, -1 },
+			{ 18, 6, 0 },
+			{ 24, 6, -1 },
+		};
+		UnicodeLexerToken scalar32[] =
+		{
+			{ 0, 8, -1 },
+			{ 8, 1, 0 },
+			{ 9, 21, -1 },
+		};
+		UnicodeLexerToken inverseWord32[] =
+		{
+			{ 0, 10, 0 },
+			{ 10, 4, -1 },
+			{ 14, 1, 0 },
+			{ 15, 2, -1 },
+			{ 17, 1, 0 },
+			{ 18, 6, -1 },
+			{ 24, 6, 0 },
+		};
+
+		TEST_CASE(L"All input encodings")
+		{
+			U8String input8 = u8"𩰪㦲𦰗𠀼 𣂕𣴑𣱳𦁚 Vczh is genius!@我是天才";
+			AssertUnicodeLexer(wordLexer, input8, word8);
+			AssertUnicodeLexer(scalarLexer, input8, scalar8);
+			AssertUnicodeLexer(inverseWordLexer, input8, inverseWord8);
+
+			U16String input16 = u"𩰪㦲𦰗𠀼 𣂕𣴑𣱳𦁚 Vczh is genius!@我是天才";
+			AssertUnicodeLexer(wordLexer, input16, word16);
+			AssertUnicodeLexer(scalarLexer, input16, scalar16);
+			AssertUnicodeLexer(inverseWordLexer, input16, inverseWord16);
+
+			U32String input32 = U"𩰪㦲𦰗𠀼 𣂕𣴑𣱳𦁚 Vczh is genius!@我是天才";
+			AssertUnicodeLexer(wordLexer, input32, word32);
+			AssertUnicodeLexer(scalarLexer, input32, scalar32);
+			AssertUnicodeLexer(inverseWordLexer, input32, inverseWord32);
+
+			WString input = L"𩰪㦲𦰗𠀼 𣂕𣴑𣱳𦁚 Vczh is genius!@我是天才";
+#if defined VCZH_WCHAR_UTF16
+			AssertUnicodeLexer(wordLexer, input, word16);
+			AssertUnicodeLexer(scalarLexer, input, scalar16);
+			AssertUnicodeLexer(inverseWordLexer, input, inverseWord16);
+#elif defined VCZH_WCHAR_UTF32
+			AssertUnicodeLexer(wordLexer, input, word32);
+			AssertUnicodeLexer(scalarLexer, input, scalar32);
+			AssertUnicodeLexer(inverseWordLexer, input, inverseWord32);
+#endif
 		});
 	});
 }
