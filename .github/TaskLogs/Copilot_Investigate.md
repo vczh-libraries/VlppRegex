@@ -125,7 +125,7 @@ After the walker contract was clarified, the tests were strengthened to pass the
 # PROPOSALS
 
 - No.1 DECODE SCALARS AT ENCODED-RANGE BOUNDARIES [DENIED]
-- No.2 BUFFER ENCODED WALKER INPUT UNTIL A SCALAR COMPLETES
+- No.2 BUFFER ENCODED WALKER INPUT UNTIL A SCALAR COMPLETES [CONFIRMED]
 
 ## No.1 DECODE SCALARS AT ENCODED-RANGE BOUNDARIES
 
@@ -165,9 +165,22 @@ Keep the public code-unit interface while enforcing the DFA's scalar input bound
 
 ### CODE CHANGE
 
-Planned implementation in `Source/Regex/Regex.h` and `Source/Regex/Regex.cpp`:
+Implemented in `Source/Regex/Regex.h` and `Source/Regex/Regex.cpp`:
 
-- Add the walker decoder buffer, length, scalar decoder and scalar transition helper; copy pending decoder state and restore both public `Walk(T)` overloads.
-- Add pass-through decoder state to `RegexLexerColorizer_<T>::InternalState`, restore `Pass(T)`, and process the complete buffered cluster when decoding finishes.
-- Make bounded colorization call the scalar transition helper while continuing to map every decision through `SourceCluster`.
-- Retain the independent lexer fallback and bounded `IsClosedToken` fixes, and document code-unit streaming and source-unit measurements.
+- `RegexTokenEnumerator<T>` now uses the decoded `SourceCluster().size` for an unrecognized fallback, so it cannot restart inside a UTF-8 sequence or UTF-16 surrogate pair.
+- `RegexLexerWalker_<T>` now owns `T readingBuffer[6]` and `vint readingLength`. `ReadInput` incrementally decodes with the existing UTF conversion rules, and `WalkScalar` contains the only DFA transition logic. Both public `Walk(T)` overloads retain their signatures; incomplete calls are neutral and a copied walker receives an independent copy of its pending units. The `char32_t` path remains direct.
+- `IsClosedToken` and `RegexLexerColorizer_<T>::WalkOneToken` use bounded UTF readers. The colorizer calls `WalkScalar` once per decoded scalar and uses each reader `SourceCluster` to preserve source-code-unit callback spans and retry positions.
+- `RegexLexerColorizer_<T>::InternalState` now stores the pending `Pass(T)` units and length. `Pass` invokes normal token processing only after a scalar completes, supplies the complete original `T` cluster to `extendProc`, and preserves pending data across `GetInternalState`/`SetInternalState`.
+- Public comments now distinguish encoded code units from Unicode scalars, document neutral prefix calls and the one-sequential-stream walker contract, and keep the BOM-less public header ASCII by using a universal-character escape in its UTF-8 example.
+
+### CONFIRMED
+
+The implementation satisfies both the DFA requirement and the requested public interface contract. A `Walk(T)` call appends exactly one encoded code unit. For UTF-8 and UTF-16, no state or result changes while the scalar is incomplete; the final unit decodes U+2605A and performs exactly one `PureInterpretor::Transit`. For `char32_t` and UTF-32 `wchar_t`, the same scalar continues to complete in one call. Pending walker units are copied by value, and the test completes both the original and copied walkers independently.
+
+The three focused test files pass with fail-fast execution:
+
+- `TestLexer.cpp`: 10/10, including undefined `/w+`, explicit `[𦁚]+`, `/W+`, exact source-code-unit positions and the UTF-8 continuation-byte false-token repro.
+- `TestWalker.cpp`: 2/2, covering both overloads, every incomplete prefix result, state `-1`, token-boundary restart, bounded `IsClosedToken` buffers, cache reset after completion and a mid-scalar walker copy for every multi-unit encoding.
+- `TestColorizer.cpp`: 4/4, covering exact callbacks and colors, focused supplementary ranges, bounded non-null-terminated buffers, `Pass(T)` for every encoding, full-cluster `extendProc` input and mid-scalar `InternalState` save/restore.
+
+The repository build wrapper completed without warnings on macOS. The complete suite passed 9/9 test files and 226/226 test cases. UTF-16 `wchar_t` expectations remain selected by `VCZH_WCHAR_UTF16` for Windows, while macOS exercised the UTF-32 branch; explicit `char16_t` tests exercised the same two-unit surrogate behavior on macOS. The edited Unicode test files still begin with BOM bytes `EF BB BF`, `Regex.h` remains BOM-free and ASCII-only, and `git diff --check` reports no whitespace errors.
