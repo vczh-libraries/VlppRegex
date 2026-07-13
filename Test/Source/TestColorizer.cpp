@@ -252,6 +252,37 @@ void AssertUnicodeColorizerPass(RegexLexer& sequenceLexer, RegexLexer& scalarLex
 			TEST_ASSERT(argument.reading[i] == encodedScalar[i]);
 		}
 	}
+	if (encodedScalar.Length() > 1)
+	{
+		PassExtendArgument<T> argument = {};
+		RegexProc_<T> proc;
+		proc.extendProc = &PassExtendProc<T>;
+		proc.colorizeProc = &PassExtendColorizerProc<T>;
+		proc.argument = &argument;
+		auto colorizer = scalarLexer.Colorize(proc);
+
+		for (vint i = 0; i + 1 < encodedScalar.Length(); i++)
+		{
+			colorizer.Pass(encodedScalar[i]);
+		}
+		auto savedState = colorizer.GetInternalState();
+		TEST_ASSERT(argument.extendCount == 0);
+
+		colorizer.Pass(encodedScalar[encodedScalar.Length() - 1]);
+		TEST_ASSERT(argument.extendCount == 1);
+		argument = {};
+		colorizer.SetInternalState(savedState);
+		colorizer.Pass(encodedScalar[encodedScalar.Length() - 1]);
+		TEST_ASSERT(argument.extendCount == 1);
+		TEST_ASSERT(argument.colorizeCount == 0);
+		TEST_ASSERT(argument.length == encodedScalar.Length());
+		TEST_ASSERT(argument.tokenLength == encodedScalar.Length());
+		TEST_ASSERT(argument.token == 0);
+		for (vint i = 0; i < encodedScalar.Length(); i++)
+		{
+			TEST_ASSERT(argument.reading[i] == encodedScalar[i]);
+		}
+	}
 }
 
 TEST_FILE
