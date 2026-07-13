@@ -114,3 +114,18 @@ The incremental macOS build completed successfully against the unfixed implement
 The existing UTF-32 tests and the `wchar_t`-as-UTF-32 execution on macOS retain the established scalar behavior and serve as controls.
 
 # PROPOSALS
+
+- No.1 DECODE SCALARS AT ENCODED-RANGE BOUNDARIES
+
+## No.1 DECODE SCALARS AT ENCODED-RANGE BOUNDARIES
+
+Make the DFA boundary explicit: `PureInterpretor::Transit` and scalar stepping APIs consume one decoded `char32_t`, while APIs owning `T` buffers decode one bounded source cluster at a time. Preserve all public token positions, callback spans, rows and columns in original `T` code units.
+
+- Advance `RegexTokenEnumerator<T>` by the `SourceCluster().size` of one decoded scalar when matching produces an unrecognized fallback.
+- Restore both `RegexLexerWalker_<T>::Walk` overloads to the pre-templatization `char32_t` contract and pass that scalar directly to `PureInterpretor::Transit`.
+- Keep both `IsClosedToken` signatures as encoded `T` ranges and decode them with `encoding::UtfStringRangeToStringRangeReader<T, char32_t>`.
+- Decode `RegexLexerColorizer_<T>::WalkOneToken` with the same bounded range reader. Use each source cluster's index and size for callbacks, retry boundaries and final-token lengths.
+- Preserve the scalar meaning of `RegexLexerColorizer_<char32_t>::Pass` for every instantiation by accepting `char32_t`, encoding it to a temporary `T` cluster, and routing that cluster through `WalkOneToken`. This keeps `RegexProc_<T>::extendProc` pointers and lengths encoded as `T`.
+- Clarify public documentation so scalar parameters and encoded code-unit ranges are not both described ambiguously as characters.
+
+### CODE CHANGE
