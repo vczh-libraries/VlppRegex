@@ -21,8 +21,5 @@ On Linux, only configuration "debug x64" is available, no need to build or run p
 
 ## WebAssembly
 
-`Test/Linux/vbuild` opts this project in with `WASM=YES`. From `Test/Linux`, run `../../.github/Ubuntu/build.sh -bw` for an incremental Wasm build or `-fbw` for a full rebuild. The build requires Emscripten and preloads 32 pthread workers for the imported VlppOS backend.
-
-Run `./Bin/app.sh` with Node.js installed, then open the printed URL in a browser. The launcher supplies the isolation headers required by pthreads. The page runs the tests in a worker and must report `wasm_main returns 0.` exactly once.
-
-`TestAutomaton.cpp` is native-only because it reads and writes baseline files. All other test files run in WebAssembly.
+The following unit test projects could be built to web assembly and run with a browser:
+- `REPO-ROOT/Test/Linux`
