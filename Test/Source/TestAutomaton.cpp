@@ -1,7 +1,6 @@
 ﻿#include "../../Source/Regex/AST/RegexWriter.h"
 #include <VlppOS.h>
 
-#if defined VCZH_MSVC || defined VCZH_GCC || defined VCZH_WASM
 
 using namespace vl;
 using namespace vl::collections;
@@ -176,5 +175,3 @@ TEST_FILE
 		PrintRegex(false,	L"RegexPrescan",		U"/d+(=/w+)(!vczh)");
 	});
 }
-
-#endif
