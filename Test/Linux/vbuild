@@ -1,1 +1,11 @@
-WASM=YES
+{
+  "WASM=YES": {
+    "rootFolder": "../",
+    "folders": [
+      "Output"
+    ],
+    "includes": [
+      "Resources/Baseline/*.txt"
+    ]
+  }
+}

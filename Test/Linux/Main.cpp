@@ -2,6 +2,7 @@
 
 using namespace vl;
 
+#if defined VCZH_GCC
 WString GetTestResourcePath()
 {
 	return L"../Resources/";
@@ -11,6 +12,19 @@ WString GetTestOutputPath()
 {
 	return L"../Output/";
 }
+
+#elif defined VCZH_WASM
+WString GetTestResourcePath()
+{
+	return L"/Resources/";
+}
+
+WString GetTestOutputPath()
+{
+	return L"/Output/";
+}
+
+#endif
 
 #if defined VCZH_WASM
 #include <emscripten.h>
